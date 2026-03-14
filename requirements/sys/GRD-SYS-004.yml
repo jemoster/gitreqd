@@ -1,0 +1,10 @@
+id: GRD-SYS-004
+title: Project hierarchy
+description: |
+  A hierarchical structure of requirements shall be defined by the directory structure under which requirements are stored.  The directory under which a requirement is grouped will be determined by its path up to the requirement_dirs entry that contains it.
+attributes:
+  status: active
+  rationale: |
+    Group requirements into categories for easier navigation.
+links:
+  - satisfies: GRD-SYS-002

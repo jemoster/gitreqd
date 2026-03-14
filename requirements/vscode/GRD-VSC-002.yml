@@ -1,0 +1,14 @@
+id: GRD-VSC-002
+title: Follow links in requirement files
+description: |
+  The plugin shall allow the user to follow links inside requirement files.
+  Links include satisfies references (e.g. satisfies: GRD-SYS-001) and any
+  other link targets defined in requirement YAML, opening the target requirement
+  or resource in the editor.
+attributes:
+  status: active
+  rationale: |
+    Following links is essential for navigating between related requirements
+    and understanding dependency structure without manual file lookup.
+links:
+  - satisfies: GRD-VSC-001

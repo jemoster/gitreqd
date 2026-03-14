@@ -1,0 +1,79 @@
+{
+  "name": "gitreqd-vscode",
+  "version": "0.1.0",
+  "description": "VSCode extension for gitreqd — follow links in requirement files",
+  "main": "dist/extension.js",
+  "scripts": {
+    "build": "npm run build -w @gitreqd/core 2>/dev/null || true && esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --format=cjs --external:vscode --sourcemap",
+    "clean": "rm -rf dist",
+    "package": "npx vsce package --no-dependencies --allow-missing-repository"
+  },
+  "displayName": "gitreqd",
+  "publisher": "gitreqd",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onStartupFinished"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "requirements",
+    "yaml",
+    "gitreqd"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@gitreqd/core": "0.1.0",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.2"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitreqd.requirement.openPreview",
+        "title": "Gitreqd: Open Requirement Preview",
+        "category": "Gitreqd",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "gitreqd.requirement.new",
+        "title": "GitReqD: Add New Requirement",
+        "category": "Gitreqd"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "gitreqd.requirement.openPreview",
+          "group": "navigation@1",
+          "when": "editorLangId == yaml"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "gitreqd.requirement.new",
+          "group": "Gitreqd"
+        }
+      ]
+    },
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          "**/requirements/**/*.yml",
+          "**/requirements/**/*.yaml"
+        ],
+        "url": "./schemas/requirement.json"
+      }
+    ]
+  }
+}

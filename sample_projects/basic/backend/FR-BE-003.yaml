@@ -1,0 +1,11 @@
+id: FR-BE-003
+title: Storage Retention
+description: |
+  The backend shall automatically purge video data older than 30 days unless a "Legal Hold" flag is active.
+attributes:
+  status: active
+  rationale: |
+    Balances storage costs with data retention requirements and privacy 
+    regulations regarding data minimization.
+links:
+  - satisfies: SYS-001

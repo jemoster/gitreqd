@@ -1,0 +1,22 @@
+---
+description: Ensure npm and node are on PATH when running terminal commands
+alwaysApply: true
+---
+
+# Node/npm in terminal commands
+
+When generating or running terminal commands that use `npm`, `npx`, or `node`, the Cursor agent's shell may be non-interactive and not have loaded your profile, so `npm` or `node` might not be found.
+
+**Do this when running npm/node commands:**
+
+1. **Prefer a single shell that loads PATH**: Run the command in a bash login/login-like shell so `~/.bashrc` (or equivalent) is sourced and `npm`/`node` are on PATH. For example:
+   - `bash -l -c 'npm run build'`
+   - or prefix with: `source ~/.bashrc 2>/dev/null || true; ` then your command
+
+2. **If using this repo's install scripts**: Node is installed to `$HOME/.local/node` by default (`scripts/install-node.sh`). Ensure that directory is on PATH before npm/node:
+   - `export PATH="$HOME/.local/node/bin:$PATH"`
+   - Then run `npm`/`node` in the same shell (same terminal command or same script).
+
+3. **If using nvm/fnm**: Source the version manager in the same shell before running npm/node (e.g. `source ~/.nvm/nvm.sh` or `eval "$(fnm env)"`), then run the command.
+
+**When suggesting commands to the user**, use one of the above so that `npm` and `node` are available. Do not assume the bare `npm` or `node` will be in PATH in the agent's execution environment.

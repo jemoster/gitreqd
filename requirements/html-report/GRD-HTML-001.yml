@@ -1,0 +1,11 @@
+id: GRD-HTML-001
+title: HTML report
+description: |
+  The HTML report shall represent the full set of information present in the requirements file.
+
+  When a requirement defines a `parameters` map the preview shall display those parameters—name and value—so the user can see at a glance which parameters the requirement defines and their current values.
+attributes:
+  status: active
+  rationale: |
+    HTML output is easily consumed and distributed outside of a coding environment.
+links:

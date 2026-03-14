@@ -1,0 +1,9 @@
+id: GRD-GIT-001
+title: GIT diff tool
+description: |
+  The tool shall provide a way to validate requirement changes between two commits.
+attributes:
+  status: active
+  rationale: |
+    Aid the user to review requirement changes between two commits.  This supports changing requirements in a way similar to how git diff supports code changes between two commits.
+links: []

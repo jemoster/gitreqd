@@ -1,0 +1,9 @@
+id: GRD-VALID-001
+title: Validation rulesets
+description: |
+  A base set of validation rules shall be provided that can be extended by projects.
+attributes:
+  status: active
+  rationale: |
+    Users need a set of rules to validate their requirements.
+links: []

@@ -1,0 +1,10 @@
+id: GRD-HTML-002
+title: HTML reverse lookup
+description: |
+  The HTML report shall include a list of requirements that link to each requirement.
+attributes:
+  status: active
+  rationale: |
+    As a user I want to navigate up and down the graph of requirements.
+links:
+  - satisfies: GRD-HTML-001

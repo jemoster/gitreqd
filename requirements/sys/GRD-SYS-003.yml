@@ -1,0 +1,11 @@
+id: GRD-SYS-003
+title: Project root and discovery
+description: |
+  The project root shall be identified by a marker root.gitreqd and requirements shall be discovered under that tree (e.g. **/*.yml, **/*.yaml).
+attributes:
+  status: active
+  rationale: |
+    Enables the tool to work in any repo that opts in by adding the marker
+    and to ignore requirements outside the project.
+links:
+  - satisfies: GRD-SYS-002

@@ -1,0 +1,11 @@
+id: GRD-VSC-001
+title: VSCode plugin for gitreqd
+description: |
+  A VSCode extension shall provide gitreqd functionality within the editor,
+  enabling users to work with requirement files without leaving the IDE.
+attributes:
+  status: active
+  rationale: |
+    IDE integration improves discoverability and workflow when editing and
+    navigating requirement files as part of development.
+links: []

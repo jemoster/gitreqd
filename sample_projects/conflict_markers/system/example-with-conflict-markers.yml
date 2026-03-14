@@ -1,0 +1,19 @@
+id: SYS-CONFLICT-EXAMPLE
+title: API Access Policy
+description: |
+<<<<<<< HEAD
+  The system shall require authenticated login for all API endpoints.
+  # TODO: consider allowing anonymous read access for public API endpoints.
+=======
+  The system shall allow anonymous read access for public API endpoints.
+  Authenticated login is required only for write and admin operations.
+>>>>>>> feature/public-read
+attributes:
+  status: active
+  rationale: |
+<<<<<<< HEAD
+    Ensures all usage is attributable and auditable for compliance.
+=======
+    Balances security with usability for public documentation and discovery endpoints.
+>>>>>>> feature/public-read
+links: []

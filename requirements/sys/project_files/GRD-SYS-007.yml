@@ -1,0 +1,24 @@
+id: GRD-SYS-007
+title: root.gitreqd contents
+description: |
+  The project root shall contain a root.gitreqd file that configures where requirement files are discovered.
+
+  The root.gitreqd file shall be valid YAML whose top-level document is a mapping.
+  * The mapping shall contain a key `requirement_dirs` whose value is a list of directories to search for requirement files.
+  * The `requirement_dirs` value shall be a sequence.
+  * Each item in the `requirement_dirs` sequence shall be a non-empty string representing a directory path, relative to the project root.
+  * Duplicate directories after resolving paths shall result in an error.
+  * When discovering requirement files, the tool shall search in the directories specified in the `requirement_dirs` sequence, in order.
+  For example, a minimal root.gitreqd file might be:
+
+  ```yaml
+  requirement_dirs:
+    - requirements
+    - more-requirements/frontend
+  ```
+attributes:
+  status: active
+  rationale: |
+    Explicit configuration of requirement directories makes discovery predictable and avoids coupling to ad-hoc filesystem layouts.
+links:
+  - satisfies: GRD-SYS-002

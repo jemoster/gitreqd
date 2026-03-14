@@ -1,0 +1,14 @@
+id: GRD-VALID-005
+title: Requirement links must be acyclic
+description: |
+  The tool shall validate that the directed graph of links between requirements
+  (e.g. satisfies, refines) contains no cycles. A cycle exists when a requirement
+  directly or indirectly links back to itself. Cycles shall be reported with the
+  path of requirements involved in the cycle.
+attributes:
+  status: active
+  rationale: |
+    Cyclic links make traceability ambiguous and can cause infinite loops in
+    tooling that follows requirement relationships.
+links:
+  - satisfies: GRD-VALID-001

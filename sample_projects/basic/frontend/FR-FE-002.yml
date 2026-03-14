@@ -1,0 +1,11 @@
+id: FR-FE-002
+title: Latency Threshold
+description: |
+  The UI shall maintain a glass-to-glass latency of less than 500ms for live monitoring.
+attributes:
+  status: active
+  rationale: |
+    High latency renders live monitoring ineffective for security personnel 
+    attempting to respond to real-time events.
+links:
+  - satisfies: SYS-002

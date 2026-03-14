@@ -1,0 +1,40 @@
+{
+  "name": "@gitreqd/core",
+  "version": "0.1.0",
+  "description": "Core engine for gitreqd — discovery, parse, validate, resolve",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "requirements",
+    "yaml"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "glob": "^11.0.0",
+    "markdown-it": "^14.1.0",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}

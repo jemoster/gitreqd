@@ -1,0 +1,11 @@
+id: FR-FE-003
+title: MFA Login
+description: |
+  The frontend shall require Multi-Factor Authentication (MFA) via TOTP for all administrative accounts.
+attributes:
+  status: active
+  rationale: |
+    Prevents unauthorized access to camera feeds even in the event of password 
+    compromise, protecting the integrity of the secure stream.
+links:
+  - satisfies: SYS-001

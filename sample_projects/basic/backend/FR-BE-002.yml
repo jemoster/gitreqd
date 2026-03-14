@@ -1,0 +1,11 @@
+id: FR-BE-002
+title: Audit Logging
+description: |
+  The backend shall log all camera access attempts (timestamp, UserID, IP) to a read-only audit trail.
+attributes:
+  status: active
+  rationale: |
+    Necessary for forensic analysis and compliance audits to verify who 
+    accessed which feed and when.
+links:
+  - satisfies: SYS-001

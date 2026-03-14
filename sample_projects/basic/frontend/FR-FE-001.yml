@@ -1,0 +1,13 @@
+id: FR-FE-001
+title: Live Dashboard
+description: |
+  The frontend shall provide a grid-view dashboard capable of displaying 4 concurrent WebRTC streams.
+  * four streams
+  * two streams per row
+attributes:
+  status: active
+  rationale: |
+    Users need to monitor multiple entry points simultaneously 
+    to maintain situational awareness of the facility.
+links:
+  - satisfies: SYS-002

@@ -1,0 +1,21 @@
+This file contains Git merge conflict markers for testing.
+
+Line of context before the conflict.
+
+<<<<<<< HEAD
+This is the version from the current branch (e.g. main).
+We decided to require login for all endpoints.
+=======
+This is the version from the incoming branch (e.g. feature/auth).
+We decided to allow anonymous read for public endpoints.
+>>>>>>> feature/public-read
+
+Line of context after the conflict.
+
+<<<<<<< HEAD
+strict_mode: true
+=======
+strict_mode: false
+>>>>>>> branch-name
+
+End of file.

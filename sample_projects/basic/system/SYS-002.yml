@@ -1,0 +1,12 @@
+id: SYS-002
+title: Multi-Stream Support
+description: |
+  The backend shall support concurrent streaming of up to {{:max_streams}} high-definition (1080p) feeds per user account.
+parameters:
+  max_streams: 50
+attributes:
+  status: active
+  rationale: |
+    Required to meet the scalability needs of enterprise-tier commercial customers 
+    monitoring large-scale facilities.
+links:

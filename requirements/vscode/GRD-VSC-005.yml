@@ -1,0 +1,17 @@
+id: GRD-VSC-005
+title: Add new requirement from explorer context menu
+description: |
+  The VSCode extension shall add a context menu item in the file explorer for GitReqD.
+  When the user right-clicks in the explorer and selects the GitReqD menu item to add a new
+  requirement, the extension shall create a new YAML requirement file at the chosen location.
+  The file content shall be a template based on the requirement schema (id, title, description,
+  attributes, links), so the user can fill in the requirement details with full editor support
+  (validation, completion) from the existing YAML schema.
+attributes:
+  status: active
+  rationale: |
+    Creating new requirements from the explorer with a schema-based template reduces
+    manual copy-paste and ensures new files conform to the requirement format.
+links:
+  - satisfies: GRD-VSC-001
+  - satisfies: GRD-VSC-004

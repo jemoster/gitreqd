@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pre-commit hook: run gitreqd validate from the Git repo root.
+# Copy this file to the .git/hooks directory.
+
+set -euo pipefail
+
+GIT_ROOT="$(git rev-parse --show-toplevel)"
+cd "${GIT_ROOT}"
+PATH="/home/dev/.local/node/bin:$PATH"
+exec gitreqd validate --project-dir "${GIT_ROOT}/gitreqd"

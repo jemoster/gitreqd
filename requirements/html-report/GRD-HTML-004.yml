@@ -1,0 +1,10 @@
+id: GRD-HTML-004
+title: Markdown in description and rationale
+description: |
+  When rendering the HTML report, the description and rationale shall be rendered as Markdown.
+attributes:
+  status: active
+  rationale: |
+    Allow rich formatting in requirement text for readability.
+links:
+  - satisfies: GRD-HTML-001

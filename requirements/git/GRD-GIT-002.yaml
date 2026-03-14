@@ -1,0 +1,17 @@
+id: GRD-GIT-002
+title: Merge-conflict resolution tool
+description: |
+  The tool shall provide a merge-conflict resolution capability that uses an LLM (e.g. Ollama, configurable in root.gitreqd) to resolve conflicts in requirement files.
+
+  For requirement files (YAML under the project's requirement directories), resolution shall:
+  1. Reconstruct the state of the YAML in both branches (ours and theirs) by replacing each conflict region with the respective side.
+  2. Compare the text fields title, description, and rationale; if identical in both branches, no merge is needed for that field.
+  3. For any field that differs, pass the complete YAML of both branches to the LLM and ask it to merge only that field. The LLM return must be just the merged string for that field. Repeat for each differing field, merging the changes into the result as they are resolved.
+
+  The resolved content shall conform to the requirement YAML schema. If the resolved content does not match the schema, the conflict resolution shall fail and the tool shall make no changes to any files.
+attributes:
+  status: active
+  rationale: |
+    Reduce manual conflict resolution effort by leveraging Cursor to propose or apply resolutions during merges. Requiring schema compliance ensures that automatic resolution does not produce invalid requirement files.
+links:
+  - satisfies: GRD-GIT-001

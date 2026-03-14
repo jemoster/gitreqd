@@ -1,0 +1,11 @@
+id: GRD-VALID-003
+title: Requirement ids must be unique
+description: |
+  The tool shall validate that all requirement ids are unique across the project.
+  Duplicate ids shall be reported with the paths of the conflicting files.
+attributes:
+  status: active
+  rationale: |
+    Unique ids are required to reference requirements and to avoid ambiguity.
+links:
+  - satisfies: GRD-VALID-001

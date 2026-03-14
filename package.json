@@ -1,0 +1,26 @@
+{
+  "name": "gitreqd",
+  "private": true,
+  "description": "Requirement management tool",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "validate": "node packages/cli/dist/index.js validate",
+    "html": "node packages/cli/dist/index.js html",
+    "test": "NODE_OPTIONS='--no-webstorage' jest"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/cli",
+    "packages/vscode"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6"
+  }
+}

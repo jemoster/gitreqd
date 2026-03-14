@@ -1,0 +1,10 @@
+id: SYS-001
+title: End-to-End Encryption
+description: |
+  The system shall encrypt all {{SYS-002:max_streams}} video streams using AES-256 from the camera source to the end-user browser.
+attributes:
+  status: active
+  rationale: |
+    Ensures compliance with privacy standards for government and military facilities 
+    to prevent unauthorized interception of sensitive visual data.
+links:

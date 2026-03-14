@@ -1,0 +1,11 @@
+id: FR-BE-001
+title: Stream Proxying
+description: |
+  The backend shall utilize a TURN/STUN server architecture to bypass restrictive firewalls in secure facilities.
+attributes:
+  status: active
+  rationale: |
+    Military and government networks often have strict firewall rules; 
+    traversal is necessary for the SaaS model to function.
+links:
+  - satisfies: SYS-002
