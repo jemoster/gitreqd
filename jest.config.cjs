@@ -7,6 +7,7 @@ module.exports = {
   moduleFileExtensions: ["ts", "js", "json"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@gitreqd/core$": "<rootDir>/packages/core/src/index.ts",
   },
   transform: {
     "^.+\\.tsx?$": [

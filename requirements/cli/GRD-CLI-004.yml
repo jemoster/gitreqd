@@ -1,0 +1,16 @@
+id: GRD-CLI-004
+title: CLI bootstrap project
+description: |
+  The CLI shall provide a bootstrap command that initializes a directory with the basic files for a gitreqd project.
+
+  * The target directory shall be the current working directory by default, or a directory specified by the user (e.g. via an option or argument).
+  * The bootstrap shall create the project root marker file (root.gitreqd) in the target directory, with minimal valid content consistent with the root.gitreqd schema (e.g. requirement_dirs including the requirements folder).
+  * The bootstrap shall create a requirements folder in the target directory (e.g. requirements/).
+  * If the target directory already contains a root.gitreqd or the requirements folder, the CLI behavior (overwrite, skip, or error) shall be specified and consistent.
+  * Confirm with the user if .cursor rules should be added to the target directory.
+attributes:
+  status: active
+  rationale: |
+    Users need a quick way to start a new gitreqd project without manually creating root.gitreqd and the requirements directory structure.
+links:
+  - satisfies: GRD-SYS-007
