@@ -33,6 +33,19 @@ npm run build
 
 Then run the CLI via `node packages/cli/dist/index.js` or use the workspace scripts (see below). To use the `gitreqd` binary locally, run `npm link` from `packages/cli` after building.
 
+## Distribution
+
+To build and package the tool for installation on a host (so multiple repositories can use the same installation):
+
+```bash
+./scripts/package.sh
+```
+
+This produces a `release/` directory containing installable `.tgz` artifacts. To install from that directory:
+```bash
+npm install -g ./release/*.tgz
+```
+
 ## Usage
 
 From a directory that contains (or is below) a `root.gitreqd` marker:
@@ -59,7 +72,7 @@ npm run validate -- --project-dir sample_projects/basic
 npm run html -- --project-dir sample_projects/basic --output ./out
 ```
 
-### Pre-commit hook (GRD-GIT-003)
+### Pre-commit hook
 
 A pre-commit hook runs `gitreqd validate` so invalid requirement YAML is not committed. Install it into your repo:
 
@@ -69,7 +82,7 @@ A pre-commit hook runs `gitreqd validate` so invalid requirement YAML is not com
 
 - **REPO_DIR** (optional): path to the git repository. If omitted, the repository containing the current working directory is used.
 - The hook uses the git repository root as the project directory unless `GITREQD_PROJECT_DIR` is set.
-- Ensure `gitreqd` is on your PATH (e.g. run `./scripts/install-gitreqd.sh` and use `npm link` from `packages/cli`).
+- Ensure `gitreqd` is on your PATH (e.g. run `./scripts/install-gitreqd.sh` to build and link from source, or run `./scripts/package.sh` then `./scripts/install-gitreqd.sh ./release` to install from the packaged artifact).
 
 ## Requirement file format
 

@@ -11,7 +11,7 @@ Steps:
   [] Annotate code with the ID of the requirement
   [] Tests cover the functionality of the requirement
   [] Run tests for the requirements
-  [] Update user documentation as needed to reflect the new functionality.
+  [] Update user documentation as needed to reflect the new functionality.  User facing documentation shall not include references to the requirement ID.
 
 3. Clean-up
   [] Remove code and features attributed to earlier versions of the requirement that are no longer a part of the requirement.  Notify the user of these removals.
