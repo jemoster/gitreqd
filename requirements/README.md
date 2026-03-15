@@ -7,6 +7,7 @@ Product requirements for the gitreqd requirement management tool are stored here
 - **GRD-SYS-*** – System / platform (core engine, discovery, API).
 - **GRD-CLI-*** – CLI behavior (validate, HTML export).
 - **GRD-VSC-*** – VSCode plugin (IDE integration, link following).
+- **GRD-DEVOPS-*** – DevOps / CI (GitHub Actions, tests on PRs).
 
 Add new categories as needed (e.g. GRD-WEB-*) when you add formal requirements for other consumers.
 

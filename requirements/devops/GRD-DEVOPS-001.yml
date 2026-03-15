@@ -1,0 +1,11 @@
+id: GRD-DEVOPS-001
+title: Run npm tests on pull requests
+description: |
+  GitHub shall run npm tests when a pull request is opened or updated.
+
+  The tests shall execute in the project's CI environment (e.g. GitHub Actions) and their result shall be visible on the pull request so that merging can be gated on passing tests if desired.
+attributes:
+  status: active
+  rationale: |
+    Running tests on PRs catches regressions before merge and gives reviewers a clear pass/fail signal. Making test results visible on the PR supports branch protection rules that require checks to pass before merging.
+links: []

@@ -1,6 +1,9 @@
 # gitreqd
 
 A requirement management tool that works with requirement files stored in your repo.
+
+[![Tests](https://github.com/jemoster/gitreqd/actions/workflows/test.yml/badge.svg)](https://github.com/jemoster/gitreqd/actions/workflows/test.yml)
+
 ## Current
 
 - **CLI** – Discover requirements, validate schema, and generate static HTML reports. Run from the project root (where `root.gitreqd` is present) or pass `--project-dir`.
