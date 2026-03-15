@@ -1,0 +1,15 @@
+id: GRD-GIT-003
+title: Pre-commit hook
+description: |
+  A pre-commit hook shall call the gitreqd CLI to validate the current state of the repository's requirements.
+
+  The pre-commit hook shall use the root of the git repository as the project directory unless the GITREQD_PROJECT_DIR environment variable is set.
+
+  An installation script shall be provided that installs the pre-commit hook into the repository's .git/hooks directory.
+  The repository may be specified when calling the installation script.  The repository is otherwise determined finding the repository for the current working directory.
+  
+attributes:
+  status: active
+  rationale: |
+    Give users a single, repeatable way to enable local validation on commit without manually copying or symlinking the hook. Reduces invalid requirement YAML from being committed.
+links: []

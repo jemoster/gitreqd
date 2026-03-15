@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Pre-commit hook: run gitreqd validate from the Git repo root.
-# Copy this file to the .git/hooks directory.
+# GRD-GIT-003: Pre-commit hook – run gitreqd validate for the repository's requirements.
+# Install with: ./scripts/install-pre-commit.sh [REPO_DIR]
+# Project directory: git repo root unless GITREQD_PROJECT_DIR is set.
 
 set -euo pipefail
 
 GIT_ROOT="$(git rev-parse --show-toplevel)"
-cd "${GIT_ROOT}"
-PATH="/home/dev/.local/node/bin:$PATH"
-exec gitreqd validate --project-dir "${GIT_ROOT}/gitreqd"
+PROJECT_DIR="${GITREQD_PROJECT_DIR:-${GIT_ROOT}}"
+exec gitreqd validate --project-dir "${PROJECT_DIR}"

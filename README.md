@@ -59,7 +59,17 @@ npm run validate -- --project-dir sample_projects/basic
 npm run html -- --project-dir sample_projects/basic --output ./out
 ```
 
-python3 -m http.server 80 --directory /home/dev/src/Theia/gitreqd/out
+### Pre-commit hook (GRD-GIT-003)
+
+A pre-commit hook runs `gitreqd validate` so invalid requirement YAML is not committed. Install it into your repo:
+
+```bash
+./scripts/install-pre-commit.sh [REPO_DIR]
+```
+
+- **REPO_DIR** (optional): path to the git repository. If omitted, the repository containing the current working directory is used.
+- The hook uses the git repository root as the project directory unless `GITREQD_PROJECT_DIR` is set.
+- Ensure `gitreqd` is on your PATH (e.g. run `./scripts/install-gitreqd.sh` and use `npm link` from `packages/cli`).
 
 ## Requirement file format
 
