@@ -21,5 +21,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      # GRD-DEVOPS-002: same package step as the release workflow; catches packaging regressions on PRs.
+      - name: Package VSCode extension
+        run: npm run package -w gitreqd-vscode
       - name: Run tests
         run: npm test

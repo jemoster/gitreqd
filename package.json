@@ -9,7 +9,7 @@
     "validate": "node packages/cli/dist/index.js validate",
     "html": "node packages/cli/dist/index.js html",
     "bootstrap": "node packages/cli/dist/index.js bootstrap",
-    "test": "NODE_OPTIONS='--no-webstorage' jest"
+    "test": "jest"
   },
   "workspaces": [
     "packages/core",

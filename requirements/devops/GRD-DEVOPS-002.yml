@@ -1,0 +1,11 @@
+id: GRD-DEVOPS-002
+title: Publish VSCode extension artifact on GitHub release
+description: |
+  When the project publishes a release on GitHub (e.g. a GitHub Release for a version tag), the release process shall build the VSCode extension into an installable package (e.g. a `.vsix` file) and attach that build output as an artifact of the release so users can download it from the release page.
+
+  The build shall run in the project’s CI or release automation on GitHub (e.g. GitHub Actions triggered by the release) rather than relying on manual local builds for the published artifact.
+attributes:
+  status: active
+  rationale: |
+    Shipping the extension as a release artifact gives users and testers a reproducible, versioned installable without cloning and building from source, and aligns the published binary with the tagged source for that release.
+links: []

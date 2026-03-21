@@ -1,0 +1,36 @@
+# GRD-DEVOPS-002: Build VSCode extension and attach the .vsix to the GitHub Release.
+name: Release VSCode extension
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  vsix:
+    name: Package and upload VSIX
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Package VSCode extension
+        run: npm run package -w gitreqd-vscode
+      - name: Upload VSIX to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in packages/vscode/*.vsix; do
+            gh release upload "${{ github.event.release.tag_name }}" "$f" --clobber
+          done

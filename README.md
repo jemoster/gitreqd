@@ -38,6 +38,8 @@ Then run the CLI via `node packages/cli/dist/index.js` or use the workspace scri
 
 ## Distribution
 
+### CLI (npm packages)
+
 To build and package the tool for installation on a host (so multiple repositories can use the same installation):
 
 ```bash
@@ -48,6 +50,10 @@ This produces a `release/` directory containing installable `.tgz` artifacts. To
 ```bash
 npm install -g ./release/*.tgz
 ```
+
+### VS Code extension
+
+When you publish a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository), the release workflow builds the extension into a `.vsix` and uploads it to that release. Download the `.vsix` from the release’s assets, then in VS Code use **Extensions** → **⋯** → **Install from VSIX...** and select the file. To build a `.vsix` locally instead, see `packages/vscode/README.md`.
 
 ## Usage
 
