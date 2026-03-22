@@ -1,9 +1,9 @@
 id: GRD-CLI-003
 title: CLI project root discovery
 description: |
-  The CLI shall search for a root.gitreqd starting at the current directory (or a given path), walking up the directory structure to locate the project root.
+  The CLI shall search for a {{ GRD-SYS-007:root_marker_filename }} starting at the current directory (or a given path), walking up the directory structure to locate the project root.
   * If no project root is found, the CLI shall exit with an error.
-  * The CLI shall stop searching for a project root as soon as the first root.gitreqd file is found.
+  * The CLI shall stop searching for a project root as soon as the first {{ GRD-SYS-007:root_marker_filename }} file is found.
 attributes:
   status: active
   rationale: |

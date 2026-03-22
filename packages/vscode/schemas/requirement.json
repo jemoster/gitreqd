@@ -37,6 +37,13 @@
         },
         "additionalProperties": true
       }
+    },
+    "parameters": {
+      "type": "object",
+      "description": "GRD-SYS-005: Named parameters for templating in text fields (string, number, or boolean values).",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean"]
+      }
     }
   }
 }
