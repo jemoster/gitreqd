@@ -7,21 +7,23 @@ A requirement management tool that works with requirement files stored in your r
 ## Current
 
 - **CLI** – Discover requirements, validate schema, and generate static HTML reports. Run from the project root (where `gitreqd.yaml` or `gitreqd.yml` is present) or pass `--project-dir`. Requirement files use the `.req.yml` or `.req.yaml` suffix. Use `gitreqd bootstrap` to initialize a directory with `gitreqd.yaml` and a `requirements` folder.
+- **VS Code extension** – Navigate `satisfies` links and use Go to Definition on requirement ids; JSON Schema validation for `.req.yml` / `.req.yaml` (via the Red Hat YAML extension); requirement preview and “add new requirement” commands. Built as `packages/vscode`, shipped as a `.vsix` (see **Distribution** below).
+- **Pre-commit hook** – Repositories can install the script under `scripts/` so commits run `gitreqd validate` against the project (see **Pre-commit hook** below).
 
 ## Planned consumers
 
 Future integrations are described here; formal product requirements will be added when we start building them.
 
-- **VSCode extension** – Validation, outline, and navigation of requirement files inside the editor.
 - **Web portal** – Browse and search requirements via a web app that uses the same core API.
-- **GitHub CI** – Action or workflow step to validate requirements and enforce status checks (e.g. required approvals) on PRs.
+- **GitHub CI** – Published GitHub Action or reusable workflow so repositories can validate requirements and gate pull requests without hand-writing steps (this repo’s own CI builds and tests the tool; it does not yet ship a consumer-facing Action).
 
 ## Project layout
 
-Workspace with two TypeScript packages:
+Workspace with three TypeScript packages:
 
 - `packages/core` – **@gitreqd/core**: Core engine (discovery, parse, validate, resolve). Consumer-agnostic; no CLI dependencies.
 - `packages/cli` – **gitreqd**: CLI that depends on core. Provides the `gitreqd` binary.
+- `packages/vscode` – **gitreqd-vscode**: Editor extension bundled with core; see `packages/vscode/README.md`.
 - `requirements/` – Product requirements for gitreqd itself (GRD-*).
 - `sample_projects/` – Test data only; not part of the product.
 
