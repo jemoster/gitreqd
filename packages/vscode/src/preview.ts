@@ -12,6 +12,7 @@ import * as vscode from "vscode";
 import { generateSingleRequirementHtml, loadRequirements } from "@gitreqd/core";
 import type { ParameterValue, RequirementWithSource } from "@gitreqd/core";
 import { parse as parseYaml } from "yaml";
+import { isRequirementDocument } from "./requirement-document.js";
 
 function previewTitle(uri: vscode.Uri): string {
   return `Requirement Preview: ${path.basename(uri.fsPath)}`;
@@ -118,7 +119,7 @@ export class RequirementPreviewManager {
     const activeEditorSub = vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (!editor) return;
       const doc = editor.document;
-      if (doc.languageId !== "yaml") return;
+      if (!isRequirementDocument(doc)) return;
       // GRD-VSC-003: When user clicks a satisfies link, the target file opens and becomes active;
       // open the preview for that requirement if the panel did not exist yet.
       if (!this.panel) {
@@ -136,8 +137,8 @@ export class RequirementPreviewManager {
   }
 
   openPreviewForDocument(document: vscode.TextDocument): void {
-    if (document.languageId !== "yaml") {
-      this.log("[Gitreqd] Preview is only available for YAML requirement files.");
+    if (!isRequirementDocument(document)) {
+      this.log("[Gitreqd] Preview is only available for `.req.yml` or `.req.yaml` requirement files.");
       return;
     }
 

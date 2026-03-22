@@ -75,7 +75,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
   });
 
   describe("resolveRequirementConflicts", () => {
-    const filePath = "/fake/req.yml";
+    const filePath = "/fake/GRD-CONFLICT-001.req.yml";
     const ollamaConfig: OllamaConfig = { base_url: "http://localhost:11434", model: "test" };
 
     /** Mock merge: no LLM call, no logging. */

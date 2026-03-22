@@ -1,5 +1,5 @@
 id: GRD-SYS-007
-title: Project root configuration file
+title: Project filename conventions
 description: |
   The project root shall contain a {{ :root_marker_filename }} file that configures where requirement files are discovered.
 
@@ -17,7 +17,9 @@ description: |
     - more-requirements/frontend
   ```
 parameters:
-  root_marker_filename: root.gitreqd
+  root_marker_filename: gitreqd.yaml | gitreqd.yml
+  requirement_file_extension: .req.yaml | .req.yml
+  directory_metadata_filename: reqs.yaml | reqs.yml
 attributes:
   status: active
   rationale: |

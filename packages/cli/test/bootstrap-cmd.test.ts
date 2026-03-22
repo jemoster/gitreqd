@@ -5,14 +5,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { runBootstrap } from "../src/bootstrap-cmd";
-import { ROOT_MARKER } from "@gitreqd/core";
+import { ROOT_MARKER, ROOT_MARKER_FILENAMES } from "@gitreqd/core";
 
 describe("GRD-CLI-004: CLI bootstrap", () => {
   function makeTempDir(): string {
     return fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-bootstrap-"));
   }
 
-  it("creates root.gitreqd and requirements folder in empty directory", async () => {
+  it("creates gitreqd.yaml and requirements folder in empty directory", async () => {
     const tmpDir = makeTempDir();
     const result = await runBootstrap(tmpDir);
 
@@ -30,7 +30,7 @@ describe("GRD-CLI-004: CLI bootstrap", () => {
     expect(fs.statSync(path.join(tmpDir, "requirements")).isDirectory()).toBe(true);
   });
 
-  it("fails when root.gitreqd already exists and force is false", async () => {
+  it("fails when gitreqd.yaml already exists and force is false", async () => {
     const tmpDir = makeTempDir();
     fs.writeFileSync(path.join(tmpDir, ROOT_MARKER), "requirement_dirs:\n  - x\n", "utf-8");
 
@@ -41,7 +41,19 @@ describe("GRD-CLI-004: CLI bootstrap", () => {
     expect(result.error).toContain("--force");
   });
 
-  it("overwrites root.gitreqd when force is true", async () => {
+  it("fails when gitreqd.yml already exists and force is false", async () => {
+    const tmpDir = makeTempDir();
+    const alt = ROOT_MARKER_FILENAMES[1]!;
+    fs.writeFileSync(path.join(tmpDir, alt), "requirement_dirs:\n  - x\n", "utf-8");
+
+    const result = await runBootstrap(tmpDir);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("already exists");
+    expect(result.error).toContain("--force");
+  });
+
+  it("overwrites gitreqd.yaml when force is true", async () => {
     const tmpDir = makeTempDir();
     const rootPath = path.join(tmpDir, ROOT_MARKER);
     fs.writeFileSync(rootPath, "requirement_dirs:\n  - other\n", "utf-8");

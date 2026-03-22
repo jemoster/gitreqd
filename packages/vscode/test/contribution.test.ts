@@ -28,13 +28,15 @@ describe("GRD-VSC-003 requirement preview contributions", () => {
     expect(preview!.icon).toBe("$(open-preview)");
   });
 
-  it("contributes editor/title menu so Preview button is shown for YAML", () => {
+  it("contributes editor/title menu so Preview is shown only for .req.yml / .req.yaml", () => {
     const editorTitle = pkg.contributes?.menus?.["editor/title"] ?? [];
     const previewEntry = editorTitle.find(
       (m) => m.command === "gitreqd.requirement.openPreview"
     );
     expect(previewEntry).toBeDefined();
-    expect(previewEntry!.when).toBe("editorLangId == yaml");
+    expect(previewEntry!.when).toBe(
+      "editorLangId == yaml && resourceFilename =~ /\\.req\\.(yaml|yml)$/"
+    );
   });
 });
 
@@ -47,12 +49,9 @@ describe("GRD-VSC-004 YAML schema for requirement files", () => {
     );
     expect(requirementSchema).toBeDefined();
     const fileMatch = requirementSchema!.fileMatch;
-    expect(Array.isArray(fileMatch) ? fileMatch : [fileMatch]).toContain(
-      "**/requirements/**/*.yml"
-    );
-    expect(Array.isArray(fileMatch) ? fileMatch : [fileMatch]).toContain(
-      "**/requirements/**/*.yaml"
-    );
+    const patterns = Array.isArray(fileMatch) ? fileMatch : [fileMatch];
+    expect(patterns).toContain("**/requirements/**/*.req.yml");
+    expect(patterns).toContain("**/requirements/**/*.req.yaml");
   });
 
   it("schema file exists and describes requirement structure (id, title, description, attributes, links)", () => {

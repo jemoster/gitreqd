@@ -6,11 +6,23 @@ export {
   discoverProjectRoot,
   discoverProjectRootCandidates,
   discoverRequirementPaths,
+  findRootMarkerPath,
   getRequirementDirs,
   getOllamaConfig,
   ROOT_MARKER,
+  ROOT_MARKER_FILENAMES,
+  ROOT_MARKER_HINT,
 } from "./discovery.js";
 export type { DiscoverResult } from "./discovery.js";
+
+export {
+  REQUIREMENT_FILE_EXTENSION,
+  REQUIREMENT_FILE_EXTENSIONS,
+  expectedRequirementBasenamesForId,
+  isRequirementFilename,
+  requirementFileExtensionsDisplay,
+  requirementIdFromFilename,
+} from "./requirement-files.js";
 
 export {
   resolveRequirementConflicts,

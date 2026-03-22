@@ -4,6 +4,8 @@
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
+import { REQUIREMENT_FILE_EXTENSION } from "@gitreqd/core";
+import { isRequirementDocument } from "./requirement-document.js";
 import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
 import { RequirementPreviewManager } from "./preview.js";
@@ -34,7 +36,9 @@ export function activate(context: vscode.ExtensionContext): void {
   const outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   const log = (message: string) => outputChannel.appendLine(message);
   context.subscriptions.push(outputChannel);
-  log("[Gitreqd] Extension active. Open a YAML requirement file to resolve links; logs will appear here.");
+  log(
+    "[Gitreqd] Extension active. Open a `.req.yml` or `.req.yaml` requirement file to resolve links; logs will appear here."
+  );
 
   const previewManager = new RequirementPreviewManager(
     context,
@@ -63,8 +67,14 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  /** GRD-SYS-007: requirement files use `.req.yml` or `.req.yaml`. */
+  const requirementYamlSelector: vscode.DocumentSelector = [
+    { language: "yaml", pattern: "**/*.req.yml" },
+    { language: "yaml", pattern: "**/*.req.yaml" },
+  ];
+
   const documentLinkProvider = vscode.languages.registerDocumentLinkProvider(
-    { language: "yaml" },
+    requirementYamlSelector,
     {
       async provideDocumentLinks(
         document: vscode.TextDocument,
@@ -89,7 +99,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const definitionProvider = vscode.languages.registerDefinitionProvider(
-    { language: "yaml" },
+    requirementYamlSelector,
     {
       async provideDefinition(
         document: vscode.TextDocument,
@@ -128,6 +138,10 @@ export function activate(context: vscode.ExtensionContext): void {
         log("[Gitreqd] No active editor for preview command.");
         return;
       }
+      if (!isRequirementDocument(editor.document)) {
+        log("[Gitreqd] Preview applies only to `.req.yml` / `.req.yaml` requirement files.");
+        return;
+      }
       previewManager.openPreviewForDocument(editor.document);
     }
   );
@@ -155,7 +169,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const id = await vscode.window.showInputBox({
         title: "GitReqD: New Requirement",
-        prompt: "Requirement ID (e.g. GRD-VSC-006). Filename will be {id}.yml",
+        prompt: `Requirement ID (e.g. GRD-VSC-006). Filename will be {id}${REQUIREMENT_FILE_EXTENSION}`,
         placeHolder: "GRD-XXX-001",
         validateInput(value) {
           if (!value.trim()) {
@@ -171,11 +185,11 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
       const trimmedId = id.trim();
-      const filePath = path.join(targetDir, `${trimmedId}.yml`);
+      const filePath = path.join(targetDir, `${trimmedId}${REQUIREMENT_FILE_EXTENSION}`);
       const uri = vscode.Uri.file(filePath);
       try {
         await vscode.workspace.fs.stat(uri);
-        vscode.window.showErrorMessage(`GitReqD: File already exists: ${trimmedId}.yml`);
+        vscode.window.showErrorMessage(`GitReqD: File already exists: ${trimmedId}${REQUIREMENT_FILE_EXTENSION}`);
         return;
       } catch {
         // file does not exist, ok to create

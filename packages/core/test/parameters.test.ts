@@ -13,7 +13,7 @@ function r(
     id,
     title,
     description: "",
-    sourcePath: `/${id}.yml`,
+    sourcePath: `/${id}.req.yml`,
     ...(params && { parameters: params }),
   };
 }

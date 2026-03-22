@@ -17,7 +17,7 @@ Usage: gitreqd <command> [options]
 Commands:
   validate          Check requirement files for schema, duplicate IDs, and broken links
   html              Generate an HTML report of all requirements
-  bootstrap         Initialize a directory with root.gitreqd and a requirements folder
+  bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
   resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
 
 Options (global):
@@ -55,14 +55,14 @@ const BOOTSTRAP_HELP = `gitreqd bootstrap – initialize a directory with gitreq
 
 Usage: gitreqd bootstrap [options]
 
-Creates root.gitreqd and a requirements folder in the target directory. Use --project-dir
-to specify the directory (default: current directory). If root.gitreqd or requirements
+Creates gitreqd.yaml and a requirements folder in the target directory. Use --project-dir
+to specify the directory (default: current directory). If gitreqd.yaml or requirements
 already exists, use --force to overwrite the root file or to continue when the folder exists.
 
 Options:
   -h, --help           Show this help
   --project-dir <dir>  Directory to bootstrap (default: current directory)
-  --force              Overwrite existing root.gitreqd; do not fail if requirements folder exists
+  --force              Overwrite existing gitreqd.yaml; do not fail if requirements folder exists
   --cursor-rules       Add .cursor rules for requirements (without prompting)
 `;
 
@@ -71,7 +71,7 @@ const RESOLVE_CONFLICTS_HELP = `gitreqd resolve-conflicts – resolve merge conf
 Usage: gitreqd resolve-conflicts [options]
 
 Resolves Git merge conflicts in requirement YAML files under the project using the LLM
-configured in root.gitreqd (ollama.base_url, ollama.model). Only requirement files
+configured in gitreqd.yaml (ollama.base_url, ollama.model). Only requirement files
 under requirement_dirs are processed. Resolved content is validated against the
 requirement schema; on validation failure no changes are written.
 

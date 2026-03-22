@@ -2,7 +2,7 @@ id: GRD-VALID-002
 title: Filename matches requirement id
 description: |
   The tool shall validate that requirement files are named after their id and that the id matches the file name.
-  File extensions must be .yml or .yaml.
+  File extension must be {{ GRD-SYS-007:requirement_file_extension }}.
 attributes:
   status: active
   rationale: |

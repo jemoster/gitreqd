@@ -6,6 +6,7 @@ import {
   generateFullHtml,
   generateSingleRequirementHtml,
 } from "../src/html";
+import { REQUIREMENT_FILE_EXTENSION } from "../src/requirement-files";
 import type { RequirementWithSource } from "../src/types";
 
 function req(
@@ -17,7 +18,7 @@ function req(
     id,
     title,
     description: "Description text",
-    sourcePath: `/project/${id}.yml`,
+    sourcePath: `/project/${id}${REQUIREMENT_FILE_EXTENSION}`,
     ...overrides,
   };
 }
@@ -75,7 +76,7 @@ describe("generateFullHtml", () => {
         description: "Full description text",
         attributes: { status: "draft", rationale: "Test rationale." },
         links: [{ satisfies: "GRD-OTHER" }],
-        sourcePath: "/project/reqs/GRD-FULL-001.yml",
+        sourcePath: "/project/reqs/GRD-FULL-001.req.yml",
       });
       const html = generateFullHtml([r]);
       expect(html).toContain("GRD-FULL-001");
@@ -87,13 +88,13 @@ describe("generateFullHtml", () => {
       expect(html).toContain("Test rationale");
       expect(html).toContain("Satisfies");
       expect(html).toContain('href="#GRD-OTHER"');
-      expect(html).toContain("/project/reqs/GRD-FULL-001.yml");
+      expect(html).toContain("/project/reqs/GRD-FULL-001.req.yml");
     });
 
     it("displays parameters (name and value) when requirement defines a parameters map", () => {
       const r = req("GRD-PARAMS-001", "Parameterized requirement", {
         parameters: { limit: 42, name: "maxItems", enabled: true },
-        sourcePath: "/project/GRD-PARAMS-001.yml",
+        sourcePath: "/project/GRD-PARAMS-001.req.yml",
       });
       const html = generateFullHtml([r]);
       expect(html).toContain("Parameters");
@@ -109,7 +110,7 @@ describe("generateFullHtml", () => {
     it("GRD-HTML-005: renders parameters in a table with Name and Value columns", () => {
       const r = req("GRD-TBL-001", "Table requirement", {
         parameters: { alpha: "one", beta: "two" },
-        sourcePath: "/p/GRD-TBL-001.yml",
+        sourcePath: "/p/GRD-TBL-001.req.yml",
       });
       const html = generateFullHtml([r]);
       expect(html).toContain('<table class="parameters-table">');
@@ -276,7 +277,7 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
   it("escapes HTML in requirement fields", () => {
     const r = req("ID", "Title <script>", {
       description: "Desc & \"quoted\"",
-      sourcePath: "/p/ID.yml",
+      sourcePath: "/p/ID.req.yml",
     });
     const html = generateSingleRequirementHtml(r);
     expect(html).not.toContain("<script>");
@@ -291,7 +292,7 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
     const r = req("GRD-P-001", "Limit is {{ :limit }}", {
       description: "The maximum count is {{ :limit }} items.",
       parameters: { limit: 42 },
-      sourcePath: "/p/GRD-P-001.yml",
+      sourcePath: "/p/GRD-P-001.req.yml",
     });
     const html = generateFullHtml([r]);
     expect(html).toMatch(/Limit is .*42/);
@@ -304,11 +305,11 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
   it("resolves cross-requirement parameter and links to source requirement", () => {
     const rA = req("GRD-A", "Source", {
       parameters: { max: 100 },
-      sourcePath: "/p/GRD-A.yml",
+      sourcePath: "/p/GRD-A.req.yml",
     });
     const rB = req("GRD-B", "Consumer", {
       description: "Max from A is {{ GRD-A:max }}.",
-      sourcePath: "/p/GRD-B.yml",
+      sourcePath: "/p/GRD-B.req.yml",
     });
     const html = generateFullHtml([rA, rB]);
     expect(html).toMatch(/Max from A is .*100.*\./);
@@ -322,7 +323,7 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
       description: "Desc",
       attributes: { rationale: "Because {{ :reason }}." },
       parameters: { reason: "traceability" },
-      sourcePath: "/p/GRD-R-001.yml",
+      sourcePath: "/p/GRD-R-001.req.yml",
     });
     const html = generateFullHtml([r]);
     expect(html).toMatch(/Because .*traceability.*\./);
@@ -330,10 +331,10 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
   });
 
   it("single-requirement HTML resolves params when allRequirements provided", () => {
-    const rA = req("GRD-A", "A", { parameters: { x: "10" }, sourcePath: "/a.yml" });
+    const rA = req("GRD-A", "A", { parameters: { x: "10" }, sourcePath: "/a.req.yml" });
     const rB = req("GRD-B", "B", {
       description: "Value: {{ GRD-A:x }}",
-      sourcePath: "/b.yml",
+      sourcePath: "/b.req.yml",
     });
     const html = generateSingleRequirementHtml(rB, [rA, rB]);
     expect(html).toMatch(/Value: .*10/);

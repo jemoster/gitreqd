@@ -17,13 +17,13 @@ function req(overrides: Partial<RequirementWithSource> & { id: string; sourcePat
 
 describe("GRD-SYS-005: parametersValid", () => {
   it("returns no errors when requirement has no parameters", () => {
-    expect(parametersValid(req({ id: "R", sourcePath: "/r.yml" }))).toEqual([]);
+    expect(parametersValid(req({ id: "R", sourcePath: "/r.req.yml" }))).toEqual([]);
   });
 
   it("returns no errors when parameters are valid and unique", () => {
     const r = req({
       id: "R",
-      sourcePath: "/r.yml",
+      sourcePath: "/r.req.yml",
       parameters: { limit: 10, name: "foo", enabled: true },
     });
     expect(parametersValid(r)).toEqual([]);
@@ -32,7 +32,7 @@ describe("GRD-SYS-005: parametersValid", () => {
   it("returns error when parameter name overlaps with id", () => {
     const r = req({
       id: "R",
-      sourcePath: "/r.yml",
+      sourcePath: "/r.req.yml",
       parameters: { id: "value" },
     });
     const errors = parametersValid(r);
@@ -45,7 +45,7 @@ describe("GRD-SYS-005: parametersValid", () => {
   it("returns error when parameter name overlaps with title", () => {
     const r = req({
       id: "R",
-      sourcePath: "/r.yml",
+      sourcePath: "/r.req.yml",
       parameters: { title: "x" },
     });
     const errors = parametersValid(r);
@@ -56,7 +56,7 @@ describe("GRD-SYS-005: parametersValid", () => {
   it("returns error when parameter name overlaps with description", () => {
     const r = req({
       id: "R",
-      sourcePath: "/r.yml",
+      sourcePath: "/r.req.yml",
       parameters: { description: "x" },
     });
     const errors = parametersValid(r);

@@ -1,9 +1,9 @@
 /**
- * GRD-CLI-004: CLI bootstrap project – initialize a directory with root.gitreqd and requirements folder.
+ * GRD-CLI-004: CLI bootstrap project – initialize a directory with gitreqd.yaml and requirements folder.
  */
 import fs from "node:fs";
 import path from "node:path";
-import { ROOT_MARKER } from "@gitreqd/core";
+import { findRootMarkerPath, ROOT_MARKER } from "@gitreqd/core";
 
 const DEFAULT_REQUIREMENT_DIR = "requirements";
 const MINIMAL_ROOT_CONTENT = `requirement_dirs:
@@ -11,7 +11,7 @@ const MINIMAL_ROOT_CONTENT = `requirement_dirs:
 `;
 
 export interface BootstrapOptions {
-  /** When true, overwrite existing root.gitreqd and do not fail if requirements dir exists. */
+  /** When true, overwrite existing gitreqd.yaml and do not fail if requirements dir exists. */
   force?: boolean;
   /** When true, copy .cursor rules into target/.cursor/rules. */
   cursorRules?: boolean;
@@ -27,8 +27,8 @@ export interface BootstrapResult {
 }
 
 /**
- * GRD-CLI-004: Bootstrap a directory with root.gitreqd and a requirements folder.
- * Optionally add .cursor rules. With force, overwrites root.gitreqd and skips creating requirements if it exists.
+ * GRD-CLI-004: Bootstrap a directory with gitreqd.yaml and a requirements folder.
+ * Optionally add .cursor rules. With force, overwrites gitreqd.yaml and skips creating requirements if it exists.
  */
 export async function runBootstrap(
   targetDir: string,
@@ -55,14 +55,15 @@ export async function runBootstrap(
     };
   }
 
+  const existingMarker = findRootMarkerPath(resolvedDir);
   const rootMarkerPath = path.join(resolvedDir, ROOT_MARKER);
   const requirementsPath = path.join(resolvedDir, DEFAULT_REQUIREMENT_DIR);
 
-  if (fs.existsSync(rootMarkerPath) && !force) {
+  if (existingMarker !== null && !force) {
     return {
       success: false,
       created: [],
-      error: `Project root file already exists: ${rootMarkerPath}. Use --force to overwrite.`,
+      error: `Project root file already exists: ${existingMarker}. Use --force to overwrite.`,
     };
   }
 

@@ -7,10 +7,12 @@ import path from "node:path";
 import {
   discoverProjectRootCandidates,
   discoverRequirementPaths,
+  findRootMarkerPath,
   getOllamaConfig,
   hasConflictMarkers,
   resolveRequirementConflicts,
   ROOT_MARKER,
+  ROOT_MARKER_HINT,
 } from "@gitreqd/core";
 import type { ValidationError } from "@gitreqd/core";
 
@@ -23,7 +25,7 @@ export async function runResolveConflicts(projectDir: string): Promise<{
   if (candidates.length === 0) {
     const err: ValidationError = {
       path: projectDir,
-      message: `No project root found (missing ${ROOT_MARKER}). Run from a directory that contains ${ROOT_MARKER} or use --project-dir.`,
+      message: `No project root found (missing ${ROOT_MARKER_HINT}). Run from a directory that contains ${ROOT_MARKER_HINT} or use --project-dir.`,
     };
     return { success: false, resolved: [], errors: [err] };
   }
@@ -34,7 +36,10 @@ export async function runResolveConflicts(projectDir: string): Promise<{
     return {
       success: false,
       resolved: [],
-      errors: [{ path: path.join(root, ROOT_MARKER), message: "Missing or invalid 'ollama' config (base_url, model) in root.gitreqd" }],
+      errors: [{
+        path: findRootMarkerPath(root) ?? path.join(root, ROOT_MARKER),
+        message: `Missing or invalid 'ollama' config (base_url, model) in ${ROOT_MARKER_HINT}`,
+      }],
     };
   }
 

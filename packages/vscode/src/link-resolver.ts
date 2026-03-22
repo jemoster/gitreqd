@@ -1,5 +1,5 @@
 import path from "node:path";
-import { discoverRequirementPaths } from "@gitreqd/core";
+import { discoverRequirementPaths, requirementIdFromFilename } from "@gitreqd/core";
 
 const cache = new Map<string, Map<string, string>>();
 
@@ -44,9 +44,8 @@ async function getIdToPathMap(
   idToPath = new Map<string, string>();
   for (const filePath of paths) {
     const basename = path.basename(filePath);
-    const ext = path.extname(basename);
-    if (ext === ".yml" || ext === ".yaml") {
-      const id = basename.slice(0, -ext.length);
+    const id = requirementIdFromFilename(basename);
+    if (id !== null) {
       idToPath.set(id, filePath);
     }
   }

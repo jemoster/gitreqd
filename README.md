@@ -6,7 +6,7 @@ A requirement management tool that works with requirement files stored in your r
 
 ## Current
 
-- **CLI** – Discover requirements, validate schema, and generate static HTML reports. Run from the project root (where `root.gitreqd` is present) or pass `--project-dir`. Use `gitreqd bootstrap` to initialize a directory with `root.gitreqd` and a `requirements` folder.
+- **CLI** – Discover requirements, validate schema, and generate static HTML reports. Run from the project root (where `gitreqd.yaml` or `gitreqd.yml` is present) or pass `--project-dir`. Requirement files use the `.req.yml` or `.req.yaml` suffix. Use `gitreqd bootstrap` to initialize a directory with `gitreqd.yaml` and a `requirements` folder.
 
 ## Planned consumers
 
@@ -65,11 +65,11 @@ To create the basic gitreqd layout in the current directory (or a given path):
 npx gitreqd bootstrap [--project-dir /path/to/dir] [--force] [--cursor-rules]
 ```
 
-This creates `root.gitreqd` and a `requirements` folder. If either already exists, use `--force` to overwrite the root file or to continue when the folder is present. Use `--cursor-rules` to add Cursor editor rules for the requirements directory; otherwise you are prompted when running interactively.
+This creates `gitreqd.yaml` and a `requirements` folder. If either already exists, use `--force` to overwrite the root file or to continue when the folder is present. Use `--cursor-rules` to add Cursor editor rules for the requirements directory; otherwise you are prompted when running interactively.
 
 ### Validating and reporting
 
-From a directory that contains (or is below) a `root.gitreqd` marker:
+From a directory that contains (or is below) a `gitreqd.yaml` or `gitreqd.yml` marker:
 
 ```bash
 # Validate requirement YAML under the project root

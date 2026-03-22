@@ -1,6 +1,6 @@
 # gitreqd VSCode extension
 
-Follow links in requirement YAML files (e.g. `satisfies: GRD-SYS-001`) via click or Go to Definition.
+Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satisfies: GRD-SYS-001`) via click or Go to Definition.
 
 ## Install for regular use
 
@@ -25,7 +25,7 @@ Follow links in requirement YAML files (e.g. `satisfies: GRD-SYS-001`) via click
    - Select the `gitreqd-vscode-*.vsix` file from `packages/vscode/`.
    - Reload the window if prompted.
 
-The extension will then be installed like any marketplace extension and activate when you open YAML files in a workspace whose root contains a `root.gitreqd` (see gitreqd docs).
+The extension will then be installed like any marketplace extension and activate when you open YAML (including `.req.yml` / `.req.yaml` requirement files) in a workspace whose root contains `gitreqd.yaml` or `gitreqd.yml` (see gitreqd docs). Link navigation, Go to Definition, schema validation under `requirements/`, and the preview apply only to `*.req.yml` and `*.req.yaml` files, not plain `.yml` or `.yaml` files.
 
 ## Update the installation
 
@@ -57,7 +57,7 @@ You will see messages such as:
 
 - **No workspace folder for document** – The current file is not inside any opened workspace folder (e.g. you opened a single file). Open a folder as the workspace so the extension can use it as the project root.
 - **Using workspace root: /path/to/workspace** – The folder the extension is using as the project root.
-- **Discovery failed: …** – Reading or parsing `root.gitreqd` at the workspace root failed (e.g. file missing or invalid). The message shows the error; fix that file and try again.
+- **Discovery failed: …** – Reading or parsing the project root marker (`gitreqd.yaml` or `gitreqd.yml`) at the workspace root failed (e.g. file missing or invalid). The message shows the error; fix that file and try again.
 - **Discovered N requirement file(s)** – Discovery succeeded; links should resolve if the requirement ids exist in those files.
 
-After changing `root.gitreqd` or requirement files, close and reopen the YAML file (or reload the window) so the extension’s cache is refreshed and new log lines are written.
+After changing the project root marker or requirement `.req.yml` / `.req.yaml` files, close and reopen the file (or reload the window) so the extension’s cache is refreshed and new log lines are written.

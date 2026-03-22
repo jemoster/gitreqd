@@ -14,6 +14,6 @@ Add new categories as needed (e.g. GRD-WEB-*) when you add formal requirements f
 ## Adding requirements
 
 - One YAML file per requirement.
-- File name should match the requirement id (e.g. `GRD-SYS-001.yml`).
+- File name should match the requirement id (e.g. `GRD-SYS-001.req.yml` or `GRD-SYS-001.req.yaml`).
 - Use the same schema as project requirements: `id`, `title`, `description`, `attributes`, `links`.
 - In `links`, use `satisfies: <id>` to reference other requirements (e.g. `satisfies: GRD-SYS-001`).

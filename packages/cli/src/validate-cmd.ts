@@ -1,7 +1,7 @@
 import {
   discoverProjectRootCandidates,
   loadRequirements,
-  ROOT_MARKER,
+  ROOT_MARKER_HINT,
 } from "@gitreqd/core";
 import type { ValidationError } from "@gitreqd/core";
 
@@ -9,11 +9,11 @@ export async function runValidate(projectDir: string): Promise<{ success: boolea
   const candidates = await discoverProjectRootCandidates(projectDir);
   if (candidates.length === 0) {
     console.error(
-      `No project root found (missing ${ROOT_MARKER}). Run from a directory that contains ${ROOT_MARKER} or use --project-dir.`
+      `No project root found (missing ${ROOT_MARKER_HINT}). Run from a directory that contains ${ROOT_MARKER_HINT} or use --project-dir.`
     );
     return {
       success: false,
-      errors: [{ path: projectDir, message: `No project root found (missing ${ROOT_MARKER})` }],
+      errors: [{ path: projectDir, message: `No project root found (missing ${ROOT_MARKER_HINT})` }],
     };
   }
 

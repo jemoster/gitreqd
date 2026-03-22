@@ -34,7 +34,7 @@ export interface RequirementWithSource extends Requirement {
 }
 
 export interface ProjectInfo {
-  /** Absolute path to the project root (directory containing root.gitreqd) */
+  /** Absolute path to the project root (directory containing gitreqd.yaml or gitreqd.yml) */
   rootDir: string;
   /** Absolute paths to requirement YAML files under the project */
   requirementPaths: string[];
