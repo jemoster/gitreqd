@@ -169,7 +169,9 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
       });
       expect("error" in result).toBe(true);
       if ("error" in result) {
-        expect(result.error.message).toMatch(/Missing required field|Expected an object|Invalid YAML/);
+        expect(result.error.message).toMatch(
+          /Missing required field|Expected an object|Invalid YAML|Unrecognized key|required/i
+        );
       }
     });
 

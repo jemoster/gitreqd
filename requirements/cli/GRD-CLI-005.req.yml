@@ -1,0 +1,19 @@
+id: GRD-CLI-005
+title: CLI output requirement schema
+description: |
+  The CLI shall provide a command (or subcommand) that writes the effective requirement schema for the current project to standard output or to a path given by the user.
+
+  The command shall use the same project root discovery as other CLI commands (e.g. from the current directory or `--project-dir`).
+
+  When the schema is composed from project configuration (see GRD-SYS-009), the output shall reflect that project’s effective schema.
+
+  The user shall be able to select the output representation. At minimum, the CLI shall offer JSON Schema as one format. Other representations (for example YAML as the wire format for the same schema document, or additional standard or custom formats) may be added later; the command design shall remain extensible.
+
+  Exact flag names, defaults (stdout vs file), and the full set of supported format identifiers are left to implementation.
+attributes:
+  status: active
+  rationale: |
+    Teams need to feed the schema into editors, CI, or documentation tools without relying on ad hoc scripts; a first-class CLI option keeps the behavior aligned with the project and extensible for new formats.
+links:
+  - satisfies: GRD-CLI-003
+  - satisfies: GRD-SYS-009

@@ -1,6 +1,7 @@
 /**
  * VSCode extension for gitreqd: link resolution, preview (GRD-VSC-003), navigation,
- * YAML schema for requirement files (GRD-VSC-004), and new requirement from explorer (GRD-VSC-005).
+ * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core Zod (GRD-SYS-009),
+ * refreshed when project root markers change, and new requirement from explorer (GRD-VSC-005).
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
@@ -9,6 +10,7 @@ import { isRequirementDocument } from "./requirement-document.js";
 import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
 import { RequirementPreviewManager } from "./preview.js";
+import { registerRequirementYamlSchema } from "./requirement-yaml-schema.js";
 
 const SATISFIES_REGEX = /satisfies:\s*['"]?([^\s'"\n]+)['"]?/g;
 
@@ -39,6 +41,8 @@ export function activate(context: vscode.ExtensionContext): void {
   log(
     "[Gitreqd] Extension active. Open a `.req.yml` or `.req.yaml` requirement file to resolve links; logs will appear here."
   );
+
+  context.subscriptions.push(registerRequirementYamlSchema(context));
 
   const previewManager = new RequirementPreviewManager(
     context,

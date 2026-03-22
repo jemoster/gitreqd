@@ -2,8 +2,7 @@ id: GRD-VSC-004
 title: YAML schema for requirement files
 description: |
   The VSCode extension shall include a schema for the YAML format of the requirement files.
-  The schema shall enable editor support such as validation, completion, and documentation for
-  requirement file structure (e.g. id, title, description, attributes, links).
+  The schema shall enable editor support such as validation, completion, and documentation for requirement file structure (e.g. id, title, description, attributes, links).  
 attributes:
   status: active
   rationale: |

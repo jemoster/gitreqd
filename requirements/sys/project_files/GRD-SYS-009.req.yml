@@ -1,0 +1,12 @@
+id: GRD-SYS-009
+title: 'Requirement Schema'
+description: |
+  The tool shall encode a schema for the requirement YAML file in Zod.
+  This shall be a single source of truth for this tool.
+  The schema may be composed at runtime based on configuration.
+  The schema used shall be exportable to other needed schemas such as JSON Schema.
+attributes:
+  status: active
+  rationale: |
+    Encode the schema in a common format that allows for a single source of truth.
+links: []

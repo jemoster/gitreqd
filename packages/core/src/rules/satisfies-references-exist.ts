@@ -15,7 +15,7 @@ export function satisfiesReferencesExist(
     const links = r.links ?? [];
     for (const link of links) {
       const targetId = link.satisfies;
-      if (targetId && !idSet.has(targetId)) {
+      if (typeof targetId === "string" && targetId && !idSet.has(targetId)) {
         errors.push({
           path: r.sourcePath,
           message: `Requirement ${r.id} references unknown id: ${targetId}`,

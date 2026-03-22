@@ -8,13 +8,13 @@
  */
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { exportRequirementFileJsonSchema } from "@gitreqd/core";
 
 const packagePath = path.join(__dirname, "..", "package.json");
 const pkg = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as {
   contributes?: {
     commands?: Array<{ command: string; title: string; category?: string; icon?: string }>;
     menus?: Record<string, Array<{ command: string; when?: string; group?: string }>>;
-    yamlValidation?: Array<{ fileMatch?: string | string[]; url?: string }>;
   };
 };
 
@@ -41,23 +41,12 @@ describe("GRD-VSC-003 requirement preview contributions", () => {
 });
 
 describe("GRD-VSC-004 YAML schema for requirement files", () => {
-  it("contributes yamlValidation with schema URL and fileMatch for requirement files", () => {
-    const validations = pkg.contributes?.yamlValidation ?? [];
-    expect(validations.length).toBeGreaterThan(0);
-    const requirementSchema = validations.find(
-      (v) => v.url === "./schemas/requirement.json"
-    );
-    expect(requirementSchema).toBeDefined();
-    const fileMatch = requirementSchema!.fileMatch;
-    const patterns = Array.isArray(fileMatch) ? fileMatch : [fileMatch];
-    expect(patterns).toContain("**/requirements/**/*.req.yml");
-    expect(patterns).toContain("**/requirements/**/*.req.yaml");
+  it("does not ship static yamlValidation; schema is applied at runtime via yaml.schemas", () => {
+    expect((pkg.contributes as Record<string, unknown> | undefined)?.yamlValidation).toBeUndefined();
   });
 
-  it("schema file exists and describes requirement structure (id, title, description, attributes, links)", () => {
-    const schemaPath = path.join(__dirname, "..", "schemas", "requirement.json");
-    expect(fs.existsSync(schemaPath)).toBe(true);
-    const schema = JSON.parse(fs.readFileSync(schemaPath, "utf-8")) as {
+  it("exported JSON Schema describes requirement structure (id, title, description, attributes, links)", () => {
+    const schema = exportRequirementFileJsonSchema() as {
       type?: string;
       required?: string[];
       properties?: Record<string, unknown>;
@@ -71,6 +60,7 @@ describe("GRD-VSC-004 YAML schema for requirement files", () => {
     expect(schema.properties!.description).toBeDefined();
     expect(schema.properties!.attributes).toBeDefined();
     expect(schema.properties!.links).toBeDefined();
+    expect(schema.properties!.parameters).toBeDefined();
   });
 });
 

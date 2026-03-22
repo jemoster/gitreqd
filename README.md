@@ -77,6 +77,10 @@ npx gitreqd validate
 
 # Generate HTML report (default output: ./index.html in the current directory)
 npx gitreqd html [--output dir]
+
+# Print the effective requirement schema (JSON Schema by default; use --format yaml for YAML)
+npx gitreqd schema
+npx gitreqd schema --format json-schema --output ./requirement.schema.json
 ```
 
 Specify a project directory explicitly:
@@ -84,6 +88,7 @@ Specify a project directory explicitly:
 ```bash
 npx gitreqd validate --project-dir /path/to/project
 npx gitreqd html --project-dir /path/to/project --output ./out
+npx gitreqd schema --project-dir /path/to/project --format yaml -o ./schema.yaml
 ```
 
 From the workspace after `npm run build`:
@@ -91,6 +96,7 @@ From the workspace after `npm run build`:
 ```bash
 npm run validate -- --project-dir sample_projects/basic
 npm run html -- --project-dir sample_projects/basic --output ./out
+node packages/cli/dist/index.js schema --project-dir sample_projects/basic
 ```
 
 ### Pre-commit hook
@@ -107,4 +113,20 @@ A pre-commit hook runs `gitreqd validate` so invalid requirement YAML is not com
 
 ## Requirement file format
 
-Text fields in requirement YAML support template syntax (GRD-SYS-005, GRD-SYS-006): `{{ :parameter_name }}` for local parameters, `{{ requirement_id:parameter_name }}` for cross-requirement references, and `{{ "literal" }}` or `{{ 'literal' }}` for literal strings that are not processed.
+Each requirement lives in **one YAML file** whose name ends with **`.req.yml`** or **`.req.yaml`**. The **`id`** in the file should match the filename (without that suffix). The project’s `gitreqd.yaml` / `gitreqd.yml` lists which directories are searched for these files (`requirement_dirs`).
+
+Every file must include:
+
+- **`id`** – Stable identifier (for example `GRD-FEATURE-001`).
+- **`title`** – Short label for the requirement.
+
+You will usually also add:
+
+- **`description`** – Full text of the requirement. Reports can render this as Markdown.
+- **`attributes`** – Optional key–value metadata (for example `status` and `rationale`) for your own process.
+- **`links`** – A list of link objects. Use **`satisfies: <other-id>`** when this requirement implements or traces to another requirement.
+- **`parameters`** – Named values (string, number, or boolean) you can reference from the text of **`description`** and other string fields so shared values stay in one place.
+
+In string fields, you can use **parameter placeholders**: `{{ :name }}` for a parameter defined on the same requirement, `{{ other_id:name }}` to pull a parameter from another requirement, and quoted literals such as `{{ "fixed text" }}` when the text should not be treated as a parameter reference.
+
+With the gitreqd VS Code extension and a YAML language extension installed, editors typically offer validation and completion for these fields while you edit `.req.yml` / `.req.yaml` files under your configured requirement directories.

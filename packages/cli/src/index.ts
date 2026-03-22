@@ -7,6 +7,7 @@ import { runValidate } from "./validate-cmd.js";
 import { runHtml } from "./html-cmd.js";
 import { runResolveConflicts } from "./resolve-conflicts-cmd.js";
 import { runBootstrap } from "./bootstrap-cmd.js";
+import { runSchema } from "./schema-cmd.js";
 
 const DEFAULT_OUTPUT_DIR = ".";
 
@@ -17,6 +18,7 @@ Usage: gitreqd <command> [options]
 Commands:
   validate          Check requirement files for schema, duplicate IDs, and broken links
   html              Generate an HTML report of all requirements
+  schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
   resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
 
@@ -25,6 +27,21 @@ Options (global):
   --project-dir <dir>  Project directory (default: current directory)
 
 Run 'gitreqd <command> --help' for command-specific options.
+`;
+
+const SCHEMA_HELP = `gitreqd schema – print the effective requirement schema for the project
+
+Usage: gitreqd schema [options]
+
+Writes the requirement schema (as used for validation) to standard output or to a file.
+Uses the same project root discovery as other commands. When project configuration affects
+the schema, the output reflects that project.
+
+Options:
+  -h, --help              Show this help
+  --project-dir <dir>     Project directory to search (default: current directory)
+  --format <name>         Output format: json-schema (default) or yaml
+  -o, --output <file>     Write to this file instead of stdout
 `;
 
 const VALIDATE_HELP = `gitreqd validate – validate requirement files
@@ -82,39 +99,70 @@ Options:
   --project-dir <dir>  Project directory (default: current directory)
 `;
 
+const CLI_COMMANDS = [
+  "validate",
+  "html",
+  "schema",
+  "bootstrap",
+  "resolve-conflicts",
+] as const;
+
+type CliCommand = (typeof CLI_COMMANDS)[number];
+
+function parseCliCommand(args: string[]): CliCommand {
+  for (const a of args) {
+    if ((CLI_COMMANDS as readonly string[]).includes(a)) {
+      return a as CliCommand;
+    }
+  }
+  return "validate";
+}
+
 function parseArgs(argv: string[]): {
-  command: "validate" | "html" | "bootstrap" | "resolve-conflicts";
+  command: CliCommand;
   projectDir: string;
   outputDir: string;
+  schemaFormat: "json-schema" | "yaml";
+  schemaOutputFile: string | undefined;
   showHelp: boolean;
-  helpCommand: "validate" | "html" | "bootstrap" | "resolve-conflicts" | null;
+  helpCommand: CliCommand | null;
   bootstrapForce: boolean;
   bootstrapCursorRules: boolean;
 } {
   const args = argv.slice(2);
-  let command: "validate" | "html" | "bootstrap" | "resolve-conflicts" = "validate";
+  const command = parseCliCommand(args);
   let projectDir = process.cwd();
   let outputDir = DEFAULT_OUTPUT_DIR;
+  let schemaFormat: "json-schema" | "yaml" = "json-schema";
+  let schemaOutputFile: string | undefined;
   let showHelp = false;
-  let helpCommand: "validate" | "html" | "bootstrap" | "resolve-conflicts" | null = null;
+  let helpCommand: CliCommand | null = null;
   let bootstrapForce = false;
   let bootstrapCursorRules = false;
 
-  const hasExplicitCommand = args.some(
-    (a) => a === "validate" || a === "html" || a === "bootstrap" || a === "resolve-conflicts"
-  );
+  const hasExplicitCommand = args.some((a) => (CLI_COMMANDS as readonly string[]).includes(a));
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "-h" || arg === "--help") {
       showHelp = true;
       helpCommand = hasExplicitCommand ? command : null;
-    } else if (arg === "validate" || arg === "html" || arg === "bootstrap" || arg === "resolve-conflicts") {
-      command = arg;
+    } else if ((CLI_COMMANDS as readonly string[]).includes(arg)) {
+      continue;
     } else if (arg === "--project-dir" && args[i + 1]) {
       projectDir = path.resolve(args[++i]);
     } else if ((arg === "--output" || arg === "-o") && args[i + 1]) {
-      outputDir = args[++i];
+      const next = args[++i];
+      if (command === "schema") {
+        schemaOutputFile = path.resolve(next);
+      } else {
+        outputDir = next;
+      }
+    } else if (arg === "--format" && args[i + 1]) {
+      const fmt = args[++i];
+      if (fmt === "json-schema" || fmt === "yaml") {
+        schemaFormat = fmt;
+      }
     } else if (arg === "--force") {
       bootstrapForce = true;
     } else if (arg === "--cursor-rules") {
@@ -126,6 +174,8 @@ function parseArgs(argv: string[]): {
     command,
     projectDir,
     outputDir,
+    schemaFormat,
+    schemaOutputFile,
     showHelp,
     helpCommand,
     bootstrapForce,
@@ -165,6 +215,8 @@ async function main(): Promise<number> {
     command,
     projectDir,
     outputDir,
+    schemaFormat,
+    schemaOutputFile,
     showHelp,
     helpCommand,
     bootstrapForce,
@@ -176,6 +228,8 @@ async function main(): Promise<number> {
       console.log(VALIDATE_HELP);
     } else if (helpCommand === "html") {
       console.log(HTML_HELP);
+    } else if (helpCommand === "schema") {
+      console.log(SCHEMA_HELP);
     } else if (helpCommand === "bootstrap") {
       console.log(BOOTSTRAP_HELP);
     } else if (helpCommand === "resolve-conflicts") {
@@ -193,6 +247,16 @@ async function main(): Promise<number> {
     }
     if (command === "html") {
       const { success } = await runHtml(projectDir, outputDir);
+      return success ? 0 : 1;
+    }
+    if (command === "schema") {
+      const { success, error } = await runSchema(projectDir, {
+        format: schemaFormat,
+        outputFile: schemaOutputFile,
+      });
+      if (error) {
+        console.error(error);
+      }
       return success ? 0 : 1;
     }
     if (command === "bootstrap") {
@@ -230,7 +294,7 @@ async function main(): Promise<number> {
   }
 
   console.error(
-    "Usage: gitreqd validate | html | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <dir>]"
+    "Usage: gitreqd validate | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
   );
   return 1;
 }

@@ -71,15 +71,6 @@
           "group": "Gitreqd"
         }
       ]
-    },
-    "yamlValidation": [
-      {
-        "fileMatch": [
-          "**/requirements/**/*.req.yml",
-          "**/requirements/**/*.req.yaml"
-        ],
-        "url": "./schemas/requirement.json"
-      }
-    ]
+    }
   }
 }

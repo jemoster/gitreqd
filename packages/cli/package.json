@@ -26,7 +26,8 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@gitreqd/core": "0.1.0"
+    "@gitreqd/core": "0.1.0",
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

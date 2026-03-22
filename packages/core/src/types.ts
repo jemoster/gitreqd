@@ -3,10 +3,14 @@
  */
 export type ParameterValue = string | number | boolean;
 
+export interface Link {
+  satisfies?: string;
+  [key: string]: unknown;
+}
+
 /**
- * Requirement schema: id, title, description, attributes, links, parameters.
- * Matches the YAML format used in requirement files.
- * GRD-SYS-005: parameters is a list of named parameters (name -> value) usable in text templates.
+ * Requirement shape for YAML files. Runtime validation is enforced by the Zod schema
+ * in `requirement-schema.ts` (GRD-SYS-009); this interface is the TypeScript contract.
  */
 export interface Requirement {
   id: string;
@@ -16,11 +20,6 @@ export interface Requirement {
   links?: Link[];
   /** GRD-SYS-005: Named parameters for templating in text fields. */
   parameters?: Record<string, ParameterValue>;
-}
-
-export interface Link {
-  satisfies?: string;
-  [key: string]: unknown;
 }
 
 export interface RequirementWithSource extends Requirement {

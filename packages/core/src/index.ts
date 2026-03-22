@@ -33,6 +33,15 @@ export type { OllamaConfig, ResolveResult, MergeFieldFn, ResolveRequirementConfl
 
 export { parseRequirementContent } from "./parse.js";
 
+export {
+  requirementFileInnerSchema,
+  requirementFileDataSchema,
+  exportRequirementFileJsonSchema,
+} from "./requirement-schema.js";
+export type { RequirementFileInner, RequirementSchemaComposeOptions } from "./requirement-schema.js";
+
+export { requirementSchemaComposeOptionsForProject } from "./schema-compose.js";
+
 export { loadRequirements, getRequirementsWithLinks } from "./load.js";
 export { parseRequirementFile } from "./parse.js";
 export { validateRequirements } from "./validate.js";
