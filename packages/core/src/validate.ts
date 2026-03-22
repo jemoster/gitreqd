@@ -5,6 +5,7 @@ import { runGlobalRules, runRules } from "./rules/index.js";
  * Validate a list of requirements (GRD-VALID-003 unique ids, GRD-VALID-004
  * link references exist, GRD-VALID-005 links acyclic, and ruleset rules such
  * as filename-id match). Returns a list of validation errors; empty if valid.
+ * GRD-SYS-010: The active profile delegates here for the standard ruleset.
  */
 export function validateRequirements(requirements: RequirementWithSource[]): ValidationError[] {
   const errors: ValidationError[] = [];

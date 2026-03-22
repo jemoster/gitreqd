@@ -69,6 +69,10 @@ npx gitreqd bootstrap [--project-dir /path/to/dir] [--force] [--cursor-rules]
 
 This creates `gitreqd.yaml` and a `requirements` folder. If either already exists, use `--force` to overwrite the root file or to continue when the folder is present. Use `--cursor-rules` to add Cursor editor rules for the requirements directory; otherwise you are prompted when running interactively.
 
+### Project profile (optional)
+
+The root file may include an optional `profile` key. The active profile controls how requirement YAML is interpreted, validated, and rendered in HTML reports. Only one profile applies per project. If you omit `profile`, the tool uses the built-in `standard` profile. Future releases may add more profiles for different document shapes or reporting rules.
+
 ### Validating and reporting
 
 From a directory that contains (or is below) a `gitreqd.yaml` or `gitreqd.yml` marker:

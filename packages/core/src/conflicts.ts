@@ -4,7 +4,8 @@
  * and validates resolved content against the requirement schema before any write.
  */
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
-import { parseRequirementContent } from "./parse.js";
+import { getRequirementProfile, STANDARD_PROFILE_ID } from "./profile/registry.js";
+import type { RequirementProfile } from "./profile/types.js";
 import type { ValidationError } from "./types.js";
 
 const CONFLICT_START = /^<<<<<<< .+$/m;
@@ -31,6 +32,8 @@ export type MergeFieldFn = (
 export interface ResolveRequirementConflictsOptions {
   /** When set, used instead of calling the LLM. Enables testing without network or logging. */
   mergeField?: MergeFieldFn;
+  /** GRD-SYS-010: Profile used to validate merged YAML (defaults to standard). */
+  profile?: RequirementProfile;
 }
 
 /**
@@ -254,7 +257,8 @@ export async function resolveRequirementConflicts(
   merged.attributes = Object.keys(attrs).length > 0 ? attrs : undefined;
 
   const resolvedYaml = stringifyYaml(merged, { lineWidth: 0 });
-  const parsed = parseRequirementContent(resolvedYaml, filePath);
+  const profile = options?.profile ?? getRequirementProfile(STANDARD_PROFILE_ID);
+  const parsed = profile.parseRequirementContent(resolvedYaml, filePath);
   if ("error" in parsed) {
     return { error: parsed.error };
   }

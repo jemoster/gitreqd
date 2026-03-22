@@ -266,7 +266,7 @@ function capitalizeLabel(key: string): string {
   return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
 }
 
-/** GRD-HTML-001: HTML report represents the full set of information in the requirements file. */
+/** GRD-HTML-001: HTML report represents the full set of information in the requirements file. GRD-SYS-010: Invoked via the active profile. */
 export function generateFullHtml(requirements: RequirementWithSource[]): string {
   /** GRD-SYS-005: Map for resolving cross-requirement parameter references. */
   const requirementsById = new Map(requirements.map((r) => [r.id, r]));

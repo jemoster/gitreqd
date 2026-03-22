@@ -2,8 +2,7 @@ import fs from "node:fs";
 import { stringify } from "yaml";
 import {
   discoverProjectRootCandidates,
-  exportRequirementFileJsonSchema,
-  requirementSchemaComposeOptionsForProject,
+  loadActiveProfile,
   ROOT_MARKER_HINT,
 } from "@gitreqd/core";
 
@@ -24,8 +23,9 @@ export async function runSchema(
   }
 
   const root = candidates[0]!;
-  const compose = requirementSchemaComposeOptionsForProject(root);
-  const schema = exportRequirementFileJsonSchema(compose);
+  const profile = loadActiveProfile(root);
+  const compose = profile.requirementSchemaComposeOptionsForProject(root);
+  const schema = profile.exportRequirementFileJsonSchema(compose);
 
   let body: string;
   if (options.format === "json-schema") {

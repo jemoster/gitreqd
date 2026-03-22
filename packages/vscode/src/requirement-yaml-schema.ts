@@ -5,7 +5,11 @@
  */
 import * as vscode from "vscode";
 import {
-  exportRequirementFileJsonSchema,
+  discoverProjectRoot,
+  getRequirementProfile,
+  loadActiveProfile,
+  STANDARD_PROFILE_ID,
+  type RequirementProfile,
   type RequirementSchemaComposeOptions,
 } from "@gitreqd/core";
 
@@ -13,10 +17,21 @@ const SCHEMA_FILE = "requirement.json";
 const GLOB_REQ_YML = "**/requirements/**/*.req.yml";
 const GLOB_REQ_YAML = "**/requirements/**/*.req.yaml";
 
-async function composeOptionsFromWorkspace(): Promise<RequirementSchemaComposeOptions | undefined> {
-  // When project config affects the Zod schema, read it here and return options for
-  // exportRequirementFileJsonSchema (e.g. extra fields from gitreqd.yaml).
-  return undefined;
+async function profileAndComposeFromWorkspace(): Promise<{
+  profile: RequirementProfile;
+  compose: RequirementSchemaComposeOptions | undefined;
+}> {
+  let profile = getRequirementProfile(STANDARD_PROFILE_ID);
+  let compose: RequirementSchemaComposeOptions | undefined;
+  for (const folder of vscode.workspace.workspaceFolders ?? []) {
+    const root = await discoverProjectRoot(folder.uri.fsPath);
+    if (root) {
+      profile = loadActiveProfile(root);
+      compose = profile.requirementSchemaComposeOptionsForProject(root);
+      break;
+    }
+  }
+  return { profile, compose };
 }
 
 export function registerRequirementYamlSchema(context: vscode.ExtensionContext): vscode.Disposable {
@@ -27,8 +42,8 @@ export function registerRequirementYamlSchema(context: vscode.ExtensionContext):
     vscode.Uri.joinPath(context.globalStorageUri, "schemas", SCHEMA_FILE);
 
   const regenerate = async (): Promise<void> => {
-    const options = await composeOptionsFromWorkspace();
-    const json = exportRequirementFileJsonSchema(options);
+    const { profile, compose } = await profileAndComposeFromWorkspace();
+    const json = profile.exportRequirementFileJsonSchema(compose);
     const dir = vscode.Uri.joinPath(context.globalStorageUri, "schemas");
     await vscode.workspace.fs.createDirectory(dir);
     const out = schemaOutUri();

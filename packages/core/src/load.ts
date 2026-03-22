@@ -1,7 +1,6 @@
 import path from "node:path";
 import { discoverProject, discoverRequirementPaths, getRequirementDirs } from "./discovery.js";
-import { parseRequirementFile } from "./parse.js";
-import { validateRequirements } from "./validate.js";
+import { loadActiveProfile } from "./profile/index.js";
 import type { LoadResult, RequirementWithSource, ValidationError } from "./types.js";
 
 /**
@@ -31,6 +30,7 @@ function categoryPathFor(
  * uses that root; otherwise discovers root from startDir (throws if none or multiple).
  * Parses each requirement file and validates (schema + duplicate ids + broken links).
  * GRD-SYS-004: Sets categoryPath on each requirement from directory structure.
+ * GRD-SYS-010: Parsing and validation use the active profile from project configuration.
  */
 export async function loadRequirements(
   startDir: string,
@@ -47,12 +47,13 @@ export async function loadRequirements(
     requirementPaths = discovered.requirementPaths;
   }
 
+  const profile = loadActiveProfile(root);
   const requirementDirs = getRequirementDirs(root);
   const requirements: RequirementWithSource[] = [];
   const errors: ValidationError[] = [];
 
   for (const filePath of requirementPaths) {
-    const result = parseRequirementFile(filePath);
+    const result = profile.parseRequirementFile(filePath);
     if ("error" in result) {
       errors.push(result.error);
     } else {
@@ -62,7 +63,7 @@ export async function loadRequirements(
     }
   }
 
-  const validationErrors = validateRequirements(requirements);
+  const validationErrors = profile.validateRequirements(requirements);
   errors.push(...validationErrors);
 
   return { requirements, errors };

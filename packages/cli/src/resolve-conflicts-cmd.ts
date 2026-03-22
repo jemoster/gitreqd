@@ -10,6 +10,7 @@ import {
   findRootMarkerPath,
   getOllamaConfig,
   hasConflictMarkers,
+  loadActiveProfile,
   resolveRequirementConflicts,
   ROOT_MARKER,
   ROOT_MARKER_HINT,
@@ -31,6 +32,7 @@ export async function runResolveConflicts(projectDir: string): Promise<{
   }
 
   const root = candidates[0]!;
+  const profile = loadActiveProfile(root);
   const ollamaConfig = getOllamaConfig(root);
   if (!ollamaConfig) {
     return {
@@ -57,7 +59,7 @@ export async function runResolveConflicts(projectDir: string): Promise<{
     }
     if (!hasConflictMarkers(content)) continue;
 
-    const result = await resolveRequirementConflicts(content, filePath, ollamaConfig);
+    const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, { profile });
     if ("error" in result) {
       errors.push(result.error);
       continue;

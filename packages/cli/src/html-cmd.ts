@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   discoverProjectRootCandidates,
-  generateFullHtml,
+  loadActiveProfile,
   loadRequirements,
   ROOT_MARKER_HINT,
 } from "@gitreqd/core";
@@ -20,6 +20,7 @@ export async function runHtml(
   }
 
   const root = candidates[0]!;
+  const profile = loadActiveProfile(root);
   const { requirements, errors } = await loadRequirements(projectDir, root);
 
   if (errors.length > 0) {
@@ -35,7 +36,7 @@ export async function runHtml(
   const outDir = path.resolve(process.cwd(), outputDir);
   fs.mkdirSync(outDir, { recursive: true });
   const htmlPath = path.join(outDir, "index.html");
-  fs.writeFileSync(htmlPath, generateFullHtml(requirements), "utf-8");
+  fs.writeFileSync(htmlPath, profile.generateFullHtml(requirements), "utf-8");
   console.log(`Wrote ${htmlPath} (${requirements.length} requirements).`);
   return { success: true };
 }

@@ -31,7 +31,13 @@ export {
 } from "./conflicts.js";
 export type { OllamaConfig, ResolveResult, MergeFieldFn, ResolveRequirementConflictsOptions } from "./conflicts.js";
 
-export { parseRequirementContent } from "./parse.js";
+export {
+  parseRequirementContent,
+  parseRequirementContentWithSchema,
+  parseRequirementData,
+  parseRequirementFile,
+  parseRequirementFileWithSchema,
+} from "./parse.js";
 
 export {
   requirementFileInnerSchema,
@@ -42,8 +48,16 @@ export type { RequirementFileInner, RequirementSchemaComposeOptions } from "./re
 
 export { requirementSchemaComposeOptionsForProject } from "./schema-compose.js";
 
+export {
+  loadActiveProfile,
+  getActiveProfileId,
+  getRequirementProfile,
+  listRegisteredProfileIds,
+  STANDARD_PROFILE_ID,
+} from "./profile/index.js";
+export type { RequirementProfile } from "./profile/index.js";
+
 export { loadRequirements, getRequirementsWithLinks } from "./load.js";
-export { parseRequirementFile } from "./parse.js";
 export { validateRequirements } from "./validate.js";
 export {
   defaultRules,

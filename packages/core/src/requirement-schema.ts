@@ -99,7 +99,7 @@ export const requirementFileDataSchema = requirementFileInnerSchema.transform((d
 
 /**
  * Optional inputs when the JSON Schema must reflect project runtime configuration (GRD-SYS-009).
- * Extend when `gitreqd.yaml` or other config affects composed fields.
+ * Profiles (GRD-SYS-010) pass compose options from project configuration into `exportRequirementFileJsonSchema`.
  */
 export interface RequirementSchemaComposeOptions {
   // reserved for future use
