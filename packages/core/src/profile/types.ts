@@ -15,6 +15,7 @@ export interface RequirementProfile {
   generateFullHtml(requirements: RequirementWithSource[]): string;
   generateSingleRequirementHtml(
     requirement: RequirementWithSource,
-    allRequirements?: RequirementWithSource[]
+    allRequirements?: RequirementWithSource[],
+    options?: { editableFieldMarkers?: boolean }
   ): string;
 }

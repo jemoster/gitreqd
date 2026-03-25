@@ -27,6 +27,12 @@ Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satis
 
 The extension will then be installed like any marketplace extension and activate when you open YAML (including `.req.yml` / `.req.yaml` requirement files) in a workspace whose root contains `gitreqd.yaml` or `gitreqd.yml` (see gitreqd docs). Link navigation, Go to Definition, schema validation under `requirements/`, and the preview apply only to `*.req.yml` and `*.req.yaml` files, not plain `.yml` or `.yaml` files.
 
+### Requirement preview and rich-text editing
+
+With a requirement file active, use the editor title **Open Requirement Preview** action (preview icon) to open the HTML preview beside the editor. The preview matches the structure and styling of the exported requirements report.
+
+For **Description** and **Rationale** (when present), the preview includes a rich (WYSIWYG) editor with a formatting toolbar (headings, emphasis, lists, links, images, tables, code blocks, quotes). Edit the raw Markdown in the YAML file when you need the plain source. Changes in the preview are written back to the YAML file; you can also edit the same fields in the text editor—updates stay in sync when the document changes.
+
 ## Update the installation
 
 After changing the extension or upgrading the repo:

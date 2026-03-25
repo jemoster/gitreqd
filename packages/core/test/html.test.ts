@@ -285,6 +285,19 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
     expect(html).toContain("&amp;");
     expect(html).toContain("&quot;");
   });
+
+  it("GRD-VSC-006: optional markers tag description and rationale for the preview editor", () => {
+    const r = req("GRD-E-001", "T", {
+      description: "Hello",
+      attributes: { rationale: "Why" },
+      sourcePath: "/p/req.req.yml",
+    });
+    const marked = generateSingleRequirementHtml(r, undefined, { editableFieldMarkers: true });
+    expect(marked).toContain('data-gitreqd-field="description"');
+    expect(marked).toContain('data-gitreqd-field="rationale"');
+    const plain = generateSingleRequirementHtml(r);
+    expect(plain).not.toContain("data-gitreqd-field");
+  });
 });
 
 describe("GRD-SYS-005: parameterization in HTML export", () => {

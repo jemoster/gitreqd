@@ -158,11 +158,13 @@ function linkedFromMap(requirements: RequirementWithSource[]): Map<string, strin
   return map;
 }
 
-/** GRD-HTML-001: HTML report represents the full set of information in the requirements file. */
+/** GRD-HTML-001: HTML report represents the full set of information in the requirements file.
+ *  GRD-VSC-006: Optional `editableFieldMarkers` adds data-gitreqd-field for the preview webview WYSIWYG. */
 function requirementDetailHtml(
   r: RequirementWithSource,
   linkedFromIds?: string[],
-  requirementsById?: Map<string, RequirementWithSource>
+  requirementsById?: Map<string, RequirementWithSource>,
+  editableFieldMarkers?: boolean
 ): string {
   const byId = requirementsById ?? new Map<string, RequirementWithSource>([[r.id, r]]);
   const resolve = (text: string, useMarkdown: boolean) =>
@@ -238,7 +240,9 @@ function requirementDetailHtml(
           .map(([k, v]) => {
             const strVal = String(v);
             const html = k === "rationale" ? resolve(strVal, true) : resolve(strVal, false);
-            return `<div class="labeled-block"><span class="label">${escapeHtml(capitalizeLabel(k))}</span><div class="rationale">${html}</div></div>`;
+            const rationaleMarker =
+              editableFieldMarkers && k === "rationale" ? ' data-gitreqd-field="rationale"' : "";
+            return `<div class="labeled-block"><span class="label">${escapeHtml(capitalizeLabel(k))}</span><div class="rationale"${rationaleMarker}>${html}</div></div>`;
           })
           .join("")
       : "";
@@ -255,7 +259,9 @@ function requirementDetailHtml(
       <h2>${escapeHtml(r.id)} – ${titleHtml}</h2>
       ${metaHtml}
       ${parametersHtml}
-      <div class="labeled-block"><span class="label">Description</span><div class="description">${descriptionHtml}</div></div>
+      <div class="labeled-block"><span class="label">Description</span><div class="description"${
+        editableFieldMarkers ? ' data-gitreqd-field="description"' : ""
+      }>${descriptionHtml}</div></div>
       ${rationaleHtml}
       ${linksAtBottom}
       <p class="source"><span class="label">Source file</span> ${escapeHtml(r.sourcePath)}</p>
@@ -275,7 +281,7 @@ export function generateFullHtml(requirements: RequirementWithSource[]): string 
   /** GRD-HTML-002: Reverse lookup so each requirement shows who links to it. */
   const linkedFrom = linkedFromMap(requirements);
   const details = requirements
-    .map((r) => requirementDetailHtml(r, linkedFrom.get(r.id), requirementsById))
+    .map((r) => requirementDetailHtml(r, linkedFrom.get(r.id), requirementsById, false))
     .join("\n");
 
   return `<!DOCTYPE html>
@@ -316,17 +322,24 @@ ${details}
 }
 
 /** GRD-VSC-003: Single-requirement preview shares base structure/styling with full report.
- *  GRD-HTML-004: Description and rationale are rendered as Markdown (same as full report). */
+ *  GRD-HTML-004: Description and rationale are rendered as Markdown (same as full report).
+ *  GRD-VSC-006: Pass `editableFieldMarkers: true` in the VSCode preview so the webview can attach WYSIWYG editors. */
 export function generateSingleRequirementHtml(
   requirement: RequirementWithSource,
-  allRequirements?: RequirementWithSource[]
+  allRequirements?: RequirementWithSource[],
+  options?: { editableFieldMarkers?: boolean }
 ): string {
   // Use the same head, styling, and detail rendering as the full report (including markdown).
   // Only the scope differs: single requirement, no index/list.
   const list = allRequirements && allRequirements.length > 0 ? allRequirements : [requirement];
   const requirementsById = new Map(list.map((r) => [r.id, r]));
   const linkedFromIds = linkedFromMap(list).get(requirement.id);
-  const detail = requirementDetailHtml(requirement, linkedFromIds, requirementsById);
+  const detail = requirementDetailHtml(
+    requirement,
+    linkedFromIds,
+    requirementsById,
+    options?.editableFieldMarkers === true
+  );
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
