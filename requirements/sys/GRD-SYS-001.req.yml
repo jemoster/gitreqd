@@ -4,8 +4,7 @@ description: |
   The core engine shall parse requirement YAML files containing id, title, description,
   attributes, and links (including satisfies references).
 attributes:
-  status: active
   rationale: |
     Parsing is the foundation for validation, reporting, and all consumers
     (CLI, VSCode, web, CI).
-links: []
+  status: active

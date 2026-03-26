@@ -15,7 +15,6 @@ description: |
 
   The profiles API shall be structured to allow for the addition of new profiles in the future. 
 attributes:
-  status: ACTIVE
   rationale: |
     A single extensions API lets the same core engine serve generic use and regulated domains without forking the tool, while keeping YAML structure, validation, and reports aligned per profile.
-links: []
+  status: ACTIVE

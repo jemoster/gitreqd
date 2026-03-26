@@ -4,8 +4,8 @@ description: |
   The tool shall validate that requirement files are named after their id and that the id matches the file name.
   File extension must be {{ GRD-SYS-007:requirement_file_extension }}.
 attributes:
-  status: active
   rationale: |
     This ensures that requirements are easy to find and identify.
+  status: active
 links:
   - satisfies: GRD-VALID-001

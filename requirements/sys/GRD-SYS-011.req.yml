@@ -1,0 +1,19 @@
+id: GRD-SYS-011
+title: Format requirement YAML consistently
+description: |
+  The tool shall provide a formatter for requirement YAML documents that produces a consistent,deterministic canonical representation of a requirement file.
+
+  The formatter shall be able to read an existing requirement YAML file and rewrite it such that:
+
+  * field ordering is consistent across files of the same profile and schema
+  * indentation and whitespace are normalized
+  * line endings and trailing whitespace are normalized
+  * YAML output is stable such that formatting the same input repeatedly is idempotent
+
+  The formatter shall preserve the semantic meaning of the requirement document as defined by the active requirement schema and profile, and shall not introduce or remove data beyond formatting changes.
+attributes:
+  rationale: A canonical formatter reduces noisy diffs, improves review quality, and keeps requirement YAML files consistent across different editors and contributors.
+  status: active
+links:
+  - satisfies: GRD-SYS-001
+  - satisfies: GRD-SYS-009

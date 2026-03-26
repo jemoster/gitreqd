@@ -1,25 +1,26 @@
 id: GRD-SYS-005
-title: "Requirement Parameterization"
+title: Requirement Parameterization
 description: |
-  The requirement schema shall contain a list of named parameters.  These parameters may be referenced in text fields as a templatized field.  This allows for parameters to be used in multiple places and updated in a single location.
+  The requirement schema shall contain a list of named parameters. These parameters may be referenced in text fields as a templatized field. This allows for parameters to be used in multiple places and updated in a single location.
 
   The template syntax is as follows:
 
   To reference a local parameter, use the following syntax:
+
   ```
   {{"{{ :parameter_name }}"}}
   ```
 
   To reference a parameter from another requirement, use the following syntax:
+
   ```
   {{"{{ requirement_id:parameter_name }}"}}
   ```
 
-  The names of parameters must be unique within a requirement and not overlap with any other fields in the requirement.  Parameters can be a data type such as string, number, or boolean.
+  The names of parameters must be unique within a requirement and not overlap with any other fields in the requirement. Parameters can be a data type such as string, number, or boolean.
 
-  Exports of requirements should resolve all parameter references to their actual values, ensuring that the final output is clear and unambiguous.  Parameterized values should be visually distinguishable in the exported format, such as by using a specific formatting style or color coding, to indicate that they are derived from parameters.  Linking back to the source requirement and parameter definition should be maintained in the exported format to allow for traceability and easy reference.
+  Exports of requirements should resolve all parameter references to their actual values, ensuring that the final output is clear and unambiguous. Parameterized values should be visually distinguishable in the exported format, such as by using a specific formatting style or color coding, to indicate that they are derived from parameters. Linking back to the source requirement and parameter definition should be maintained in the exported format to allow for traceability and easy reference.
 attributes:
-  status: active
   rationale: |
     Parameterization allows for more flexible and maintainable requirement definitions by enabling the reuse of values across multiple requirements.
-links: []
+  status: active

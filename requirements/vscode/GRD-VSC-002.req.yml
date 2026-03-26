@@ -6,9 +6,9 @@ description: |
   other link targets defined in requirement YAML, opening the target requirement
   or resource in the editor.
 attributes:
-  status: active
   rationale: |
     Following links is essential for navigating between related requirements
     and understanding dependency structure without manual file lookup.
+  status: active
 links:
   - satisfies: GRD-VSC-001

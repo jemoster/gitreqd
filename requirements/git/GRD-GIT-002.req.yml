@@ -10,8 +10,8 @@ description: |
 
   The resolved content shall conform to the requirement YAML schema. If the resolved content does not match the schema, the conflict resolution shall fail and the tool shall make no changes to any files.
 attributes:
-  status: active
   rationale: |
     Reduce manual conflict resolution effort by leveraging Cursor to propose or apply resolutions during merges. Requiring schema compliance ensures that automatic resolution does not produce invalid requirement files.
+  status: active
 links:
   - satisfies: GRD-GIT-001

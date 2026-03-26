@@ -8,10 +8,10 @@ description: |
   attributes, links), so the user can fill in the requirement details with full editor support
   (validation, completion) from the existing YAML schema.
 attributes:
-  status: active
   rationale: |
     Creating new requirements from the explorer with a schema-based template reduces
     manual copy-paste and ensures new files conform to the requirement format.
+  status: active
 links:
   - satisfies: GRD-VSC-001
   - satisfies: GRD-VSC-004

@@ -1,11 +1,9 @@
 id: GRD-CLI-001
 title: CLI validate requirements
-description: |
-  The CLI shall load all requirements discovered for a project and validate their schema, reporting errors with file and line where possible.
+description: The CLI shall load all requirements discovered for a project and validate their schema, reporting errors with file and line where possible.
 attributes:
+  rationale: Users need to run validation from the terminal and get actionable errors.
   status: active
-  rationale: |
-    Users need to run validation from the terminal and get actionable errors.
 links:
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003

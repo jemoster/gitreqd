@@ -3,8 +3,8 @@ title: Parameters in table format
 description: |
   When a requirement defines a `parameters` map, the HTML report (and any export that displays parameters) shall render those parameters in a table. The table shall show parameter name and value so the user can scan them at a glance.
 attributes:
-  status: active
   rationale: |
     A table layout provides clear alignment of names and values and scales better when a requirement has many parameters.
+  status: active
 links:
   - satisfies: GRD-HTML-001

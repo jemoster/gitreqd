@@ -5,7 +5,6 @@ description: |
 
   The packaged artifact shall support installation onto a host system. Once installed, the tool shall be usable from various repositories running on that host (e.g. via a globally available command or PATH-installed binary).
 attributes:
-  status: active
   rationale: |
     Users need a single, repeatable way to obtain an installable artifact and install the tool on a machine so that multiple repositories can use the same installation without building from source per repo.
-links: []
+  status: active

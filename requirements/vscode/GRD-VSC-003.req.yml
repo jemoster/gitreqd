@@ -1,6 +1,6 @@
 id: GRD-VSC-003
 title: Requirement editor
-description: |-
+description: |
   The VSCode extension shall provide a dedicated requirement editor webview.
 
   Launch mechanism — Editor title action (Editor button):
@@ -14,8 +14,8 @@ description: |-
 
   When a user clicks on a "satisfies" link in the requirement YAML, the extension shall open the editor webview for the target requirement.
 attributes:
-  status: active
   rationale: |
     A split Editor/YAML experience allows users to both directly edit the underlying requirement YAML and immediately see a rendered representation in a form consistent with exported reports. Sharing a common HTML base between the per-requirement Editor and the full report minimizes duplication, reduces divergence in presentation, and ensures that what users see in the editor accurately reflects the generated documentation.
+  status: active
 links:
   - satisfies: GRD-VSC-001

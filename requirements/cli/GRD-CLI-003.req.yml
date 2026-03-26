@@ -5,10 +5,9 @@ description: |
   * If no project root is found, the CLI shall exit with an error.
   * The CLI shall stop searching for a project root as soon as the first {{ GRD-SYS-007:root_marker_filename }} file is found.
 attributes:
-  status: active
   rationale: |
     Users need the CLI to reliably locate the correct project root before running validation or generating reports.
+  status: active
 links:
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003
-

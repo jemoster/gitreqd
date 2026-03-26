@@ -6,9 +6,9 @@ description: |
   directly or indirectly links back to itself. Cycles shall be reported with the
   path of requirements involved in the cycle.
 attributes:
-  status: active
   rationale: |
     Cyclic links make traceability ambiguous and can cause infinite loops in
     tooling that follows requirement relationships.
+  status: active
 links:
   - satisfies: GRD-VALID-001

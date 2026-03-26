@@ -1,13 +1,10 @@
 id: GRD-SYS-006
-title: 'Template Syntax'
+title: Template Syntax
 description: |
   The general template syntax for parameterized values reflects Jinja2 template syntax:
 
   A double curly brace syntax is used to denote the start and end of a template.
   A quoted string inside the double curly braces signifies a literal string.  This string is not processed by the template engine.
-
 attributes:
+  rationale: ""
   status: active
-  rationale: |
-    
-links: []

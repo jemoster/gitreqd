@@ -11,9 +11,9 @@ description: |
 
   Exact flag names, defaults (stdout vs file), and the full set of supported format identifiers are left to implementation.
 attributes:
-  status: active
   rationale: |
     Teams need to feed the schema into editors, CI, or documentation tools without relying on ad hoc scripts; a first-class CLI option keeps the behavior aligned with the project and extensible for new formats.
+  status: active
 links:
   - satisfies: GRD-CLI-003
   - satisfies: GRD-SYS-009

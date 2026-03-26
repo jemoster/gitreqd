@@ -7,6 +7,7 @@
     "build": "npm run build --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "validate": "node packages/cli/dist/index.js validate",
+    "format": "node packages/cli/dist/index.js format",
     "html": "node packages/cli/dist/index.js html",
     "bootstrap": "node packages/cli/dist/index.js bootstrap",
     "test": "jest"

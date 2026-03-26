@@ -58,6 +58,14 @@ export {
 export type { RequirementProfile } from "./profile/index.js";
 
 export { loadRequirements, getRequirementsWithLinks } from "./load.js";
+
+export {
+  formatRequirementToYaml,
+  normalizeRequirementFileTextForCompare,
+  preferClipBlockChompForMarkdownKeys,
+} from "./format-requirement-yaml.js";
+export { formatProjectRequirementFiles } from "./format-project.js";
+export type { FormatProjectResult } from "./format-project.js";
 export { validateRequirements } from "./validate.js";
 export {
   defaultRules,

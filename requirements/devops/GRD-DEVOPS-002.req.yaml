@@ -5,7 +5,6 @@ description: |
 
   The build shall run in the project’s CI or release automation on GitHub (e.g. GitHub Actions triggered by the release) rather than relying on manual local builds for the published artifact.
 attributes:
-  status: active
   rationale: |
     Shipping the extension as a release artifact gives users and testers a reproducible, versioned installable without cloning and building from source, and aligns the published binary with the tagged source for that release.
-links: []
+  status: active

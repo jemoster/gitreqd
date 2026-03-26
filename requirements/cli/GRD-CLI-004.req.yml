@@ -9,8 +9,8 @@ description: |
   * If the target directory already contains a {{ GRD-SYS-007:root_marker_filename }} or the requirements folder, the CLI behavior (overwrite, skip, or error) shall be specified and consistent.
   * Confirm with the user if .cursor rules should be added to the target directory.
 attributes:
-  status: active
   rationale: |
     Users need a quick way to start a new gitreqd project without manually creating {{ GRD-SYS-007:root_marker_filename }} and the requirements directory structure.
+  status: active
 links:
   - satisfies: GRD-SYS-007

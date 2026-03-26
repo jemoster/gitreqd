@@ -81,6 +81,9 @@ From a directory that contains (or is below) a `gitreqd.yaml` or `gitreqd.yml` m
 # Validate requirement YAML under the project root
 npx gitreqd validate
 
+# Rewrite all requirement files to canonical YAML (field order, indentation, line endings)
+npx gitreqd format
+
 # Generate HTML report (default output: ./index.html in the current directory)
 npx gitreqd html [--output dir]
 
@@ -93,6 +96,7 @@ Specify a project directory explicitly:
 
 ```bash
 npx gitreqd validate --project-dir /path/to/project
+npx gitreqd format --project-dir /path/to/project
 npx gitreqd html --project-dir /path/to/project --output ./out
 npx gitreqd schema --project-dir /path/to/project --format yaml -o ./schema.yaml
 ```
@@ -101,6 +105,7 @@ From the workspace after `npm run build`:
 
 ```bash
 npm run validate -- --project-dir sample_projects/basic
+node packages/cli/dist/index.js format --project-dir sample_projects/basic
 npm run html -- --project-dir sample_projects/basic --output ./out
 node packages/cli/dist/index.js schema --project-dir sample_projects/basic
 ```

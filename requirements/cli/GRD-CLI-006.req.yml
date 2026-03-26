@@ -1,0 +1,15 @@
+id: GRD-CLI-006
+title: CLI format all requirement YAML files
+description: |
+  The CLI shall provide a command (or subcommand) that formats every requirement YAML file discovered for the project using the same discovery rules as other CLI commands that operate on the full requirement set (e.g. validation).
+
+  The command shall use the same project root discovery as other CLI commands (e.g. from the current directory or `--project-dir`).
+
+  The command shall rewrite each discovered requirement file in place according to the formatting rules defined for requirement YAML (see GRD-SYS-011). Files that already conform shall not change.
+attributes:
+  rationale: Teams need a single terminal invocation to normalize all requirement YAML in a repo, matching CI and editor behavior without editing files one at a time.
+  status: active
+links:
+  - satisfies: GRD-SYS-002
+  - satisfies: GRD-SYS-003
+  - satisfies: GRD-SYS-011

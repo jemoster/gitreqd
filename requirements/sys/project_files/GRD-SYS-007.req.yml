@@ -16,13 +16,13 @@ description: |
     - requirements
     - more-requirements/frontend
   ```
-parameters:
-  root_marker_filename: gitreqd.yaml | gitreqd.yml
-  requirement_file_extension: .req.yaml | .req.yml
-  directory_metadata_filename: reqs.yaml | reqs.yml
 attributes:
-  status: active
   rationale: |
     Explicit configuration of requirement directories makes discovery predictable and avoids coupling to ad-hoc filesystem layouts.
+  status: active
 links:
   - satisfies: GRD-SYS-002
+parameters:
+  directory_metadata_filename: reqs.yaml | reqs.yml
+  requirement_file_extension: .req.yaml | .req.yml
+  root_marker_filename: gitreqd.yaml | gitreqd.yml

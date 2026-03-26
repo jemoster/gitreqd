@@ -10,6 +10,16 @@ description: old
     expect(out).toContain("description: new");
   });
 
+  it("uses | not |- for multiline description (clip chomp, matches formatter)", () => {
+    const src = `id: A
+title: T
+description: old
+`;
+    const out = applyYamlMarkdownFieldUpdate(src, "description", "Line1\nLine2");
+    expect(out).toMatch(/^description: \|(\r?\n)/m);
+    expect(out).not.toContain("description: |-");
+  });
+
   it("sets attributes.rationale, creating attributes if needed", () => {
     const src = `id: A
 title: T
@@ -29,5 +39,15 @@ attributes:
     const out = applyYamlMarkdownFieldUpdate(src, "rationale", "why");
     expect(out).toContain("status: active");
     expect(out).toContain("rationale: why");
+  });
+
+  it("uses | not |- for multiline rationale", () => {
+    const src = `id: A
+title: T
+description: d
+`;
+    const out = applyYamlMarkdownFieldUpdate(src, "rationale", "R1\nR2");
+    expect(out).toMatch(/rationale: \|(\r?\n)/);
+    expect(out).not.toContain("rationale: |-");
   });
 });

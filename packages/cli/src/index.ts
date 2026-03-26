@@ -8,6 +8,7 @@ import { runHtml } from "./html-cmd.js";
 import { runResolveConflicts } from "./resolve-conflicts-cmd.js";
 import { runBootstrap } from "./bootstrap-cmd.js";
 import { runSchema } from "./schema-cmd.js";
+import { runFormat } from "./format-cmd.js";
 
 const DEFAULT_OUTPUT_DIR = ".";
 
@@ -17,6 +18,7 @@ Usage: gitreqd <command> [options]
 
 Commands:
   validate          Check requirement files for schema, duplicate IDs, and broken links
+  format            Rewrite all requirement YAML files to the canonical formatting
   html              Generate an HTML report of all requirements
   schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
@@ -42,6 +44,19 @@ Options:
   --project-dir <dir>     Project directory to search (default: current directory)
   --format <name>         Output format: json-schema (default) or yaml
   -o, --output <file>     Write to this file instead of stdout
+`;
+
+const FORMAT_HELP = `gitreqd format – canonical formatting for requirement YAML files
+
+Usage: gitreqd format [options]
+
+Rewrites every requirement file under the project root to the canonical YAML layout (consistent
+field order, indentation, and line endings). Files that already match the canonical form are not
+modified.
+
+Options:
+  -h, --help           Show this help
+  --project-dir <dir>  Project directory to search (default: current directory)
 `;
 
 const VALIDATE_HELP = `gitreqd validate – validate requirement files
@@ -101,6 +116,7 @@ Options:
 
 const CLI_COMMANDS = [
   "validate",
+  "format",
   "html",
   "schema",
   "bootstrap",
@@ -226,6 +242,8 @@ async function main(): Promise<number> {
   if (showHelp) {
     if (helpCommand === "validate") {
       console.log(VALIDATE_HELP);
+    } else if (helpCommand === "format") {
+      console.log(FORMAT_HELP);
     } else if (helpCommand === "html") {
       console.log(HTML_HELP);
     } else if (helpCommand === "schema") {
@@ -243,6 +261,10 @@ async function main(): Promise<number> {
   try {
     if (command === "validate") {
       const { success } = await runValidate(projectDir);
+      return success ? 0 : 1;
+    }
+    if (command === "format") {
+      const { success } = await runFormat(projectDir);
       return success ? 0 : 1;
     }
     if (command === "html") {
@@ -294,7 +316,7 @@ async function main(): Promise<number> {
   }
 
   console.error(
-    "Usage: gitreqd validate | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
+    "Usage: gitreqd validate | format | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
   );
   return 1;
 }
