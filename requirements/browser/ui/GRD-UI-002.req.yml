@@ -1,0 +1,47 @@
+id: GRD-UI-002
+title: Browser UI design system
+description: |
+  The browser UI (GRD-BRW-001) shall implement a consistent visual design
+  system defined by a shared token set and layout conventions. All UI
+  components shall derive their appearance from these tokens rather than
+  ad-hoc inline styles.
+
+  Token categories:
+  - Color: background (primary, secondary, tertiary), text (primary, secondary,
+    muted), border, accent, and semantic states (error, warning, success, info).
+    Tokens shall support both light and dark themes via CSS custom properties.
+  - Typography: a sans-serif body font and a monospace font for requirement IDs,
+    file paths, and code. Font sizes shall follow a fixed scale (e.g. 11, 12,
+    13, 15px). Font weights shall be limited to regular (400) and medium (500).
+  - Spacing: a base-4px scale (4, 8, 12, 16, 24, 32px). Components shall use
+    named spacing tokens rather than arbitrary values.
+  - Border radius: a single small radius (e.g. 4–6px) applied consistently to
+    cards, chips, and inputs. No mixed or decorative radii.
+  - Borders: a single hairline weight (0.5–1px) in the border token color.
+
+  Layout conventions:
+  - The split-pane shell shall use a fixed sidebar width with a resizable
+    divider. Sidebar and detail pane shall scroll independently.
+  - Interactive elements (tree rows, link chips, buttons) shall have clearly
+    distinct hover and active states using background or border token shifts,
+    not color changes.
+  - Requirement IDs throughout the UI shall render in the monospace font at a
+    visually reduced size relative to accompanying title text, to create clear
+    typographic hierarchy without bold weight.
+  - Requirement IDs shall always render in full on a single line; IDs shall
+    not be truncated and shall not wrap onto multiple lines.
+  - Validation errors shall use the semantic error token exclusively; no other
+    red-family color shall appear in the UI outside of error states.
+  - Tree row expand/collapse controls shall have no border, background, or
+    outline of their own. The control shall be an undecorated inline icon
+    (e.g. a chevron or triangle) rendered within the row's own hit area and
+    padded flush with the row text. The entire row including the icon shall
+    share a single hover state; the icon shall not be visually separable from
+    the row it controls.
+
+  The design system shall be documented as a set of CSS custom properties in a
+  single shared stylesheet imported by all UI components.
+attributes:
+  status: active
+links:
+  - satisfies: GRD-UI-001

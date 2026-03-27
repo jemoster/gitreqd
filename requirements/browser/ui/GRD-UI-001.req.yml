@@ -1,0 +1,14 @@
+id: GRD-UI-001
+title: Browser UI for gitreqd
+description: |
+  A browser-based UI shall provide a split-pane interface for viewing and editing gitreqd requirements.
+
+  The left pane shall display top-level requirements (those with no parent) grouped by directory, derived from the project's directory structure (GRD-SYS-004). Each requirement node shall be expandable to show sub-requirements that link to it, and users shall be able to expand directories and sub-requirement nodes recursively down the chain. The selected requirement displayed on the right panel will be visually highlighted in this panel. Any requirements with a validation error will have a small red circle to indicate there is an error.
+
+  The right pane shall display the rendered detail of the selected requirement, consistent in structure and styling with the HTML report output (GRD-HTML-001 and GRD-HTML-002).
+
+  A persistent status strip shall surface the total requirement count and current validation state. Navigation between requirements shall be possible via the tree and via link chips within the detail pane.
+
+  The UI shall support adding and editing links between requirements inline, without leaving the interface.
+attributes:
+  status: active

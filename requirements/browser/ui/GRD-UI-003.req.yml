@@ -1,0 +1,15 @@
+id: GRD-UI-003
+title: Requirement navigation history
+description: |
+  As the user navigates between requirements in the browser UI (GRD-UI-001),
+  each selection shall be pushed onto the browser's native history stack so that
+  the browser's back and forward controls move through previously visited
+  requirements.
+
+  The active requirement shall be reflected in the URL (e.g. as a path segment
+  or query parameter containing the requirement id) so that history entries are
+  bookmarkable and survive page reload.
+attributes:
+  status: active
+links:
+  - satisfies: GRD-UI-001

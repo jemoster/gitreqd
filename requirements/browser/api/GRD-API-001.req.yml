@@ -1,0 +1,17 @@
+id: GRD-API-001
+title: Browser UI REST API
+description: |
+  A REST API shall provide the data and mutation operations required by the browser UI (GRD-BRW-001).
+
+  The API shall expose endpoints for the following operations:
+
+  * List all requirements for a project, including their id, title, category, description, attributes, links, and parameters.
+  * Retrieve a single requirement by id.
+  * Update a requirement's links (add or remove a link entry).
+  * Retrieve the current validation state of the project (requirement count, error list).
+
+  All responses shall be JSON. Error responses shall include a machine-readable code and a human-readable message.
+
+  The API shall be provider-agnostic: it defines the contract that UI consumers depend on. Concrete providers (e.g. local, cloud) implement this contract independently (GRD-LOCAL-001).
+attributes:
+  status: active
