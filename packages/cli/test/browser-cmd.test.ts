@@ -48,7 +48,7 @@ function makeProject(): string {
   return tmp;
 }
 
-describe("GRD-API-001/GRD-LOCAL-001/GRD-BRW-001 browser server", () => {
+describe("GRD-API-001/GRD-LOCAL-001/GRD-UI-001 browser server", () => {
   it("serves requirements, status, and allows link updates", async () => {
     const project = makeProject();
     const started = await startBrowserServer(project, 0);

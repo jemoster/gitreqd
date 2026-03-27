@@ -1,0 +1,14 @@
+id: GRD-HTML-006
+title: Link requirement references in text
+description: |
+  When rendering requirement text fields in HTML, references to requirement IDs
+  (for example `GRD-HTML-001`) shall be rendered as hyperlinks to the referenced
+  requirement definition within the report.
+
+  This applies to requirement prose content, including description and rationale,
+  so users can navigate directly from textual references to the linked
+  requirement.
+attributes:
+  status: active
+links:
+  - satisfies: GRD-HTML-001

@@ -98,6 +98,31 @@ function markdownToHtml(text: string): string {
   return md.render(text.trim()).trim();
 }
 
+/** GRD-HTML-006: Link requirement ID references in rendered text fields. */
+function autoLinkRequirementRefs(
+  renderedHtml: string,
+  requirementsById: Map<string, RequirementWithSource>
+): string {
+  const idPattern = /\b([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)\b/g;
+  const tokens = renderedHtml.split(/(<[^>]+>)/g);
+  let anchorDepth = 0;
+  return tokens
+    .map((token) => {
+      if (!token) return token;
+      if (token.startsWith("<")) {
+        if (/^<a\b/i.test(token)) anchorDepth += 1;
+        if (/^<\/a>/i.test(token)) anchorDepth = Math.max(0, anchorDepth - 1);
+        return token;
+      }
+      if (anchorDepth > 0) return token;
+      return token.replace(idPattern, (match, candidateId: string) => {
+        if (!requirementsById.has(candidateId)) return match;
+        return `<a href="#${escapeHtml(candidateId)}">${escapeHtml(candidateId)}</a>`;
+      });
+    })
+    .join("");
+}
+
 /**
  * GRD-SYS-005: Resolve parameter references in text and render to HTML. Parameterized values
  * are wrapped in spans with class "param-value" and link to source requirement for traceability.
@@ -131,6 +156,7 @@ function resolveAndRenderText(
   for (let i = 0; i < paramSpans.length; i++) {
     out = out.split(String.fromCharCode(PARAM_PLACEHOLDER_BASE + i)).join(paramSpans[i]!);
   }
+  out = autoLinkRequirementRefs(out, requirementsById);
   return out;
 }
 

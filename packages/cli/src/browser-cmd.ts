@@ -91,7 +91,7 @@ function extractBodyHtml(htmlDoc: string): string {
 }
 
 /**
- * GRD-LOCAL-001 + GRD-API-001 + GRD-BRW-001 + GRD-HTML-001 + GRD-HTML-002:
+ * GRD-LOCAL-001 + GRD-API-001 + GRD-UI-001 + GRD-HTML-001 + GRD-HTML-002:
  * Run a local browser server with REST API and UI over localhost.
  */
 export async function runBrowser(projectDir: string, port: number): Promise<BrowserServerResult> {

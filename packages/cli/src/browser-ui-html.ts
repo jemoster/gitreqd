@@ -1,4 +1,4 @@
-/** GRD-BRW-001 + GRD-UI-002 + GRD-UI-003: Browser split-pane UI served by local provider. */
+/** GRD-UI-001 + GRD-UI-002 + GRD-UI-003: Browser split-pane UI served by local provider. */
 export const BROWSER_UI_HTML = `<!doctype html>
 <html lang="en">
 <head>

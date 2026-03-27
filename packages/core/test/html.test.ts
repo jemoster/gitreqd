@@ -237,6 +237,38 @@ describe("generateFullHtml", () => {
       expect(html).toContain("&lt;script&gt;");
     });
   });
+
+  describe("GRD-HTML-006: link requirement references in text", () => {
+    it("links requirement IDs referenced in description and rationale to definitions", () => {
+      const requirements = [
+        req("GRD-HTML-001", "Target 1"),
+        req("GRD-HTML-002", "Target 2"),
+        req("GRD-REF-001", "Reference holder", {
+          description: "See GRD-HTML-001 for base behavior.",
+          attributes: { rationale: "Also depends on GRD-HTML-002." },
+        }),
+      ];
+      const html = generateFullHtml(requirements);
+      const start = html.indexOf('id="GRD-REF-001"');
+      const detail = html.slice(start, html.indexOf("</section>", start));
+      expect(detail).toContain('href="#GRD-HTML-001"');
+      expect(detail).toContain('href="#GRD-HTML-002"');
+    });
+
+    it("does not link unknown IDs that are not requirement definitions", () => {
+      const requirements = [
+        req("GRD-HTML-001", "Target"),
+        req("GRD-REF-002", "Reference holder", {
+          description: "Mentions GRD-UNKNOWN-999 as plain text.",
+        }),
+      ];
+      const html = generateFullHtml(requirements);
+      const start = html.indexOf('id="GRD-REF-002"');
+      const detail = html.slice(start, html.indexOf("</section>", start));
+      expect(detail).not.toContain('href="#GRD-UNKNOWN-999"');
+      expect(detail).toContain("GRD-UNKNOWN-999");
+    });
+  });
 });
 
 describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {

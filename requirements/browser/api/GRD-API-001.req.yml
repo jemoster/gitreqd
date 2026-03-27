@@ -1,7 +1,7 @@
 id: GRD-API-001
 title: Browser UI REST API
 description: |
-  A REST API shall provide the data and mutation operations required by the browser UI (GRD-BRW-001).
+  A REST API shall provide the data and mutation operations required by the browser UI (GRD-UI-001).
 
   The API shall expose endpoints for the following operations:
 
