@@ -1,0 +1,11 @@
+id: GRD-VSC-007
+title: Hover shows requirement title for links and ID references
+description: |
+  The VSCode extension shall show the title of the referenced requirement when the user hovers the pointer over a requirement link and when the user hovers over plain text that references a requirement by id (for example satisfies values, link targets, or requirement ids appearing in descriptions or other YAML string values that the extension treats as requirement references). The hover content shall include the target requirement's title field from its requirement file when that requirement is resolvable within the project; if the id cannot be resolved, the extension may omit the title or show an indication that the requirement was not found, without contradicting this requirement for resolvable references.
+attributes:
+  rationale: |
+    Showing the title on hover lets users confirm which requirement they are about to open or which id they are reading about, without navigating away or opening another file.
+  status: active
+links:
+  - satisfies: GRD-VSC-001
+  - satisfies: GRD-VSC-002

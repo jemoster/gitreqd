@@ -1,7 +1,8 @@
 /**
  * VSCode extension for gitreqd: link resolution, preview (GRD-VSC-003), WYSIWYG/Markdown fields in preview (GRD-VSC-006), navigation,
  * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core Zod (GRD-SYS-009),
- * refreshed when project root markers change, and new requirement from explorer (GRD-VSC-005).
+ * refreshed when project root markers change, new requirement from explorer (GRD-VSC-005),
+ * and hover titles for requirement id references (GRD-VSC-007).
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
@@ -11,6 +12,7 @@ import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
 import { RequirementPreviewManager } from "./preview.js";
 import { registerRequirementYamlSchema } from "./requirement-yaml-schema.js";
+import { registerRequirementHoverProvider } from "./requirement-hover.js";
 
 const SATISFIES_REGEX = /satisfies:\s*['"]?([^\s'"\n]+)['"]?/g;
 
@@ -133,6 +135,9 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  // GRD-VSC-007: Hover shows resolved requirement title for ids under the pointer (satisfies lines and other references).
+  const hoverProvider = registerRequirementHoverProvider(requirementYamlSelector, log);
+
   // GRD-VSC-003: Editor title action (Preview button) — opens requirement preview webview side-by-side.
   const openPreviewCommand = vscode.commands.registerCommand(
     "gitreqd.requirement.openPreview",
@@ -209,6 +214,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     documentLinkProvider,
     definitionProvider,
+    hoverProvider,
     openPreviewCommand,
     newRequirementCommand
   );
