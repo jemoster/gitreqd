@@ -1,0 +1,12 @@
+id: GRD-SYS-012
+title: Configure external LLM providers in project config
+description: |
+  The tool shall allow configuration of external LLM providers in the project root marker file `{{ GRD-SYS-007:root_marker_filename }}`.
+
+  The configuration shall support selecting a provider and specifying provider-specific connection settings required for the tool to make LLM requests.
+
+  Features that use LLM capabilities shall read their provider configuration from `{{ GRD-SYS-007:root_marker_filename }}` and shall fail with a clear error if required LLM configuration is missing or invalid.
+attributes:
+  rationale: |
+    Centralizing external LLM configuration in project settings ensures consistent behavior across LLM-powered features and avoids hardcoded provider assumptions.
+  status: active

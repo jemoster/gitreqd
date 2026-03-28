@@ -1,7 +1,7 @@
 id: GRD-GIT-002
 title: Merge-conflict resolution tool
 description: |
-  The tool shall provide a merge-conflict resolution capability that uses an LLM (e.g. Ollama, configurable in {{ GRD-SYS-007:root_marker_filename }}) to resolve conflicts in requirement files.
+  The tool shall provide a merge-conflict resolution capability that uses an LLM to resolve conflicts in requirement files, using provider configuration defined by GRD-SYS-012.
 
   For requirement files (YAML under the project's requirement directories), resolution shall:
   1. Reconstruct the state of the YAML in both branches (ours and theirs) by replacing each conflict region with the respective side.

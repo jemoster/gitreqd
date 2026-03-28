@@ -7,15 +7,11 @@ import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import { getRequirementProfile, STANDARD_PROFILE_ID } from "./profile/registry.js";
 import type { RequirementProfile } from "./profile/types.js";
 import type { ValidationError } from "./types.js";
+import type { LlmRuntimeConfig } from "./llm-config.js";
 
 const CONFLICT_START = /^<<<<<<< .+$/m;
 const CONFLICT_SEP = /^=======$/m;
 const CONFLICT_END = /^>>>>>>> .+$/m;
-
-export interface OllamaConfig {
-  base_url: string;
-  model: string;
-}
 
 export interface ResolveResult {
   resolved: string;
@@ -26,7 +22,7 @@ export type MergeFieldFn = (
   fieldName: "title" | "description" | "rationale",
   oursYaml: string,
   theirsYaml: string,
-  config: OllamaConfig
+  config: LlmRuntimeConfig
 ) => Promise<string>;
 
 export interface ResolveRequirementConflictsOptions {
@@ -116,16 +112,12 @@ const MERGE_RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-/**
- * Call Ollama to merge a single text field. Uses structured JSON output so the merged value is extracted deterministically.
- */
-async function mergeFieldWithLLM(
+function buildMergePrompt(
   fieldName: "title" | "description" | "rationale",
   oursYaml: string,
-  theirsYaml: string,
-  config: OllamaConfig
-): Promise<string> {
-  const prompt = `You are merging the "${fieldName}" field from two versions of a requirement (YAML). Produce a single merged value that combines both versions intelligently: preserve important content from both sides, resolve contradictions in a sensible way, and write clear combined text. Do not simply concatenate the two versions.
+  theirsYaml: string
+): string {
+  return `You are merging the "${fieldName}" field from two versions of a requirement (YAML). Produce a single merged value that combines both versions intelligently: preserve important content from both sides, resolve contradictions in a sensible way, and write clear combined text. Do not simply concatenate the two versions.
 
 Respond with a JSON object containing exactly one key "merged_value" whose value is the merged text (string). No other keys or commentary.
 
@@ -140,43 +132,9 @@ ${theirsYaml}
 \`\`\`
 
 Return JSON: { "merged_value": "<your merged ${fieldName} here>" }`;
+}
 
-  const url = config.base_url.replace(/\/$/, "") + "/api/generate";
-  const body = {
-    model: config.model,
-    prompt,
-    stream: false,
-    format: MERGE_RESPONSE_SCHEMA,
-    options: { temperature: 0 },
-  };
-
-  if (shouldLogLLM()) {
-    console.error("[gitreqd resolve-conflicts] LLM request:", JSON.stringify({ field: fieldName, promptLength: prompt.length, prompt: prompt }, null, 2));
-  }
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    if (shouldLogLLM()) {
-      console.error("[gitreqd resolve-conflicts] LLM HTTP error:", res.status, text);
-    }
-    throw new Error(`Ollama request failed ${res.status}: ${text}`);
-  }
-
-  const json = (await res.json()) as { response?: string };
-  const rawResponse = json.response;
-  if (shouldLogLLM()) {
-    console.error("[gitreqd resolve-conflicts] LLM raw response:", typeof rawResponse === "string" ? rawResponse : JSON.stringify(rawResponse));
-  }
-
-  if (typeof rawResponse !== "string") {
-    throw new Error("Ollama response missing 'response' string");
-  }
-
+function parseMergedValueJson(rawResponse: string): string {
   let parsed: { merged_value?: string };
   try {
     parsed = JSON.parse(rawResponse.trim()) as { merged_value?: string };
@@ -195,9 +153,144 @@ Return JSON: { "merged_value": "<your merged ${fieldName} here>" }`;
   }
 
   if (shouldLogLLM()) {
-    console.error("[gitreqd resolve-conflicts] LLM extracted merged_value length:", parsed.merged_value.length, "preview:", parsed.merged_value.slice(0, 80) + (parsed.merged_value.length > 80 ? "..." : ""));
+    console.error(
+      "[gitreqd resolve-conflicts] LLM extracted merged_value length:",
+      parsed.merged_value.length,
+      "preview:",
+      parsed.merged_value.slice(0, 80) + (parsed.merged_value.length > 80 ? "..." : "")
+    );
   }
   return parsed.merged_value;
+}
+
+/**
+ * GRD-SYS-014: Call Ollama to merge a single text field (structured JSON via `format`).
+ */
+async function mergeFieldWithOllama(
+  fieldName: "title" | "description" | "rationale",
+  oursYaml: string,
+  theirsYaml: string,
+  config: Extract<LlmRuntimeConfig, { provider: "ollama" }>
+): Promise<string> {
+  const prompt = buildMergePrompt(fieldName, oursYaml, theirsYaml);
+  const url = config.base_url.replace(/\/$/, "") + "/api/generate";
+  const body = {
+    model: config.model,
+    prompt,
+    stream: false,
+    format: MERGE_RESPONSE_SCHEMA,
+    options: { temperature: 0 },
+  };
+
+  if (shouldLogLLM()) {
+    console.error(
+      "[gitreqd resolve-conflicts] LLM request:",
+      JSON.stringify({ field: fieldName, provider: "ollama", promptLength: prompt.length, prompt }, null, 2)
+    );
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    if (shouldLogLLM()) {
+      console.error("[gitreqd resolve-conflicts] LLM HTTP error:", res.status, text);
+    }
+    throw new Error(`Ollama request failed ${res.status}: ${text}`);
+  }
+
+  const json = (await res.json()) as { response?: string };
+  const rawResponse = json.response;
+  if (shouldLogLLM()) {
+    console.error(
+      "[gitreqd resolve-conflicts] LLM raw response:",
+      typeof rawResponse === "string" ? rawResponse : JSON.stringify(rawResponse)
+    );
+  }
+
+  if (typeof rawResponse !== "string") {
+    throw new Error("Ollama response missing 'response' string");
+  }
+
+  return parseMergedValueJson(rawResponse);
+}
+
+/**
+ * GRD-SYS-013: Call Anthropic Messages API to merge a single text field (JSON in assistant text).
+ */
+async function mergeFieldWithClaude(
+  fieldName: "title" | "description" | "rationale",
+  oursYaml: string,
+  theirsYaml: string,
+  config: Extract<LlmRuntimeConfig, { provider: "claude" }>
+): Promise<string> {
+  const apiKey = process.env[config.api_key_env];
+  if (apiKey == null || String(apiKey).trim() === "") {
+    throw new Error(`Anthropic API key is missing: environment variable "${config.api_key_env}" is unset or empty`);
+  }
+
+  const prompt = buildMergePrompt(fieldName, oursYaml, theirsYaml);
+  const url = `${config.base_url.replace(/\/$/, "")}/v1/messages`;
+
+  if (shouldLogLLM()) {
+    console.error(
+      "[gitreqd resolve-conflicts] LLM request:",
+      JSON.stringify(
+        { field: fieldName, provider: "claude", model: config.model, promptLength: prompt.length, prompt },
+        null,
+        2
+      )
+    );
+  }
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": String(apiKey).trim(),
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      max_tokens: 4096,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    if (shouldLogLLM()) {
+      console.error("[gitreqd resolve-conflicts] LLM HTTP error:", res.status, text);
+    }
+    throw new Error(`Claude API request failed ${res.status}: ${text}`);
+  }
+
+  const json = (await res.json()) as { content?: Array<{ type?: string; text?: string }> };
+  const block = json.content?.[0];
+  const rawResponse = block?.type === "text" && typeof block.text === "string" ? block.text : "";
+  if (shouldLogLLM()) {
+    console.error("[gitreqd resolve-conflicts] LLM raw response:", rawResponse.slice(0, 2000));
+  }
+  if (!rawResponse) {
+    throw new Error("Claude API response missing text content");
+  }
+
+  return parseMergedValueJson(rawResponse);
+}
+
+async function mergeFieldWithLLM(
+  fieldName: "title" | "description" | "rationale",
+  oursYaml: string,
+  theirsYaml: string,
+  config: LlmRuntimeConfig
+): Promise<string> {
+  if (config.provider === "ollama") {
+    return mergeFieldWithOllama(fieldName, oursYaml, theirsYaml, config);
+  }
+  return mergeFieldWithClaude(fieldName, oursYaml, theirsYaml, config);
 }
 
 /**
@@ -208,7 +301,7 @@ Return JSON: { "merged_value": "<your merged ${fieldName} here>" }`;
 export async function resolveRequirementConflicts(
   content: string,
   filePath: string,
-  ollamaConfig: OllamaConfig,
+  llmConfig: LlmRuntimeConfig,
   options?: ResolveRequirementConflictsOptions
 ): Promise<ResolveResult | { error: ValidationError }> {
   const sides = reconstructSides(content);
@@ -246,13 +339,13 @@ export async function resolveRequirementConflicts(
   const attrs = { ...oursAttrs };
 
   if (oFields.title !== tFields.title) {
-    merged.title = await mergeField("title", sides.ours, sides.theirs, ollamaConfig);
+    merged.title = await mergeField("title", sides.ours, sides.theirs, llmConfig);
   }
   if (oFields.description !== tFields.description) {
-    merged.description = await mergeField("description", sides.ours, sides.theirs, ollamaConfig);
+    merged.description = await mergeField("description", sides.ours, sides.theirs, llmConfig);
   }
   if (oFields.rationale !== tFields.rationale) {
-    attrs.rationale = await mergeField("rationale", sides.ours, sides.theirs, ollamaConfig);
+    attrs.rationale = await mergeField("rationale", sides.ours, sides.theirs, llmConfig);
   }
   merged.attributes = Object.keys(attrs).length > 0 ? attrs : undefined;
 

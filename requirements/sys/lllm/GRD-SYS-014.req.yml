@@ -1,0 +1,58 @@
+id: GRD-SYS-014
+title: Ollama local LLM provider configuration
+
+description: |
+  The tool shall support `ollama` as a named provider value in the LLM provider
+  configuration defined by GRD-SYS-012.
+
+  When the active provider is `ollama`, the following fields shall be supported
+  under the provider configuration block in `{{ GRD-SYS-007:root_marker_filename }}`:
+
+  - `model` (required) — the name of the Ollama model to use for requests
+    (e.g. `llama3.2`, `mistral`, `gemma3`). Unlike cloud providers, Ollama has
+    no universally safe default model — the available models depend on what the
+    user has pulled locally. The tool shall fail with a clear error if this
+    field is absent.
+
+  - `base_url` (optional) — the base URL of the Ollama server. Defaults to
+    `http://localhost:11434` if omitted. Teams running Ollama on a remote host
+    or non-standard port may override this value.
+
+  A minimal valid configuration example:
+  ```yaml
+  llm:
+    provider: ollama
+    model: llama3.2
+  ```
+
+  A full configuration example:
+  ```yaml
+  llm:
+    provider: ollama
+    model: llama3.2
+    base_url: http://192.168.1.50:11434
+  ```
+
+  The tool shall validate the provider configuration block on startup when any
+  LLM-backed feature is invoked. If the Ollama server is unreachable at the
+  configured `base_url`, the tool shall fail with a clear error identifying the
+  URL that could not be reached. If the specified `model` is not available on
+  the Ollama server, the tool shall fail with a clear error and, where the
+  Ollama API permits, shall include the list of available models in the error
+  message to aid diagnosis.
+
+  Unknown keys under the provider block shall produce a warning but shall not cause the tool to fail, to allow forward compatibility as new fields are added.
+
+
+attributes:
+  status: active
+  rationale: |
+    Supporting Ollama as a provider lets teams use LLM-backed features without
+    sending requirement content to an external service — important for projects
+    with confidentiality requirements or air-gapped environments. Because Ollama
+    has no implicit default model, requiring the `model` field explicitly avoids
+    silent failures where the tool falls back to a model that was never intended
+    or is not fit for the task.
+
+links:
+  - satisfies: GRD-SYS-012

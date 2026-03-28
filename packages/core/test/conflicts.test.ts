@@ -5,9 +5,9 @@ import {
   reconstructSides,
   hasConflictMarkers,
   resolveRequirementConflicts,
-  type OllamaConfig,
   type MergeFieldFn,
 } from "../src/conflicts.js";
+import type { LlmRuntimeConfig } from "../src/llm-config.js";
 
 describe("GRD-GIT-002: merge-conflict resolution", () => {
   describe("reconstructSides", () => {
@@ -76,7 +76,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
 
   describe("resolveRequirementConflicts", () => {
     const filePath = "/fake/GRD-CONFLICT-001.req.yml";
-    const ollamaConfig: OllamaConfig = { base_url: "http://localhost:11434", model: "test" };
+    const llmConfig: LlmRuntimeConfig = { provider: "ollama", base_url: "http://localhost:11434", model: "test" };
 
     /** Mock merge: no LLM call, no logging. */
     function mockMergeField(returns: Record<string, string>): MergeFieldFn {
@@ -84,7 +84,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
     }
 
     it("returns error when content has no valid conflict markers", async () => {
-      const result = await resolveRequirementConflicts("id: X\ntitle: Y\n", filePath, ollamaConfig, { mergeField: mockMergeField({}) });
+      const result = await resolveRequirementConflicts("id: X\ntitle: Y\n", filePath, llmConfig, { mergeField: mockMergeField({}) });
       expect("error" in result).toBe(true);
       if ("error" in result) expect(result.error.message).toContain("No valid conflict markers");
     });
@@ -111,7 +111,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         ">>>>>>> branch",
         "links: []",
       ].join("\n");
-      const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, { mergeField: mockMergeField({}) });
+      const result = await resolveRequirementConflicts(content, filePath, llmConfig, { mergeField: mockMergeField({}) });
       expect("resolved" in result).toBe(true);
       if ("resolved" in result) {
         expect(result.resolved).toContain("SAME-001");
@@ -137,7 +137,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         "  rationale: R",
         "links: []",
       ].join("\n");
-      const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, {
+      const result = await resolveRequirementConflicts(content, filePath, llmConfig, {
         mergeField: mockMergeField({ description: "Merged desc." }),
       });
       expect("resolved" in result).toBe(true);
@@ -164,7 +164,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         "=======",
         ">>>>>>> B",
       ].join("\n");
-      const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, {
+      const result = await resolveRequirementConflicts(content, filePath, llmConfig, {
         mergeField: mockMergeField({ title: "" }),
       });
       expect("error" in result).toBe(true);
@@ -190,7 +190,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         "  rationale: Merged rationale.",
         "links: []",
       ].join("\n");
-      const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, {
+      const result = await resolveRequirementConflicts(content, filePath, llmConfig, {
         mergeField: mockMergeField({ description: "Merged description from both sides." }),
       });
       expect("resolved" in result).toBe(true);

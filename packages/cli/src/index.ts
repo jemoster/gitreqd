@@ -117,7 +117,7 @@ const RESOLVE_CONFLICTS_HELP = `gitreqd resolve-conflicts – resolve merge conf
 Usage: gitreqd resolve-conflicts [options]
 
 Resolves Git merge conflicts in requirement YAML files under the project using the LLM
-configured in gitreqd.yaml (ollama.base_url, ollama.model). Only requirement files
+configured in gitreqd.yaml under the \`llm\` key (see project documentation). Only requirement files
 under requirement_dirs are processed. Resolved content is validated against the
 requirement schema; on validation failure no changes are written.
 

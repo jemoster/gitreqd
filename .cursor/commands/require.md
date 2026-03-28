@@ -11,3 +11,4 @@ Steps:
   [] Create a new requirement or update an existing requirement file in the requirements directory. The requirement file should be named after the requirement ID.
   [] The requirement file should be a YAML file and adhere to the requirement schema.
 
+When writing requirements yaml, do not include newlines to limit the line length.  Assume instead that a word-wrap will be used to maintain readability.

@@ -121,38 +121,6 @@ export function getRequirementDirs(projectRoot: string): string[] {
 }
 
 /**
- * GRD-GIT-002: Read ollama config from the project root marker (base_url, model).
- * Returns null if ollama key is missing or invalid.
- */
-export function getOllamaConfig(projectRoot: string): { base_url: string; model: string } | null {
-  const rootPath = findRootMarkerPath(projectRoot);
-  if (rootPath === null) {
-    return null;
-  }
-  let raw: string;
-  try {
-    raw = fs.readFileSync(rootPath, "utf-8");
-  } catch {
-    return null;
-  }
-  let data: unknown;
-  try {
-    data = parseYaml(raw);
-  } catch {
-    return null;
-  }
-  if (data == null || typeof data !== "object" || Array.isArray(data)) return null;
-  const obj = data as Record<string, unknown>;
-  const ollama = obj.ollama;
-  if (ollama == null || typeof ollama !== "object" || Array.isArray(ollama)) return null;
-  const o = ollama as Record<string, unknown>;
-  const base_url = typeof o.base_url === "string" ? o.base_url : "http://localhost:11434";
-  const model = typeof o.model === "string" ? o.model : "";
-  if (!model) return null;
-  return { base_url, model };
-}
-
-/**
  * Discover all requirement files under the directories configured in the project root marker.
  * GRD-SYS-007: `*.req.yml` and `*.req.yaml`. Excludes node_modules.
  */

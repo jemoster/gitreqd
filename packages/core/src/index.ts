@@ -8,7 +8,6 @@ export {
   discoverRequirementPaths,
   findRootMarkerPath,
   getRequirementDirs,
-  getOllamaConfig,
   ROOT_MARKER,
   ROOT_MARKER_FILENAMES,
   ROOT_MARKER_HINT,
@@ -29,7 +28,7 @@ export {
   reconstructSides,
   hasConflictMarkers,
 } from "./conflicts.js";
-export type { OllamaConfig, ResolveResult, MergeFieldFn, ResolveRequirementConflictsOptions } from "./conflicts.js";
+export type { ResolveResult, MergeFieldFn, ResolveRequirementConflictsOptions } from "./conflicts.js";
 
 export {
   parseRequirementContent,
@@ -96,5 +95,14 @@ export type {
 
 export { resolveText, resolveToSegments } from "./parameters.js";
 export type { ResolvedSegment } from "./parameters.js";
+
+export {
+  parseLlmConfig,
+  validateLlmForUse,
+  ollamaModelMatchesTag,
+  DEFAULT_CLAUDE_MODEL,
+  DEFAULT_OLLAMA_BASE_URL,
+} from "./llm-config.js";
+export type { LlmRuntimeConfig, ParseLlmConfigResult } from "./llm-config.js";
 
 export { generateFullHtml, generateSingleRequirementHtml } from "./html.js";

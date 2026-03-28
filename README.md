@@ -73,6 +73,15 @@ This creates `gitreqd.yaml` and a `requirements` folder. If either already exist
 
 The root file may include an optional `profile` key. The active profile controls how requirement YAML is interpreted, validated, and rendered in HTML reports. Only one profile applies per project. If you omit `profile`, the tool uses the built-in `standard` profile. Future releases may add more profiles for different document shapes or reporting rules.
 
+### LLM configuration (optional)
+
+Commands that call an external language model (for example merge-conflict resolution) read settings from an `llm` mapping in `gitreqd.yaml` / `gitreqd.yml`. Set `llm.provider` to choose a backend:
+
+- **`ollama`** — Local Ollama server. Required: `model` (must exist on the server). Optional: `base_url` (defaults to `http://localhost:11434`). Before running, the tool checks that the server responds and lists the configured model.
+- **`claude`** — Anthropic’s API. Required: `api_key_env` (name of an environment variable whose value is the API key; the key is never read from the YAML file). Optional: `model` (defaults to `claude-sonnet-4-20250514`, a current Claude Sonnet 4 snapshot on the Anthropic API), `base_url` (defaults to `https://api.anthropic.com` for enterprise proxies or compatible endpoints).
+
+Unknown keys under `llm` may produce warnings but are ignored so newer fields can be added without breaking older clients. Use `gitreqd resolve-conflicts` (from the project root) to resolve Git conflict markers in requirement YAML using that configuration.
+
 ### Validating and reporting
 
 From a directory that contains (or is below) a `gitreqd.yaml` or `gitreqd.yml` marker:

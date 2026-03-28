@@ -1,5 +1,6 @@
 requirement_dirs:
   - ./
-ollama:
+llm:
+  provider: ollama
   base_url: "http://ollama:11434"
   model: "llama4:scout"

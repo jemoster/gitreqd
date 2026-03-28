@@ -1,5 +1,9 @@
 requirement_dirs:
   - ./
-ollama:
-  base_url: "http://ollama:11434"
-  model: "llama4:scout"
+# llm:
+#   provider: ollama
+#   base_url: "http://ollama:11434"
+#   model: "llama4:scout"
+llm:
+  provider: claude
+  api_key_env: ANTHROPIC_API_KEY

@@ -8,12 +8,13 @@ import {
   discoverProjectRootCandidates,
   discoverRequirementPaths,
   findRootMarkerPath,
-  getOllamaConfig,
   hasConflictMarkers,
   loadActiveProfile,
+  parseLlmConfig,
   resolveRequirementConflicts,
   ROOT_MARKER,
   ROOT_MARKER_HINT,
+  validateLlmForUse,
 } from "@gitreqd/core";
 import type { ValidationError } from "@gitreqd/core";
 
@@ -33,17 +34,31 @@ export async function runResolveConflicts(projectDir: string): Promise<{
 
   const root = candidates[0]!;
   const profile = loadActiveProfile(root);
-  const ollamaConfig = getOllamaConfig(root);
-  if (!ollamaConfig) {
+  // GRD-SYS-012 / GRD-SYS-013 / GRD-SYS-014: `llm` block; GRD-GIT-002 uses the resolved provider for merges.
+  const parsed = parseLlmConfig(root, { warn: (msg) => console.warn(`gitreqd: ${msg}`) });
+  if (!parsed.ok) {
     return {
       success: false,
       resolved: [],
-      errors: [{
-        path: findRootMarkerPath(root) ?? path.join(root, ROOT_MARKER),
-        message: `Missing or invalid 'ollama' config (base_url, model) in ${ROOT_MARKER_HINT}`,
-      }],
+      errors: [{ path: parsed.markerPath ?? findRootMarkerPath(root) ?? path.join(root, ROOT_MARKER), message: parsed.message }],
     };
   }
+
+  const connectivity = await validateLlmForUse(parsed.config);
+  if (!connectivity.ok) {
+    return {
+      success: false,
+      resolved: [],
+      errors: [{ path: parsed.markerPath, message: connectivity.message }],
+    };
+  }
+
+  const llmConfig = parsed.config;
+  const modelLabel =
+    llmConfig.provider === "ollama"
+      ? `provider ollama, model ${llmConfig.model}`
+      : `provider claude, model ${llmConfig.model}`;
+  console.error(`gitreqd: using LLM (${modelLabel})`);
 
   const requirementPaths = await discoverRequirementPaths(root);
   const errors: ValidationError[] = [];
@@ -59,7 +74,7 @@ export async function runResolveConflicts(projectDir: string): Promise<{
     }
     if (!hasConflictMarkers(content)) continue;
 
-    const result = await resolveRequirementConflicts(content, filePath, ollamaConfig, { profile });
+    const result = await resolveRequirementConflicts(content, filePath, llmConfig, { profile });
     if ("error" in result) {
       errors.push(result.error);
       continue;

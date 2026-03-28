@@ -1,0 +1,63 @@
+id: GRD-SYS-013
+title: Claude API provider configuration
+
+description: |
+  The tool shall support `claude` as a named provider value in the LLM provider
+  configuration defined by GRD-SYS-012.
+
+  When the active provider is `claude`, the following fields shall be supported
+  under the provider configuration block in `{{ GRD-SYS-007:root_marker_filename }}`:
+
+  - `api_key_env` (required) — the name of an environment variable whose value
+    is the Anthropic API key. The tool shall read the key at runtime from the
+    named environment variable and shall never read or write an API key value
+    directly in the config file. If the named environment variable is unset or
+    empty at the time of a request, the tool shall fail with a clear error
+    identifying the missing variable.
+
+  - `model` (optional) — the Claude model identifier to use for requests
+    (e.g. `claude-sonnet-4-6`). If omitted, the tool shall use a documented
+    default model. The active model shall be logged or surfaced to the user
+    when an LLM-backed operation runs, so it is clear which model was invoked.
+
+  - `base_url` (optional) — a custom API base URL. When set, the tool shall
+    direct all Claude API requests to this URL instead of the default
+    Anthropic endpoint (`https://api.anthropic.com`). This supports
+    enterprise proxies and compatible third-party endpoints.
+
+  A minimal valid configuration example:
+  ```yaml
+  llm:
+    provider: claude
+    api_key_env: ANTHROPIC_API_KEY
+  ```
+
+  A full configuration example:
+  ```yaml
+  llm:
+    provider: claude
+    api_key_env: ANTHROPIC_API_KEY
+    model: claude-sonnet-4-6
+    base_url: https://my-proxy.example.com
+  ```
+
+  The tool shall validate the provider configuration block on startup when any
+  LLM-backed feature is invoked. Unknown keys under the provider block shall
+  produce a warning but shall not cause the tool to fail, to allow forward
+  compatibility as new fields are added.
+
+
+
+attributes:
+  status: active
+  rationale: |
+    Defining Claude as a named, first-class provider gives teams a clear and
+    consistent way to configure access to the Anthropic API. Indirecting the API
+    key through an environment variable name — rather than embedding the key
+    value directly — keeps secrets out of version-controlled config files.
+    Exposing `base_url` as an override accommodates enterprise environments that
+    route traffic through a proxy or use an Anthropic-compatible endpoint without
+    requiring a code change.
+
+links:
+  - satisfies: GRD-SYS-012
