@@ -18,7 +18,7 @@
     "packages/vscode"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
