@@ -106,3 +106,5 @@ export {
 export type { LlmRuntimeConfig, ParseLlmConfigResult } from "./llm-config.js";
 
 export { generateFullHtml, generateSingleRequirementHtml } from "./html.js";
+
+export type { HttpAuthDecision, HttpServerAuthGate } from "./server-auth.js";

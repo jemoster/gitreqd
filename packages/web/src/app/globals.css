@@ -1,5 +1,4 @@
-/** GRD-UI-002: Shared Browser UI design tokens + layout conventions. */
-export const BROWSER_UI_CSS = `
+/* Shared design tokens and layout for the browser shell. */
 :root {
   color-scheme: light dark;
   --color-bg-primary: #ffffff;
@@ -342,5 +341,3 @@ ul {
   color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
 }
-
-`;

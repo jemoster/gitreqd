@@ -15,7 +15,8 @@
   "workspaces": [
     "packages/core",
     "packages/cli",
-    "packages/vscode"
+    "packages/vscode",
+    "packages/web"
   ],
   "engines": {
     "node": ">=24"

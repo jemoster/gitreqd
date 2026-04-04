@@ -21,7 +21,7 @@ Commands:
   validate          Check requirement files for schema, duplicate IDs, and broken links
   format            Rewrite all requirement YAML files to the canonical formatting
   html              Generate an HTML report of all requirements
-  browser           Start local browser UI and REST API server
+  browser           Start local Next.js browser UI and REST API
   schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
   resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
@@ -100,11 +100,12 @@ Options:
   --cursor-rules       Add .cursor rules for requirements (without prompting)
 `;
 
-const BROWSER_HELP = `gitreqd browser – run local browser UI + REST API server
+const BROWSER_HELP = `gitreqd browser – run local Next.js browser UI + REST API
 
 Usage: gitreqd browser [options]
 
-Starts a localhost server for browsing and editing requirements in a split-pane browser UI.
+Starts the packages/web Next.js dev server against your project (GITREQD_PROJECT_ROOT).
+Requires the gitreqd monorepo with npm ci at the repo root, or set GITREQD_MONOREPO_ROOT.
 
 Options:
   -h, --help           Show this help

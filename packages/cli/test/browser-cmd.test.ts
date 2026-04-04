@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { ROOT_MARKER } from "@gitreqd/core";
-import { startBrowserServer } from "../src/browser-cmd";
+import { resolveGitreqdMonorepoRoot, startBrowserServer } from "../src/browser-cmd";
 
 function makeProject(): string {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-browser-"));
@@ -48,8 +48,27 @@ function makeProject(): string {
   return tmp;
 }
 
-describe("GRD-API-001/GRD-LOCAL-001/GRD-UI-001 browser server", () => {
-  it("serves requirements, status, and allows link updates", async () => {
+describe("GRD-API-001 / GRD-LOCAL-001 / GRD-UI-004 browser (Next.js)", () => {
+  const prevQuiet = process.env.GITREQD_BROWSER_TEST_QUIET;
+
+  beforeAll(() => {
+    process.env.GITREQD_BROWSER_TEST_QUIET = "1";
+  });
+
+  afterAll(() => {
+    if (prevQuiet === undefined) {
+      delete process.env.GITREQD_BROWSER_TEST_QUIET;
+    } else {
+      process.env.GITREQD_BROWSER_TEST_QUIET = prevQuiet;
+    }
+  });
+
+  it("runs Next.js and serves API + rendered detail", async () => {
+    if (!resolveGitreqdMonorepoRoot()) {
+      throw new Error("This test must run from the gitreqd monorepo with npm ci.");
+    }
+    jest.setTimeout(180_000);
+
     const project = makeProject();
     const started = await startBrowserServer(project, 0);
     if ("success" in started) {
@@ -109,9 +128,14 @@ describe("GRD-API-001/GRD-LOCAL-001/GRD-UI-001 browser server", () => {
     } finally {
       await started.close();
     }
-  });
+  }, 180_000);
 
   it("returns machine-readable error payloads", async () => {
+    if (!resolveGitreqdMonorepoRoot()) {
+      throw new Error("This test must run from the gitreqd monorepo with npm ci.");
+    }
+    jest.setTimeout(180_000);
+
     const project = makeProject();
     const started = await startBrowserServer(project, 0);
     if ("success" in started) {
@@ -127,9 +151,14 @@ describe("GRD-API-001/GRD-LOCAL-001/GRD-UI-001 browser server", () => {
     } finally {
       await started.close();
     }
-  });
+  }, 180_000);
 
-  it("serves shared UI stylesheet and split-pane shell (GRD-UI-002)", async () => {
+  it("serves the Next.js home page with split-pane shell", async () => {
+    if (!resolveGitreqdMonorepoRoot()) {
+      throw new Error("This test must run from the gitreqd monorepo with npm ci.");
+    }
+    jest.setTimeout(180_000);
+
     const project = makeProject();
     const started = await startBrowserServer(project, 0);
     if ("success" in started) {
@@ -140,30 +169,44 @@ describe("GRD-API-001/GRD-LOCAL-001/GRD-UI-001 browser server", () => {
       const htmlRes = await fetch(`${base}/`);
       expect(htmlRes.ok).toBe(true);
       const html = await htmlRes.text();
-      expect(html).toContain('href="/browser-ui.css"');
+      expect(html).toContain("gitreqd browser");
       expect(html).toContain('id="sidebar-divider"');
-      expect(html).toContain("tree-row-btn");
-      expect(html).toContain("tree-icon");
-      expect(html).toContain('searchParams.set("req", id)');
-      expect(html).toContain('window.addEventListener("popstate"');
-
-      const cssRes = await fetch(`${base}/browser-ui.css`);
-      expect(cssRes.ok).toBe(true);
-      expect(cssRes.headers.get("content-type")).toContain("text/css");
-      const css = await cssRes.text();
-      expect(css).toContain("--color-bg-primary");
-      expect(css).toContain("--font-mono");
-      expect(css).toContain("--space-1");
-      expect(css).toContain("--radius-sm");
-      expect(css).toContain("--border-hairline");
-      expect(css).toContain("--sidebar-width");
-      expect(css).toContain(".tree-row-btn");
-      expect(css).toContain(".tree-icon");
-      expect(css).toContain(".req-id");
-      expect(css).toContain("white-space: nowrap");
-      expect(css).toContain(".detail-report .parameters-table");
+      expect(html).toContain('id="tree-root"');
+      expect(html).toContain("detail-root");
     } finally {
       await started.close();
     }
-  });
+  }, 180_000);
+
+  it("rejects /api/* without credentials when test auth middleware is enabled", async () => {
+    if (!resolveGitreqdMonorepoRoot()) {
+      throw new Error("This test must run from the gitreqd monorepo with npm ci.");
+    }
+    jest.setTimeout(180_000);
+
+    const project = makeProject();
+    const started = await startBrowserServer(project, 0, {
+      childEnv: { GITREQD_BROWSER_AUTH_TEST: "1" },
+    });
+    if ("success" in started) {
+      throw new Error(started.error ?? "Expected server to start");
+    }
+    const base = `http://127.0.0.1:${started.port}`;
+    try {
+      const denied = await fetch(`${base}/api/requirements`);
+      expect(denied.status).toBe(401);
+      const deniedJson = (await denied.json()) as { error: { code: string } };
+      expect(deniedJson.error.code).toBe("UNAUTHORIZED");
+
+      const ok = await fetch(`${base}/api/requirements`, {
+        headers: { authorization: "Bearer test-token" },
+      });
+      expect(ok.ok).toBe(true);
+
+      const page = await fetch(`${base}/`);
+      expect(page.ok).toBe(true);
+    } finally {
+      await started.close();
+    }
+  }, 180_000);
 });

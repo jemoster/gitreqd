@@ -1,20 +1,8 @@
+import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
-import http from "node:http";
-import {
-  discoverProjectRootCandidates,
-  formatRequirementToYaml,
-  generateSingleRequirementHtml,
-  loadRequirements,
-  ROOT_MARKER_HINT,
-} from "@gitreqd/core";
-import type { Requirement, RequirementWithSource } from "@gitreqd/core";
-import { BROWSER_UI_HTML } from "./browser-ui-html.js";
-import { BROWSER_UI_CSS } from "./browser-ui-css.js";
-
-interface ApiError {
-  code: string;
-  message: string;
-}
+import net from "node:net";
+import path from "node:path";
+import { discoverProjectRootCandidates, ROOT_MARKER_HINT } from "@gitreqd/core";
 
 interface BrowserServerResult {
   success: boolean;
@@ -26,84 +14,84 @@ export interface RunningBrowserServer {
   close: () => Promise<void>;
 }
 
-function requirementPayloadForYaml(r: RequirementWithSource): Requirement {
-  const payload: Requirement = {
-    id: r.id,
-    title: r.title,
-    description: r.description,
-  };
-  if (r.attributes !== undefined) payload.attributes = r.attributes;
-  if (r.links !== undefined) payload.links = r.links;
-  if (r.parameters !== undefined) payload.parameters = r.parameters;
-  return payload;
+/**
+ * GRD-AUTH-003: Extra environment variables for the Next.js child process
+ * (e.g. tests enabling optional API middleware).
+ */
+export interface StartBrowserServerOptions {
+  childEnv?: Record<string, string>;
 }
 
-function json(res: http.ServerResponse, status: number, body: unknown): void {
-  res.statusCode = status;
-  res.setHeader("content-type", "application/json; charset=utf-8");
-  res.end(JSON.stringify(body));
-}
-
-function apiError(res: http.ServerResponse, status: number, error: ApiError): void {
-  json(res, status, { error });
-}
-
-function readRequestBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let raw = "";
-    req.on("data", (chunk) => {
-      raw += String(chunk);
-    });
-    req.on("end", () => resolve(raw));
-    req.on("error", reject);
-  });
-}
-
-function stableStringify(value: unknown): string {
-  if (Array.isArray(value)) {
-    return `[${value.map((v) => stableStringify(v)).join(",")}]`;
+function findMonorepoRootWalkingUp(startDir: string): string | null {
+  let dir = path.resolve(startDir);
+  for (let i = 0; i < 12; i++) {
+    const nextBin = path.join(dir, "node_modules/next/dist/bin/next");
+    const webPkg = path.join(dir, "packages/web/package.json");
+    if (fs.existsSync(nextBin) && fs.existsSync(webPkg)) {
+      return dir;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      break;
+    }
+    dir = parent;
   }
-  if (value && typeof value === "object") {
-    const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
-      a.localeCompare(b)
-    );
-    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`).join(",")}}`;
-  }
-  return JSON.stringify(value);
-}
-
-function toApiRequirement(req: RequirementWithSource): Record<string, unknown> {
-  return {
-    id: req.id,
-    title: req.title,
-    category: req.categoryPath ?? [],
-    description: req.description,
-    attributes: req.attributes ?? {},
-    links: req.links ?? [],
-    parameters: req.parameters ?? {},
-    sourcePath: req.sourcePath,
-  };
-}
-
-function extractBodyHtml(htmlDoc: string): string {
-  const match = htmlDoc.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  return match ? match[1].trim() : htmlDoc;
+  return null;
 }
 
 /**
- * GRD-LOCAL-001 + GRD-API-001 + GRD-UI-001 + GRD-HTML-001 + GRD-HTML-002:
- * Run a local browser server with REST API and UI over localhost.
+ * Resolve the gitreqd monorepo root (contains `packages/web` and hoisted `node_modules/next`).
+ */
+export function resolveGitreqdMonorepoRoot(): string | null {
+  const override = process.env.GITREQD_MONOREPO_ROOT?.trim();
+  if (override && fs.existsSync(path.join(override, "packages/web/package.json"))) {
+    return path.resolve(override);
+  }
+  return findMonorepoRootWalkingUp(process.cwd());
+}
+
+function getFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const s = net.createServer();
+    s.listen(0, "127.0.0.1", () => {
+      const a = s.address();
+      const p = typeof a === "object" && a && "port" in a ? Number(a.port) : 0;
+      s.close(() => resolve(p));
+    });
+    s.on("error", reject);
+  });
+}
+
+async function waitForLocalNextReady(port: number, timeoutMs: number): Promise<void> {
+  const base = `http://127.0.0.1:${port}`;
+  const deadline = Date.now() + timeoutMs;
+  let lastErr: unknown;
+  while (Date.now() < deadline) {
+    try {
+      const r = await fetch(`${base}/`);
+      if (r.ok) {
+        return;
+      }
+      lastErr = new Error(`HTTP ${r.status}`);
+    } catch (e) {
+      lastErr = e;
+    }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  throw new Error(`Next.js did not become ready at ${base} within ${timeoutMs}ms: ${String(lastErr)}`);
+}
+
+/**
+ * GRD-LOCAL-001 + GRD-API-001 + GRD-UI-004: Run the Next.js browser UI (`packages/web`) against a project directory.
  */
 export async function runBrowser(projectDir: string, port: number): Promise<BrowserServerResult> {
   const started = await startBrowserServer(projectDir, port);
   if (!("close" in started)) {
     return started;
   }
-  console.log(`Browser UI server running at http://127.0.0.1:${started.port}`);
+  console.log(`Browser UI running at http://127.0.0.1:${started.port}`);
   console.log("Press Ctrl+C to stop.");
 
-  // Keep the CLI process alive so the server remains running.
-  // Ctrl+C (SIGINT) will stop the server and let the command exit cleanly.
   await new Promise<void>((resolve) => {
     let stopped = false;
     const stop = async (): Promise<void> => {
@@ -127,7 +115,8 @@ export async function runBrowser(projectDir: string, port: number): Promise<Brow
 
 export async function startBrowserServer(
   projectDir: string,
-  port: number
+  port: number,
+  options?: StartBrowserServerOptions
 ): Promise<BrowserServerResult | RunningBrowserServer> {
   const candidates = await discoverProjectRootCandidates(projectDir);
   if (candidates.length === 0) {
@@ -135,176 +124,86 @@ export async function startBrowserServer(
     console.error(`${error}. Run from a directory that contains ${ROOT_MARKER_HINT} or use --project-dir.`);
     return { success: false, error };
   }
-  const root = candidates[0]!;
-  const html = BROWSER_UI_HTML;
-  const css = BROWSER_UI_CSS;
+  const projectRoot = candidates[0]!;
 
-  const server = http.createServer(async (req, res) => {
-    try {
-      const method = req.method ?? "GET";
-      const parsed = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
-      const pathname = parsed.pathname;
+  const monorepoRoot = resolveGitreqdMonorepoRoot();
+  if (!monorepoRoot) {
+    const msg =
+      "Could not find the gitreqd Next.js app. Clone the gitreqd repository, run npm ci at the repo root, " +
+      "or set GITREQD_MONOREPO_ROOT to that directory.";
+    console.error(msg);
+    return { success: false, error: msg };
+  }
 
-      if (method === "GET" && (pathname === "/" || pathname === "/index.html")) {
-        res.statusCode = 200;
-        res.setHeader("content-type", "text/html; charset=utf-8");
-        res.end(html);
-        return;
-      }
-      if (method === "GET" && pathname === "/browser-ui.css") {
-        res.statusCode = 200;
-        res.setHeader("content-type", "text/css; charset=utf-8");
-        res.end(css);
-        return;
-      }
-
-      if (method === "GET" && pathname === "/api/requirements") {
-        const { requirements } = await loadRequirements(root, root);
-        // UI shows validation details separately via `/api/status`.
-        json(res, 200, { requirements: requirements.map(toApiRequirement) });
-        return;
-      }
-
-      if (method === "GET" && pathname.startsWith("/api/requirements/")) {
-        const id = decodeURIComponent(pathname.slice("/api/requirements/".length));
-        if (id.endsWith("/rendered-detail")) {
-          const reqId = id.slice(0, -"/rendered-detail".length);
-          const { requirements } = await loadRequirements(root, root);
-          const reqById = requirements.find((r) => r.id === reqId);
-          if (!reqById) {
-            apiError(res, 404, { code: "NOT_FOUND", message: `Requirement not found: ${reqId}` });
-            return;
-          }
-          const renderedDoc = generateSingleRequirementHtml(reqById, requirements);
-          json(res, 200, { html: extractBodyHtml(renderedDoc) });
-          return;
-        }
-        const { requirements } = await loadRequirements(root, root);
-        const reqById = requirements.find((r) => r.id === id);
-        if (!reqById) {
-          apiError(res, 404, { code: "NOT_FOUND", message: `Requirement not found: ${id}` });
-          return;
-        }
-        json(res, 200, { requirement: toApiRequirement(reqById) });
-        return;
-      }
-
-      if (method === "GET" && pathname === "/api/status") {
-        const { requirements, errors } = await loadRequirements(root, root);
-        json(res, 200, {
-          requirementCount: requirements.length,
-          errors,
-        });
-        return;
-      }
-
-      if (method === "PATCH" && pathname.startsWith("/api/requirements/") && pathname.endsWith("/links")) {
-        const id = decodeURIComponent(
-          pathname.slice("/api/requirements/".length, pathname.length - "/links".length)
-        );
-        const body = await readRequestBody(req);
-        let parsedBody: unknown;
-        try {
-          parsedBody = JSON.parse(body);
-        } catch {
-          apiError(res, 400, { code: "INVALID_JSON", message: "Request body must be valid JSON." });
-          return;
-        }
-        if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
-          apiError(res, 400, { code: "INVALID_BODY", message: "Request body must be an object." });
-          return;
-        }
-        const payload = parsedBody as Record<string, unknown>;
-        const operation = payload.operation;
-        const link = payload.link;
-        if ((operation !== "add" && operation !== "remove") || !link || typeof link !== "object") {
-          apiError(res, 400, {
-            code: "INVALID_BODY",
-            message: 'Body must include "operation" ("add"|"remove") and a "link" object.',
-          });
-          return;
-        }
-
-        const { requirements } = await loadRequirements(root, root);
-
-        const target = requirements.find((r) => r.id === id);
-        if (!target) {
-          apiError(res, 404, { code: "NOT_FOUND", message: `Requirement not found: ${id}` });
-          return;
-        }
-
-        const nextLinks = [...(target.links ?? [])];
-        const targetKey = stableStringify(link);
-        if (operation === "add") {
-          nextLinks.push(link as Record<string, unknown>);
-        } else {
-          const idx = nextLinks.findIndex((entry) => stableStringify(entry) === targetKey);
-          if (idx === -1) {
-            apiError(res, 404, {
-              code: "LINK_NOT_FOUND",
-              message: "Could not remove link because the exact entry was not found.",
-            });
-            return;
-          }
-          nextLinks.splice(idx, 1);
-        }
-
-        const updated: RequirementWithSource = { ...target, links: nextLinks };
-        const yaml = formatRequirementToYaml(requirementPayloadForYaml(updated));
-        fs.writeFileSync(target.sourcePath, yaml, "utf-8");
-
-        const reloaded = await loadRequirements(root, root);
-        const updatedReq = reloaded.requirements.find((r) => r.id === id);
-        if (!updatedReq) {
-          apiError(res, 500, {
-            code: "RELOAD_FAILED",
-            message: "Requirement update was written but could not be reloaded.",
-          });
-          return;
-        }
-        json(res, 200, { requirement: toApiRequirement(updatedReq) });
-        return;
-      }
-
-      apiError(res, 404, { code: "NOT_FOUND", message: "Route not found." });
-    } catch (err) {
-      apiError(res, 500, { code: "INTERNAL_ERROR", message: String(err) });
-    }
-  });
-
-  try {
-    await new Promise<void>((resolve, reject) => {
-      server.once("error", reject);
-      server.listen(port, "127.0.0.1", () => resolve());
-    });
-  } catch (err) {
-    // Ensure we don't leave a half-open server around.
-    try {
-      server.close();
-    } catch {
-      // Ignore
-    }
-    const code = (err as { code?: unknown } | null)?.code;
-    if (code === "EADDRINUSE") {
-      const error = `Port ${port} is already in use. Stop the existing server or choose another port (use --port).`;
-      console.error(error);
-      return { success: false, error };
-    }
-    const error = `Failed to start server: ${String(err)}`;
+  const nextBin = path.join(monorepoRoot, "node_modules/next/dist/bin/next");
+  if (!fs.existsSync(nextBin)) {
+    const error = "Next.js is not installed. Run npm ci at the gitreqd repository root.";
     console.error(error);
     return { success: false, error };
   }
-  const address = server.address();
-  const resolvedPort =
-    address && typeof address === "object" && "port" in address ? Number(address.port) : port;
+
+  const listenPort = port === 0 ? await getFreePort() : port;
+  const webCwd = path.join(monorepoRoot, "packages/web");
+  const quiet = process.env.GITREQD_BROWSER_TEST_QUIET === "1";
+
+  const child: ChildProcess = spawn(
+    process.execPath,
+    [nextBin, "dev", "-p", String(listenPort), "-H", "127.0.0.1"],
+    {
+      cwd: webCwd,
+      env: {
+        ...process.env,
+        GITREQD_PROJECT_ROOT: projectRoot,
+        GITREQD_LOCAL_DEV: "1",
+        ...options?.childEnv,
+      },
+      stdio: quiet ? "pipe" : "inherit",
+    }
+  );
+
+  if (quiet && child.stdout && child.stderr) {
+    child.stdout.on("data", () => {});
+    child.stderr.on("data", () => {});
+  }
+
+  try {
+    await waitForLocalNextReady(listenPort, 120_000);
+  } catch (e) {
+    const msg = String(e);
+    console.error(msg);
+    try {
+      child.kill("SIGTERM");
+    } catch {
+      // ignore
+    }
+    return { success: false, error: msg };
+  }
+
   return {
-    port: resolvedPort,
+    port: listenPort,
     close: () =>
-      new Promise<void>((resolve, reject) => {
-        server.close((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
+      new Promise<void>((resolve) => {
+        let settled = false;
+        const finish = (): void => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        child.once("exit", finish);
+        try {
+          child.kill("SIGTERM");
+        } catch {
+          finish();
+          return;
+        }
+        setTimeout(() => {
+          try {
+            child.kill("SIGKILL");
+          } catch {
+            /* ignore */
+          }
+          finish();
+        }, 8000).unref();
       }),
   };
 }

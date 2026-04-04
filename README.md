@@ -7,7 +7,7 @@ A requirement management tool that works with requirement files stored in your r
 ## Current
 
 - **CLI** – Discover requirements, validate schema, and generate static HTML reports. Run from the project root (where `gitreqd.yaml` or `gitreqd.yml` is present) or pass `--project-dir`. Requirement files use the `.req.yml` or `.req.yaml` suffix. Use `gitreqd bootstrap` to initialize a directory with `gitreqd.yaml` and a `requirements` folder.
-- **Browser UI** – Start a local server.
+- **Browser UI** – Start a local **Next.js** app (`packages/web`) with a split-pane UI and JSON API over your project directory (`gitreqd browser`).
 - **VS Code extension** – Navigate `satisfies` links and use Go to Definition on requirement ids; JSON Schema validation for `.req.yml` / `.req.yaml` (via the Red Hat YAML extension); requirement preview and “add new requirement” commands. Built as `packages/vscode`, shipped as a `.vsix` (see **Distribution** below).
 - **Pre-commit hook** – Repositories can install the script under `scripts/` so commits run `gitreqd validate` against the project (see **Pre-commit hook** below).
 
@@ -19,10 +19,11 @@ Future integrations are described here; formal product requirements will be adde
 
 ## Project layout
 
-Workspace with three TypeScript packages:
+Workspace with four TypeScript packages:
 
 - `packages/core` – **@gitreqd/core**: Core engine (discovery, parse, validate, resolve). Consumer-agnostic; no CLI dependencies.
 - `packages/cli` – **gitreqd**: CLI that depends on core. Provides the `gitreqd` binary.
+- `packages/web` – **gitreqd-web**: Next.js (App Router) browser UI and REST API; used by `gitreqd browser`.
 - `packages/vscode` – **gitreqd-vscode**: Editor extension bundled with core; see `packages/vscode/README.md`.
 - `requirements/` – Product requirements for gitreqd itself (GRD-*).
 - `sample_projects/` – Test data only; not part of the product.
@@ -99,6 +100,11 @@ npx gitreqd html [--output dir]
 # Run local browser UI + REST API (default: http://127.0.0.1:3210)
 npx gitreqd browser [--port 3210]
 
+```
+
+The browser command runs `next dev` for `packages/web` with no authentication by default. Optional API protection can be added in that app (for example Next.js middleware); the home page and static assets are not gated by default.
+
+```bash
 # Print the effective requirement schema (JSON Schema by default; use --format yaml for YAML)
 npx gitreqd schema
 npx gitreqd schema --format json-schema --output ./requirement.schema.json

@@ -3,14 +3,17 @@ title: Local API provider
 description: |
   A local API provider shall implement the REST API contract (GRD-API-001) by operating directly on a locally cloned Git repository.
 
+  The implementation shall use the same browser UI and Route Handler stack as the gitreqd cloud service (GRD-API-002, GRD-UI-004), delivered from the **gitreqd-cloud** product repository rather than this repository. When that application is run against a project directory on the host, it shall satisfy this requirement for local editing.
+
   The provider shall locate the gitreqd project root using the same discovery logic as the CLI (GRD-CLI-003), starting from a configured or inferred repository path on the host filesystem.
 
   The provider shall use the programmatic API (GRD-SYS-002) to load, validate, and mutate requirements. Write operations (e.g. adding a link) shall persist changes to the requirement YAML files on disk.
 
-  The provider shall run as a local server process. The browser UI shall connect to it over localhost. No authentication is required for localhost connections.
+  The provider shall run as a local server process. The browser UI shall connect to it over localhost. No authentication is required for localhost connections when the application is configured for local development (e.g. GITREQD_LOCAL_DEV).
 attributes:
   status: active
 links:
   - satisfies: GRD-API-001
   - satisfies: GRD-CLI-003
   - satisfies: GRD-SYS-002
+  - satisfies: GRD-UI-004
