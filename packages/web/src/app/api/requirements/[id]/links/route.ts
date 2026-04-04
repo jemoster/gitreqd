@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { patchRequirementLinks, toApiRequirement } from "@/lib/requirements-service";
+import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001: Add or remove a link entry. */
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  const gate = await requireApiSession();
+  if (!gate.ok) return gate.response;
   try {
     const { id } = await context.params;
     let body: unknown;

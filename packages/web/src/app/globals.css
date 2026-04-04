@@ -341,3 +341,24 @@ ul {
   color: var(--color-text-secondary);
   background: var(--color-bg-secondary);
 }
+
+.auth-gate {
+  max-width: 32rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-6);
+}
+
+.auth-gate-title {
+  font-size: var(--font-size-15);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--space-4);
+}
+
+.auth-gate-link {
+  color: var(--color-accent);
+}
+
+.status-user a {
+  color: var(--color-accent);
+  margin-left: var(--space-2);
+}
