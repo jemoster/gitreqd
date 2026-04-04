@@ -1,0 +1,23 @@
+id: GRD-AUTH-003
+title: Browser backend authentication extensibility
+description: |
+  The browser-facing backend (REST API and any companion transports such as MCP)
+  shall be structured so that authentication is not fixed inside
+  `@gitreqd/core`. Instead, the implementation shall expose extension points
+  — for example middleware or request pipeline hooks, injectable session or
+  identity context, and pluggable verification of Bearer tokens or other
+  credentials — so a deployment can attach an authorization stack supplied
+  separately (OAuth/OIDC, API keys, or other policies).
+
+  Core requirement loading, validation, and mutation logic shall remain usable
+  when authentication is disabled, stubbed for tests, or fully wired to a
+  concrete identity stack in a product repository (for example GRD-AUTH-001 in
+  gitreqd-cloud).
+attributes:
+  status: active
+  rationale: |
+    The base gitreqd repository stays provider-agnostic. Hosted and on-prem
+    products can integrate their chosen auth without forking core, while
+    local development can run without credentials.
+links:
+  - satisfies: GRD-API-001

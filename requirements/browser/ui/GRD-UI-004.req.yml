@@ -1,0 +1,13 @@
+id: GRD-UI-004
+title: Next.js and React front-end framework
+description: |
+  The browser UI shall be implemented using Next.js (App Router) and React.
+
+  Server Components shall be used for data-fetching and static rendering where appropriate. Client Components shall be scoped to interactive elements (tree navigation, inline editing, presence indicators).
+attributes:
+  status: active
+  rationale: |
+    Next.js provides a unified full-stack framework covering both the API layer and the React front-end, eliminating the need for a separate server process.
+links:
+  - satisfies: GRD-UI-001
+  - satisfies: GRD-UI-002
