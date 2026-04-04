@@ -71,7 +71,13 @@ function groupRootsByDirectory(requirements: ApiRequirement[], incoming: Set<str
   return new Map([...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])));
 }
 
-export function BrowserApp() {
+export type BrowserAppProps = {
+  /** GRD-AUTH-001: Shown when authenticated (or test mode). */
+  userLabel?: string;
+  showLogout?: boolean;
+};
+
+export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [requirements, setRequirements] = useState<ApiRequirement[]>([]);
@@ -217,6 +223,17 @@ export function BrowserApp() {
     <>
       <div className="status">
         <span className="status-title">gitreqd browser</span>
+        {userLabel ? (
+          <span className="status-meta status-user">
+            {userLabel}
+            {showLogout ? (
+              <>
+                {" "}
+                <a href="/auth/logout">Sign out</a>
+              </>
+            ) : null}
+          </span>
+        ) : null}
         <span className="status-meta">Requirements: {statusCount ?? "-"}</span>
         <span className={`status-meta${statusValidation.ok ? "" : " error"}`}>{statusValidation.text}</span>
       </div>

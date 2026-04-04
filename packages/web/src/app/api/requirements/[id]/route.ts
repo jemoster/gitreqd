@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { loadProjectRequirements, toApiRequirement } from "@/lib/requirements-service";
+import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001: Single requirement by id. */
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const gate = await requireApiSession();
+  if (!gate.ok) return gate.response;
   try {
     const { id } = await context.params;
     const { requirements } = await loadProjectRequirements();
