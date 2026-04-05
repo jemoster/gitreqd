@@ -1,9 +1,11 @@
 import { Suspense } from "react";
-import { auth0 } from "@/lib/auth0";
+import { getBrowserAuth } from "@gitreqd/browser-auth";
 import { BrowserApp } from "@/components/BrowserApp";
-import { isCloudAuthConfigured } from "@/lib/auth-config";
 
-/** GRD-UI-004: Next.js App Router shell for the browser UI. GRD-AUTH-001: OAuth session gate when Auth0 env is set. */
+/** Avoid prerendering session-dependent shell at build time when auth may be configured at runtime. */
+export const dynamic = "force-dynamic";
+
+/** GRD-UI-004: Next.js App Router shell; optional login when the auth adapter requires it. */
 export default async function HomePage() {
   const isAuthTest = process.env.GITREQD_BROWSER_AUTH_TEST === "1";
   if (isAuthTest) {
@@ -14,8 +16,9 @@ export default async function HomePage() {
     );
   }
 
-  if (isCloudAuthConfigured()) {
-    const session = await auth0.getSession();
+  const browserAuth = getBrowserAuth();
+  if (browserAuth.isLoginRequired()) {
+    const session = await browserAuth.getSession();
     if (!session?.user) {
       return (
         <main className="auth-gate">

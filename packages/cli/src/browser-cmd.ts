@@ -16,18 +16,30 @@ export interface RunningBrowserServer {
 
 /**
  * GRD-AUTH-003: Extra environment variables for the Next.js child process
- * (e.g. tests enabling optional API middleware).
+ * (e.g. tests enabling optional API middleware). Auth is pluggable via `@gitreqd/browser-auth`.
  */
 export interface StartBrowserServerOptions {
   childEnv?: Record<string, string>;
 }
 
+function findNextBin(monorepoRoot: string): string | null {
+  const candidates = [
+    path.join(monorepoRoot, "node_modules/next/dist/bin/next"),
+    path.join(monorepoRoot, "..", "node_modules/next/dist/bin/next"),
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  return null;
+}
+
 function findMonorepoRootWalkingUp(startDir: string): string | null {
   let dir = path.resolve(startDir);
   for (let i = 0; i < 12; i++) {
-    const nextBin = path.join(dir, "node_modules/next/dist/bin/next");
     const webPkg = path.join(dir, "packages/web/package.json");
-    if (fs.existsSync(nextBin) && fs.existsSync(webPkg)) {
+    if (fs.existsSync(webPkg) && findNextBin(dir)) {
       return dir;
     }
     const parent = path.dirname(dir);
@@ -135,9 +147,10 @@ export async function startBrowserServer(
     return { success: false, error: msg };
   }
 
-  const nextBin = path.join(monorepoRoot, "node_modules/next/dist/bin/next");
-  if (!fs.existsSync(nextBin)) {
-    const error = "Next.js is not installed. Run npm ci at the gitreqd repository root.";
+  const nextBin = findNextBin(monorepoRoot);
+  if (!nextBin) {
+    const error =
+      "Next.js is not installed. Run npm ci at the gitreqd repository root (or the parent workspace root if you use a multi-package layout).";
     console.error(error);
     return { success: false, error };
   }

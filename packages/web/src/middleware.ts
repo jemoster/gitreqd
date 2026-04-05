@@ -1,11 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { auth0 } from "@/lib/auth0";
-import { isCloudAuthConfigured } from "@/lib/auth-config";
+import { getBrowserAuth } from "@gitreqd/browser-auth";
 
 /**
- * GRD-AUTH-001: Auth0 session handling (OAuth 2.1 / OIDC) when cloud env is set.
- * GRD-AUTH-003: Optional gate for `/api/*` when `GITREQD_BROWSER_AUTH_TEST=1` (e.g. CLI tests).
+ * GRD-AUTH-003: Delegates to `@gitreqd/browser-auth` (no-op stub in this repository).
+ * When `GITREQD_BROWSER_AUTH_TEST=1`, `/api/*` expects `Authorization: Bearer test-token` (CLI tests).
  */
 export async function middleware(request: NextRequest) {
   if (process.env.GITREQD_BROWSER_AUTH_TEST === "1" && request.nextUrl.pathname.startsWith("/api")) {
@@ -18,10 +17,11 @@ export async function middleware(request: NextRequest) {
     }
     return NextResponse.next();
   }
-  if (!isCloudAuthConfigured()) {
+  const browserAuth = getBrowserAuth();
+  if (!browserAuth.isLoginRequired()) {
     return NextResponse.next();
   }
-  return auth0.middleware(request);
+  return browserAuth.middleware(request);
 }
 
 export const config = {

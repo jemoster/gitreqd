@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth0 } from "@/lib/auth0";
-import { isCloudAuthConfigured } from "@/lib/auth-config";
+import { getBrowserAuth } from "@gitreqd/browser-auth";
 
 const unauthorized = NextResponse.json(
   { error: { code: "UNAUTHORIZED", message: "Authentication required." } },
@@ -8,19 +7,20 @@ const unauthorized = NextResponse.json(
 );
 
 /**
- * GRD-AUTH-001: Require a session when cloud Auth0 is configured.
+ * GRD-AUTH-003: Uses the pluggable auth package; enforced only when it reports login required (e.g. cloud).
  * When `GITREQD_BROWSER_AUTH_TEST=1`, the CLI test harness uses the Bearer token gate in middleware instead.
  */
 export async function requireApiSession(): Promise<
   { ok: true } | { ok: false; response: NextResponse }
 > {
-  if (!isCloudAuthConfigured()) {
+  const browserAuth = getBrowserAuth();
+  if (!browserAuth.isLoginRequired()) {
     return { ok: true };
   }
   if (process.env.GITREQD_BROWSER_AUTH_TEST === "1") {
     return { ok: true };
   }
-  const session = await auth0.getSession();
+  const session = await browserAuth.getSession();
   if (!session?.user) {
     return { ok: false, response: unauthorized };
   }

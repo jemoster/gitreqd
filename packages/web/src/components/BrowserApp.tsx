@@ -72,7 +72,7 @@ function groupRootsByDirectory(requirements: ApiRequirement[], incoming: Set<str
 }
 
 export type BrowserAppProps = {
-  /** GRD-AUTH-001: Shown when authenticated (or test mode). */
+  /** Shown when a user label is provided (e.g. signed-in or test mode). */
   userLabel?: string;
   showLogout?: boolean;
 };
