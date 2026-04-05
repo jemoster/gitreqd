@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadProjectRequirements } from "@/lib/requirements-service";
+import { loadProjectRequirements } from "@gitreqd/browser-server";
 import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001: Validation summary. Same session gate as other /api routes when the auth adapter requires login. */

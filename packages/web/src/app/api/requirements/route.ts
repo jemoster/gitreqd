@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadProjectRequirements, toApiRequirement } from "@/lib/requirements-service";
+import { loadProjectRequirements, toApiRequirement } from "@gitreqd/browser-server";
 import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001: List requirements. */

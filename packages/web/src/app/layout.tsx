@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "./globals.css";
+import "@gitreqd/browser-ui/globals.css";
 
 export const metadata: Metadata = {
   title: "gitreqd browser",

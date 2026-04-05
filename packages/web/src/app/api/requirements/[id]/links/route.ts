@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { patchRequirementLinks, toApiRequirement } from "@/lib/requirements-service";
+import { patchRequirementLinks, toApiRequirement } from "@gitreqd/browser-server";
 import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001: Add or remove a link entry. */

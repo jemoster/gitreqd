@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadProjectRequirements, renderedDetailHtml } from "@/lib/requirements-service";
+import { loadProjectRequirements, renderedDetailHtml } from "@gitreqd/browser-server";
 import { requireApiSession } from "@/lib/require-api-session";
 
 /** GRD-API-001 + GRD-HTML-*: Rendered detail fragment for the detail pane. */

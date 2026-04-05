@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { createRequire } from "node:module";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
@@ -22,25 +23,51 @@ export interface StartBrowserServerOptions {
   childEnv?: Record<string, string>;
 }
 
+function readWebPackageName(repoRoot: string): string | null {
+  const pkgPath = path.join(repoRoot, "packages/web/package.json");
+  if (!fs.existsSync(pkgPath)) return null;
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as { name?: string };
+    return pkg.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve `next` from the local gitreqd-web app (`packages/web`) so hoisted installs
+ * (e.g. a parent workspace) work without hardcoding relative paths.
+ */
 function findNextBin(monorepoRoot: string): string | null {
-  const candidates = [
-    path.join(monorepoRoot, "node_modules/next/dist/bin/next"),
-    path.join(monorepoRoot, "..", "node_modules/next/dist/bin/next"),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      return p;
-    }
+  const webPkgJson = path.join(monorepoRoot, "packages/web/package.json");
+  if (!fs.existsSync(webPkgJson)) return null;
+  try {
+    const req = createRequire(webPkgJson);
+    const nextPkg = req.resolve("next/package.json");
+    const bin = path.join(path.dirname(nextPkg), "dist/bin/next");
+    if (fs.existsSync(bin)) return bin;
+  } catch {
+    return null;
   }
   return null;
 }
 
-function findMonorepoRootWalkingUp(startDir: string): string | null {
+/**
+ * True when `dir` is the gitreqd repository root containing the local-only Next app (`gitreqd-web`).
+ */
+function isGitreqdLocalWebRoot(dir: string): boolean {
+  return readWebPackageName(dir) === "gitreqd-web";
+}
+
+function findGitreqdMonorepoRootWalkingUp(startDir: string): string | null {
   let dir = path.resolve(startDir);
-  for (let i = 0; i < 12; i++) {
-    const webPkg = path.join(dir, "packages/web/package.json");
-    if (fs.existsSync(webPkg) && findNextBin(dir)) {
+  for (let i = 0; i < 24; i++) {
+    if (isGitreqdLocalWebRoot(dir) && findNextBin(dir)) {
       return dir;
+    }
+    const nested = path.join(dir, "gitreqd");
+    if (fs.existsSync(nested) && isGitreqdLocalWebRoot(nested) && findNextBin(nested)) {
+      return nested;
     }
     const parent = path.dirname(dir);
     if (parent === dir) {
@@ -52,14 +79,14 @@ function findMonorepoRootWalkingUp(startDir: string): string | null {
 }
 
 /**
- * Resolve the gitreqd monorepo root (contains `packages/web` and hoisted `node_modules/next`).
+ * Resolve the gitreqd repository root (contains `packages/web` with package name `gitreqd-web`).
  */
 export function resolveGitreqdMonorepoRoot(): string | null {
   const override = process.env.GITREQD_MONOREPO_ROOT?.trim();
-  if (override && fs.existsSync(path.join(override, "packages/web/package.json"))) {
+  if (override && isGitreqdLocalWebRoot(override) && findNextBin(path.resolve(override))) {
     return path.resolve(override);
   }
-  return findMonorepoRootWalkingUp(process.cwd());
+  return findGitreqdMonorepoRootWalkingUp(process.cwd());
 }
 
 function getFreePort(): Promise<number> {
@@ -150,7 +177,7 @@ export async function startBrowserServer(
   const nextBin = findNextBin(monorepoRoot);
   if (!nextBin) {
     const error =
-      "Next.js is not installed. Run npm ci at the gitreqd repository root (or the parent workspace root if you use a multi-package layout).";
+      "Next.js is not installed. Run npm ci at the gitreqd repository root so the gitreqd-web app can resolve `next`.";
     console.error(error);
     return { success: false, error };
   }

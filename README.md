@@ -19,11 +19,13 @@ Future integrations are described here; formal product requirements will be adde
 
 ## Project layout
 
-Workspace with four TypeScript packages:
+Workspace TypeScript packages:
 
 - `packages/core` – **@gitreqd/core**: Core engine (discovery, parse, validate, resolve). Consumer-agnostic; no CLI dependencies.
 - `packages/cli` – **gitreqd**: CLI that depends on core. Provides the `gitreqd` binary.
-- `packages/web` – **gitreqd-web**: Next.js (App Router) browser UI and REST API; used by `gitreqd browser`.
+- `packages/browser-ui` – **@gitreqd/browser-ui**: Shared React UI for the requirement browser (consumed by `gitreqd-web` and by **gitreqd-cloud**).
+- `packages/browser-server` – **@gitreqd/browser-server**: Shared REST helpers and file-backed requirement loading (depends on `@gitreqd/core`).
+- `packages/web` – **gitreqd-web**: Local-only Next.js (App Router) shell, API routes, and auth stub; used by `gitreqd browser`.
 - `packages/vscode` – **gitreqd-vscode**: Editor extension bundled with core; see `packages/vscode/README.md`.
 - `requirements/` – Product requirements for gitreqd itself (GRD-*).
 - `sample_projects/` – Test data only; not part of the product.

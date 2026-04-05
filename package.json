@@ -16,6 +16,8 @@
     "packages/core",
     "packages/cli",
     "packages/vscode",
+    "packages/browser-ui",
+    "packages/browser-server",
     "packages/web"
   ],
   "engines": {
