@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getBrowserAuth, UnauthenticatedLanding } from "@gitreqd/browser-auth";
-import { BrowserApp } from "@/components/BrowserApp";
+import { BrowserApp } from "@gitreqd/browser-ui";
 
 /** Avoid prerendering session-dependent shell at build time when auth may be configured at runtime. */
 export const dynamic = "force-dynamic";

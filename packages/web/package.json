@@ -8,9 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "@gitreqd/core": "0.1.0",
     "@gitreqd/browser-auth": "file:./vendor/browser-auth-stub",
-    "next": "15.5.14",
+    "@gitreqd/browser-server": "0.1.0",
+    "@gitreqd/browser-ui": "0.1.0",
+    "next": "^15.5.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
