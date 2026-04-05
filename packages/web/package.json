@@ -8,8 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^4.16.1",
     "@gitreqd/core": "0.1.0",
+    "@gitreqd/browser-auth": "file:./vendor/browser-auth-stub",
     "next": "15.5.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

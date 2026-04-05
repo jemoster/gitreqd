@@ -11,8 +11,8 @@ description: |
 
   Core requirement loading, validation, and mutation logic shall remain usable
   when authentication is disabled, stubbed for tests, or fully wired to a
-  concrete identity stack in a product repository (for example GRD-AUTH-001 in
-  gitreqd-cloud).
+  concrete identity stack in a product repository (for example a replaceable
+  `@gitreqd/browser-auth` adapter supplied by that deployment).
 attributes:
   status: active
   rationale: |
