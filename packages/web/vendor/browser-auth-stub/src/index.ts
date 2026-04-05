@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import React from "react";
 
 /**
  * Session shape consumed by the gitreqd browser UI (subset of OIDC claims).
@@ -37,4 +38,22 @@ const stubAuth: BrowserAuth = {
  */
 export function getBrowserAuth(): BrowserAuth {
   return stubAuth;
+}
+
+/**
+ * GRD-AUTH-004: Minimal placeholder (no JSX file — keeps ts-jest on this package JSX-free).
+ * gitreqd-cloud replaces this package with the full landing.
+ */
+export function UnauthenticatedLanding() {
+  return React.createElement(
+    "main",
+    { className: "auth-gate" },
+    React.createElement("h1", { className: "auth-gate-title" }, "gitreqd browser"),
+    React.createElement("p", null, "Sign in to browse requirements in this project."),
+    React.createElement(
+      "p",
+      null,
+      React.createElement("a", { className: "auth-gate-link", href: "/auth/login" }, "Sign in")
+    )
+  );
 }

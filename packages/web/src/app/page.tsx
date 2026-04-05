@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getBrowserAuth } from "@gitreqd/browser-auth";
+import { getBrowserAuth, UnauthenticatedLanding } from "@gitreqd/browser-auth";
 import { BrowserApp } from "@/components/BrowserApp";
 
 /** Avoid prerendering session-dependent shell at build time when auth may be configured at runtime. */
@@ -20,17 +20,8 @@ export default async function HomePage() {
   if (browserAuth.isLoginRequired()) {
     const session = await browserAuth.getSession();
     if (!session?.user) {
-      return (
-        <main className="auth-gate">
-          <h1 className="auth-gate-title">gitreqd browser</h1>
-          <p>Sign in to browse requirements in this project.</p>
-          <p>
-            <a className="auth-gate-link" href="/auth/login">
-              Sign in
-            </a>
-          </p>
-        </main>
-      );
+      /** GRD-AUTH-004: Shell from `@gitreqd/browser-auth` (cloud implementation or stub). */
+      return <UnauthenticatedLanding />;
     }
     const label = session.user.email ?? session.user.name ?? "Signed in";
     return (
