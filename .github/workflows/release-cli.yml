@@ -1,0 +1,44 @@
+# GRD-CLI-007: Publish CLI install artifacts to GitHub Releases for direct npm install from source URLs.
+name: Release CLI artifacts
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  cli-artifacts:
+    name: Build and upload CLI tarballs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package CLI artifacts
+        run: bash ./scripts/package.sh
+
+      - name: Upload CLI tarballs to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          tgz_files=(release/*.tgz)
+          if [ ${#tgz_files[@]} -eq 0 ]; then
+            echo "ERROR: No .tgz artifacts found in release/."
+            exit 1
+          fi
+          gh release upload "${{ github.event.release.tag_name }}" "${tgz_files[@]}" --clobber

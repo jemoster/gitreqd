@@ -1,0 +1,8 @@
+id: GRD-CLI-007
+title: Install CLI directly from source reference
+description: The project distribution shall publish the installable CLI source artifacts through GitHub release assets and support installing the gitreqd CLI directly from a source reference using npm (for example a GitHub git URL or GitHub-hosted tarball URL) so users can install and run the CLI without manually downloading or cloning the repository first.
+attributes:
+  rationale: Users should be able to install the CLI in one command from a GitHub-hosted source location when a registry-published package is unavailable or undesired, while preserving a consistent installation path and a predictable release source.
+  status: active
+links:
+  - satisfies: GRD-SYS-008
