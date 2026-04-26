@@ -6,21 +6,16 @@ A requirements management CLI for repositories that store requirements as YAML f
 
 ## Installation
 
-Install from GitHub source references (no manual clone/download):
-
-1. Open the desired GitHub Release for the version you want.
-2. Copy the URL for a `.tgz` release asset (for example the `gitreqd` package tarball).
-3. Install globally from that URL:
+Install the latest published release directly from GitHub assets:
 
 ```bash
-npm install -g "https://github.com/<org>/<repo>/releases/download/vX.Y.Z/<artifact>.tgz"
-```
-
-After install, verify:
-
-```bash
+npm install -g \
+  "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz" \
+  "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"
 gitreqd --help
 ```
+
+Both asset URLs above are currently valid and downloadable.
 
 ## Quick Start
 
