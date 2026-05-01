@@ -123,6 +123,7 @@ export function getRequirementDirs(projectRoot: string): string[] {
 /**
  * Discover all requirement files under the directories configured in the project root marker.
  * GRD-SYS-007: `*.req.yml` and `*.req.yaml`. Excludes node_modules.
+ * GRD-SYS-007: a `requirement_dirs` entry of exactly `.` resolves to the project root and is searched recursively (root and all subdirectories).
  */
 export async function discoverRequirementPaths(projectRoot: string): Promise<string[]> {
   const cwd = path.resolve(projectRoot);

@@ -69,6 +69,10 @@ Parameter placeholders in strings:
 
 ## Optional Configuration
 
+### `requirement_dirs` in `gitreqd.yaml`
+
+Bootstrap creates a `requirements/` folder and lists it under `requirement_dirs`. Each entry is a path relative to the project root; the tool collects every `*.req.yml` and `*.req.yaml` file under those directories (recursively), except under `node_modules`. Use a single entry of `.` to include the whole project tree from the root down.
+
 ### `profile` in `gitreqd.yaml`
 
 Choose how requirement YAML is interpreted and rendered. If omitted, `standard` is used.

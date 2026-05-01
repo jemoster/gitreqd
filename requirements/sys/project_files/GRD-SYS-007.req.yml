@@ -7,6 +7,7 @@ description: |
   * The mapping shall contain a key `requirement_dirs` whose value is a list of directories to search for requirement files.
   * The `requirement_dirs` value shall be a sequence.
   * Each item in the `requirement_dirs` sequence shall be a non-empty string representing a directory path, relative to the project root.
+  * An entry of exactly `.` shall denote the project root directory (the directory that contains the {{ :root_marker_filename }} file) and every subdirectory beneath it when discovering requirement files; discovery under that entry shall be recursive.
   * Duplicate directories after resolving paths shall result in an error.
   * When discovering requirement files, the tool shall search in the directories specified in the `requirement_dirs` sequence, in order.
   For example, a minimal {{ :root_marker_filename }} file might be:
@@ -15,6 +16,13 @@ description: |
   requirement_dirs:
     - requirements
     - more-requirements/frontend
+  ```
+
+  A configuration that discovers requirements anywhere under the project root might be:
+
+  ```yaml
+  requirement_dirs:
+    - .
   ```
 attributes:
   rationale: |

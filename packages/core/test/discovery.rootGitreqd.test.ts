@@ -60,6 +60,24 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
     expect(paths).toHaveLength(2);
   });
 
+  it("treats requirement_dirs entry . as the project root and all subdirectories (GRD-SYS-007)", async () => {
+    const projectRoot = makeTempProject();
+    const nested = path.join(projectRoot, "deep", "nested");
+    fs.mkdirSync(nested, { recursive: true });
+    const rootFile = path.join(projectRoot, "at-root.req.yml");
+    const nestedFile = path.join(nested, "deep.req.yml");
+    fs.writeFileSync(rootFile, "id: ROOT\ntitle: t\ndescription: x\n", "utf-8");
+    fs.writeFileSync(nestedFile, "id: DEEP\ntitle: t\ndescription: x\n", "utf-8");
+    fs.writeFileSync(
+      path.join(projectRoot, ROOT_MARKER),
+      ["requirement_dirs:", "  - ."].join("\n"),
+      "utf-8"
+    );
+    const paths = await discoverRequirementPaths(projectRoot);
+    expect(paths).toEqual(expect.arrayContaining([rootFile, nestedFile]));
+    expect(paths).toHaveLength(2);
+  });
+
   it("discovers .req.yaml files as well as .req.yml (GRD-SYS-007)", async () => {
     const projectRoot = makeTempProject();
     const dirA = path.join(projectRoot, "reqs");
