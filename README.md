@@ -26,7 +26,7 @@ Run commands from the project root (where `gitreqd.yaml` or `gitreqd.yml` exists
 
 ## Cursor Workflow
 
-Use Cursor chat commands to move from requirement text to implementation:
+Use Cursor [Agent Skills](https://cursor.com/docs/context/skills) in `.cursor/skills/` to move from requirement text to implementation:
 
 - `/require` helps draft or update requirement files in your `requirements/` directory.
 - `/implement` helps generate code changes that satisfy selected requirements.
