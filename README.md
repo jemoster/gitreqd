@@ -12,10 +12,7 @@ Install the latest published release directly from GitHub assets:
 npm install -g \
   "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz" \
   "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"
-gitreqd --help
 ```
-
-Both asset URLs above are currently valid and downloadable.
 
 ## Quick Start
 
