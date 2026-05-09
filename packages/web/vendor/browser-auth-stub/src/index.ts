@@ -42,7 +42,7 @@ export function getBrowserAuth(): BrowserAuth {
 
 /**
  * GRD-AUTH-004: Minimal placeholder (no JSX file — keeps ts-jest on this package JSX-free).
- * gitreqd-cloud replaces this package with the full landing.
+ * A deployment may replace `@gitreqd/browser-auth` with a package that wires an identity provider.
  */
 export function UnauthenticatedLanding() {
   return React.createElement(

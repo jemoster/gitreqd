@@ -103,6 +103,35 @@ input {
   color: var(--color-state-error);
 }
 
+.status-revision-sha {
+  max-width: min(52vw, 42rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-revision-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0 var(--space-2);
+  margin: 0;
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-size: var(--font-size-15);
+  line-height: 1;
+}
+
+.status-revision-refresh:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) var(--space-1) 1fr;

@@ -2,6 +2,7 @@
 
 /**
  * GRD-UI-001 + GRD-UI-003 + GRD-UI-004: Split-pane browser UI (Next.js App Router + React).
+ * Optional `activeProjectId` / `onRemoteSnapshotRefresh` let a host scope REST calls and drive snapshot refresh without changing core routes.
  */
 import {
   useCallback,
@@ -34,6 +35,14 @@ async function apiJson(
     throw new Error(err.error?.message ?? `HTTP ${res.status}`);
   }
   return body;
+}
+
+/** Appends `project` when the host passes an opaque project key (convention for multi-workspace shells). */
+function appendProjectQuery(path: string, activeProjectId: string | undefined): string {
+  const id = activeProjectId?.trim();
+  if (!id) return path;
+  const joiner = path.includes("?") ? "&" : "?";
+  return `${path}${joiner}project=${encodeURIComponent(id)}`;
 }
 
 function computeRelations(requirements: ApiRequirement[]) {
@@ -75,9 +84,24 @@ export type BrowserAppProps = {
   /** Shown when a user label is provided (e.g. signed-in or test mode). */
   userLabel?: string;
   showLogout?: boolean;
+  /**
+   * Opaque id appended as the `project` query parameter on `/api/requirements` and related calls.
+   * Meaning is host-defined (e.g. a saved workspace id); core gitreqd does not interpret it.
+   */
+  activeProjectId?: string;
+  /**
+   * When the list API returns `loadedRevision`, the host may supply this to run after the user
+   * requests a refresh (invalidate remote cache, then the UI reloads requirements).
+   */
+  onRemoteSnapshotRefresh?: () => Promise<void>;
 };
 
-export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {}) {
+export function BrowserApp({
+  userLabel,
+  showLogout = true,
+  activeProjectId,
+  onRemoteSnapshotRefresh,
+}: BrowserAppProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [requirements, setRequirements] = useState<ApiRequirement[]>([]);
@@ -91,23 +115,39 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
     text: "Validation: -",
   });
   const [detailHtml, setDetailHtml] = useState<string>("");
+  const [loadedRevision, setLoadedRevision] = useState<{ branchName: string; commitSha: string } | null>(
+    null
+  );
+  const [remoteSnapshotRefreshing, setRemoteSnapshotRefreshing] = useState(false);
 
-  const refreshDetail = useCallback(async (id: string) => {
-    try {
-      const rendered = (await apiJson(`/api/requirements/${encodeURIComponent(id)}/rendered-detail`)) as {
-        html: string;
-      };
-      setDetailHtml(rendered.html ?? "");
-    } catch {
-      setDetailHtml("");
-    }
-  }, []);
+  const refreshDetail = useCallback(
+    async (id: string) => {
+      try {
+        const url = appendProjectQuery(
+          `/api/requirements/${encodeURIComponent(id)}/rendered-detail`,
+          activeProjectId
+        );
+        const rendered = (await apiJson(url)) as {
+          html: string;
+        };
+        setDetailHtml(rendered.html ?? "");
+      } catch {
+        setDetailHtml("");
+      }
+    },
+    [activeProjectId]
+  );
 
   const loadData = useCallback(
     async (keepId?: string | null) => {
       try {
-        const data = (await apiJson("/api/requirements")) as { requirements: ApiRequirement[] };
+        const reqUrl = appendProjectQuery("/api/requirements", activeProjectId);
+        const data = (await apiJson(reqUrl)) as {
+          requirements: ApiRequirement[];
+          loadedRevision?: { branchName: string; commitSha: string };
+        };
         const list = data.requirements ?? [];
+        setLoadedRevision(data.loadedRevision ?? null);
         setRequirements(list);
         setExpandedDirs((prev) => {
           if (prev.size > 0) return prev;
@@ -133,7 +173,8 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
           setDetailHtml("");
         }
 
-        const st = (await apiJson("/api/status")) as {
+        const stUrl = appendProjectQuery("/api/status", activeProjectId);
+        const st = (await apiJson(stUrl)) as {
           requirementCount: number;
           errors: unknown[];
         };
@@ -146,17 +187,17 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
       } catch {
         setRequirements([]);
         setDetailHtml("");
+        setLoadedRevision(null);
         setStatusCount(null);
         setStatusValidation({ ok: false, text: "Validation: could not load project data." });
       }
     },
-    [refreshDetail, router, searchParams]
+    [refreshDetail, router, searchParams, activeProjectId]
   );
 
   useEffect(() => {
     void loadData(searchParams.get("req"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial project load only
-  }, []);
+  }, [activeProjectId, loadData, searchParams]);
 
   useEffect(() => {
     if (requirements.length === 0) return;
@@ -179,6 +220,19 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
     },
     [byId, refreshDetail, router, searchParams]
   );
+
+  const refreshRemoteSnapshot = useCallback(async () => {
+    if (!onRemoteSnapshotRefresh) return;
+    setRemoteSnapshotRefreshing(true);
+    try {
+      await onRemoteSnapshotRefresh();
+      await loadData(selectedId);
+    } catch {
+      setStatusValidation({ ok: false, text: "Validation: could not refresh loaded snapshot." });
+    } finally {
+      setRemoteSnapshotRefreshing(false);
+    }
+  }, [onRemoteSnapshotRefresh, loadData, selectedId]);
 
   useEffect(() => {
     const divider = document.getElementById("sidebar-divider");
@@ -247,6 +301,28 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
         ) : null}
         <span className="status-meta">Requirements: {statusCount ?? "-"}</span>
         <span className={`status-meta${statusValidation.ok ? "" : " error"}`}>{statusValidation.text}</span>
+        {loadedRevision ? (
+          <>
+            <span className="status-meta mono" title="Branch at load time (when provided by the server)">
+              {loadedRevision.branchName}
+            </span>
+            <span className="status-meta mono status-revision-sha" title={loadedRevision.commitSha}>
+              {loadedRevision.commitSha}
+            </span>
+            {onRemoteSnapshotRefresh ? (
+              <button
+                type="button"
+                className="status-revision-refresh"
+                onClick={() => void refreshRemoteSnapshot()}
+                disabled={remoteSnapshotRefreshing}
+                aria-label="Refresh loaded requirement snapshot"
+                title="Refresh loaded snapshot"
+              >
+                ↻
+              </button>
+            ) : null}
+          </>
+        ) : null}
       </div>
       <div className="layout">
         <aside className="left">
@@ -317,6 +393,7 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
                 />
                 <LinkEditor
                   requirement={req}
+                  activeProjectId={activeProjectId}
                   onChanged={() => void loadData(req.id)}
                 />
               </>
@@ -402,17 +479,24 @@ function TreeReqNode({
 
 function LinkEditor({
   requirement,
+  activeProjectId,
   onChanged,
 }: {
   requirement: ApiRequirement;
+  activeProjectId?: string;
   onChanged: () => void;
 }) {
   const [keyInput, setKeyInput] = useState("");
   const [valueInput, setValueInput] = useState("");
 
+  const linksUrl = appendProjectQuery(
+    `/api/requirements/${encodeURIComponent(requirement.id)}/links`,
+    activeProjectId
+  );
+
   const remove = async (link: Record<string, unknown>) => {
     try {
-      await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
+      await apiJson(linksUrl, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ operation: "remove", link }),
@@ -429,7 +513,7 @@ function LinkEditor({
     if (!key || !value) return;
     const link: Record<string, unknown> = { [key]: value };
     try {
-      await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
+      await apiJson(linksUrl, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ operation: "add", link }),
