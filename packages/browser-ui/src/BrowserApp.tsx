@@ -3,6 +3,7 @@
 /**
  * GRD-UI-001 + GRD-UI-003 + GRD-UI-004: Split-pane browser UI (Next.js App Router + React).
  * Optional `activeProjectId` / `onRemoteSnapshotRefresh` let a host scope REST calls and drive snapshot refresh without changing core routes.
+ * GRD-UI-005: loaded revision metadata uses a seven-character commit prefix (never full oid in the UI); optional refresh callback drives the snapshot refresh button when supplied.
  */
 import {
   useCallback,
@@ -13,6 +14,8 @@ import {
   type SetStateAction,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { commitOidUiPrefix } from "./commit-oid-ui-prefix";
 
 type ApiRequirement = {
   id: string;
@@ -284,6 +287,9 @@ export function BrowserApp({
 
   const req = selectedId ? byId.get(selectedId) : undefined;
 
+  /** GRD-UI-005: short hash only; tooltip must not expose the full oid. */
+  const revisionShaDisplay = loadedRevision ? commitOidUiPrefix(loadedRevision.commitSha) : "";
+
   return (
     <>
       <div className="status">
@@ -306,8 +312,8 @@ export function BrowserApp({
             <span className="status-meta mono" title="Branch at load time (when provided by the server)">
               {loadedRevision.branchName}
             </span>
-            <span className="status-meta mono status-revision-sha" title={loadedRevision.commitSha}>
-              {loadedRevision.commitSha}
+            <span className="status-meta mono status-revision-sha" title="Loaded commit prefix">
+              {revisionShaDisplay}
             </span>
             {onRemoteSnapshotRefresh ? (
               <button
