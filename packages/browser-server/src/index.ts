@@ -5,6 +5,7 @@ export {
   toApiRequirement,
   extractBodyHtml,
   loadProjectRequirements,
+  loadProjectRequirementsOrEmpty,
   patchRequirementLinks,
   renderedDetailHtml,
 } from "./requirements-service";

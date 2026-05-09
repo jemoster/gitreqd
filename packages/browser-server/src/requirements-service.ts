@@ -4,8 +4,8 @@ import {
   generateSingleRequirementHtml,
   loadRequirements,
 } from "@gitreqd/core";
-import type { Requirement, RequirementWithSource } from "@gitreqd/core";
-import { getGitreqdProjectRoot } from "./project-root";
+import type { LoadResult, Requirement, RequirementWithSource } from "@gitreqd/core";
+import { getGitreqdProjectRoot, hasGitreqdProjectRoot } from "./project-root";
 
 /** GRD-API-001: Shared REST payload and file mutations for Route Handlers. */
 
@@ -55,6 +55,18 @@ export function extractBodyHtml(htmlDoc: string): string {
 export async function loadProjectRequirements() {
   const root = getGitreqdProjectRoot();
   return loadRequirements(root, root);
+}
+
+/**
+ * Same as {@link loadProjectRequirements} when a project root exists (env, discovery, or Vercel cwd walk).
+ * When no root is available (e.g. serverless without bundled `gitreqd.yaml`), returns an empty load so APIs can
+ * respond without error until requirements are served from another store (e.g. GitHub).
+ */
+export async function loadProjectRequirementsOrEmpty(): Promise<LoadResult> {
+  if (!hasGitreqdProjectRoot()) {
+    return { requirements: [], errors: [] };
+  }
+  return loadProjectRequirements();
 }
 
 export async function patchRequirementLinks(

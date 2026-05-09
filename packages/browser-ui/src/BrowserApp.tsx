@@ -93,51 +93,62 @@ export function BrowserApp({ userLabel, showLogout = true }: BrowserAppProps = {
   const [detailHtml, setDetailHtml] = useState<string>("");
 
   const refreshDetail = useCallback(async (id: string) => {
-    const rendered = (await apiJson(`/api/requirements/${encodeURIComponent(id)}/rendered-detail`)) as {
-      html: string;
-    };
-    setDetailHtml(rendered.html ?? "");
+    try {
+      const rendered = (await apiJson(`/api/requirements/${encodeURIComponent(id)}/rendered-detail`)) as {
+        html: string;
+      };
+      setDetailHtml(rendered.html ?? "");
+    } catch {
+      setDetailHtml("");
+    }
   }, []);
 
   const loadData = useCallback(
     async (keepId?: string | null) => {
-      const data = (await apiJson("/api/requirements")) as { requirements: ApiRequirement[] };
-      const list = data.requirements ?? [];
-      setRequirements(list);
-      setExpandedDirs((prev) => {
-        if (prev.size > 0) return prev;
-        const next = new Set<string>();
-        for (const r of list) {
-          next.add((r.category ?? []).join("/") || "(root)");
+      try {
+        const data = (await apiJson("/api/requirements")) as { requirements: ApiRequirement[] };
+        const list = data.requirements ?? [];
+        setRequirements(list);
+        setExpandedDirs((prev) => {
+          if (prev.size > 0) return prev;
+          const next = new Set<string>();
+          for (const r of list) {
+            next.add((r.category ?? []).join("/") || "(root)");
+          }
+          return next;
+        });
+
+        const urlId = searchParams.get("req")?.trim() || null;
+        const selected =
+          (keepId && list.some((r) => r.id === keepId) ? keepId : null) ??
+          (urlId && list.some((r) => r.id === urlId) ? urlId : null) ??
+          null;
+        setSelectedId(selected);
+        if (selected) {
+          const p = new URLSearchParams(searchParams.toString());
+          p.set("req", selected);
+          router.replace(`/?${p.toString()}`, { scroll: false });
+          await refreshDetail(selected);
+        } else {
+          setDetailHtml("");
         }
-        return next;
-      });
 
-      const urlId = searchParams.get("req")?.trim() || null;
-      const selected =
-        (keepId && list.some((r) => r.id === keepId) ? keepId : null) ??
-        (urlId && list.some((r) => r.id === urlId) ? urlId : null) ??
-        null;
-      setSelectedId(selected);
-      if (selected) {
-        const p = new URLSearchParams(searchParams.toString());
-        p.set("req", selected);
-        router.replace(`/?${p.toString()}`, { scroll: false });
-        await refreshDetail(selected);
-      } else {
+        const st = (await apiJson("/api/status")) as {
+          requirementCount: number;
+          errors: unknown[];
+        };
+        setStatusCount(st.requirementCount);
+        const hasErrors = Boolean(st.errors?.length);
+        setStatusValidation({
+          ok: !hasErrors,
+          text: hasErrors ? `Validation: ${st.errors.length} error(s)` : "Validation: OK",
+        });
+      } catch {
+        setRequirements([]);
         setDetailHtml("");
+        setStatusCount(null);
+        setStatusValidation({ ok: false, text: "Validation: could not load project data." });
       }
-
-      const st = (await apiJson("/api/status")) as {
-        requirementCount: number;
-        errors: unknown[];
-      };
-      setStatusCount(st.requirementCount);
-      const hasErrors = Boolean(st.errors?.length);
-      setStatusValidation({
-        ok: !hasErrors,
-        text: hasErrors ? `Validation: ${st.errors.length} error(s)` : "Validation: OK",
-      });
     },
     [refreshDetail, router, searchParams]
   );
@@ -400,12 +411,16 @@ function LinkEditor({
   const [valueInput, setValueInput] = useState("");
 
   const remove = async (link: Record<string, unknown>) => {
-    await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ operation: "remove", link }),
-    });
-    onChanged();
+    try {
+      await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ operation: "remove", link }),
+      });
+      onChanged();
+    } catch {
+      /* e.g. NO_REQUIREMENTS_STORE when there is no local project root */
+    }
   };
 
   const add = async () => {
@@ -413,14 +428,18 @@ function LinkEditor({
     const value = valueInput.trim();
     if (!key || !value) return;
     const link: Record<string, unknown> = { [key]: value };
-    await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ operation: "add", link }),
-    });
-    setKeyInput("");
-    setValueInput("");
-    onChanged();
+    try {
+      await apiJson(`/api/requirements/${encodeURIComponent(requirement.id)}/links`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ operation: "add", link }),
+      });
+      setKeyInput("");
+      setValueInput("");
+      onChanged();
+    } catch {
+      /* e.g. NO_REQUIREMENTS_STORE when there is no local project root */
+    }
   };
 
   return (
