@@ -9,6 +9,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
@@ -123,8 +124,11 @@ export function BrowserApp({
   );
   const [remoteSnapshotRefreshing, setRemoteSnapshotRefreshing] = useState(false);
 
+  /** Monotonic counter so overlapping `loadData` runs ignore stale async completions (URL + list sync). */
+  const loadDataGenerationRef = useRef(0);
+
   const refreshDetail = useCallback(
-    async (id: string) => {
+    async (id: string, loadDataGeneration?: number) => {
       try {
         const url = appendProjectQuery(
           `/api/requirements/${encodeURIComponent(id)}/rendered-detail`,
@@ -133,8 +137,20 @@ export function BrowserApp({
         const rendered = (await apiJson(url)) as {
           html: string;
         };
+        if (
+          loadDataGeneration !== undefined &&
+          loadDataGeneration !== loadDataGenerationRef.current
+        ) {
+          return;
+        }
         setDetailHtml(rendered.html ?? "");
       } catch {
+        if (
+          loadDataGeneration !== undefined &&
+          loadDataGeneration !== loadDataGenerationRef.current
+        ) {
+          return;
+        }
         setDetailHtml("");
       }
     },
@@ -143,12 +159,15 @@ export function BrowserApp({
 
   const loadData = useCallback(
     async (keepId?: string | null) => {
+      const generation = ++loadDataGenerationRef.current;
       try {
         const reqUrl = appendProjectQuery("/api/requirements", activeProjectId);
         const data = (await apiJson(reqUrl)) as {
           requirements: ApiRequirement[];
           loadedRevision?: { branchName: string; commitSha: string };
         };
+        if (generation !== loadDataGenerationRef.current) return;
+
         const list = data.requirements ?? [];
         setLoadedRevision(data.loadedRevision ?? null);
         setRequirements(list);
@@ -171,16 +190,20 @@ export function BrowserApp({
           const p = new URLSearchParams(searchParams.toString());
           p.set("req", selected);
           router.replace(`/?${p.toString()}`, { scroll: false });
-          await refreshDetail(selected);
+          await refreshDetail(selected, generation);
         } else {
           setDetailHtml("");
         }
+
+        if (generation !== loadDataGenerationRef.current) return;
 
         const stUrl = appendProjectQuery("/api/status", activeProjectId);
         const st = (await apiJson(stUrl)) as {
           requirementCount: number;
           errors: unknown[];
         };
+        if (generation !== loadDataGenerationRef.current) return;
+
         setStatusCount(st.requirementCount);
         const hasErrors = Boolean(st.errors?.length);
         setStatusValidation({
@@ -188,6 +211,7 @@ export function BrowserApp({
           text: hasErrors ? `Validation: ${st.errors.length} error(s)` : "Validation: OK",
         });
       } catch {
+        if (generation !== loadDataGenerationRef.current) return;
         setRequirements([]);
         setDetailHtml("");
         setLoadedRevision(null);
