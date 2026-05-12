@@ -9,7 +9,6 @@ import { runResolveConflicts } from "./resolve-conflicts-cmd.js";
 import { runBootstrap } from "./bootstrap-cmd.js";
 import { runSchema } from "./schema-cmd.js";
 import { runFormat } from "./format-cmd.js";
-import { runBrowser } from "./browser-cmd.js";
 
 const DEFAULT_OUTPUT_DIR = ".";
 
@@ -21,7 +20,6 @@ Commands:
   validate          Check requirement files for schema, duplicate IDs, and broken links
   format            Rewrite all requirement YAML files to the canonical formatting
   html              Generate an HTML report of all requirements
-  browser           Start local Next.js browser UI and REST API
   schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
   resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
@@ -100,19 +98,6 @@ Options:
   --cursor-rules       Add .cursor rules for requirements (without prompting)
 `;
 
-const BROWSER_HELP = `gitreqd browser – run local Next.js browser UI + REST API
-
-Usage: gitreqd browser [options]
-
-Starts the packages/web Next.js dev server against your project (GITREQD_PROJECT_ROOT).
-Requires the gitreqd monorepo with npm ci at the repo root, or set GITREQD_MONOREPO_ROOT.
-
-Options:
-  -h, --help           Show this help
-  --project-dir <dir>  Project directory to search (default: current directory)
-  --port <number>      Port to listen on (default: 3210)
-`;
-
 const RESOLVE_CONFLICTS_HELP = `gitreqd resolve-conflicts – resolve merge conflicts in requirement files (GRD-GIT-002)
 
 Usage: gitreqd resolve-conflicts [options]
@@ -133,7 +118,6 @@ const CLI_COMMANDS = [
   "validate",
   "format",
   "html",
-  "browser",
   "schema",
   "bootstrap",
   "resolve-conflicts",
@@ -160,7 +144,6 @@ function parseArgs(argv: string[]): {
   helpCommand: CliCommand | null;
   bootstrapForce: boolean;
   bootstrapCursorRules: boolean;
-  browserPort: number;
 } {
   const args = argv.slice(2);
   const command = parseCliCommand(args);
@@ -172,7 +155,6 @@ function parseArgs(argv: string[]): {
   let helpCommand: CliCommand | null = null;
   let bootstrapForce = false;
   let bootstrapCursorRules = false;
-  let browserPort = 3210;
 
   const hasExplicitCommand = args.some((a) => (CLI_COMMANDS as readonly string[]).includes(a));
 
@@ -201,11 +183,6 @@ function parseArgs(argv: string[]): {
       bootstrapForce = true;
     } else if (arg === "--cursor-rules") {
       bootstrapCursorRules = true;
-    } else if (arg === "--port" && args[i + 1]) {
-      const parsed = Number(args[++i]);
-      if (Number.isInteger(parsed) && parsed > 0 && parsed < 65536) {
-        browserPort = parsed;
-      }
     }
   }
 
@@ -219,7 +196,6 @@ function parseArgs(argv: string[]): {
     helpCommand,
     bootstrapForce,
     bootstrapCursorRules,
-    browserPort,
   };
 }
 
@@ -261,7 +237,6 @@ async function main(): Promise<number> {
     helpCommand,
     bootstrapForce,
     bootstrapCursorRules,
-    browserPort,
   } = parseArgs(process.argv);
 
   if (showHelp) {
@@ -275,8 +250,6 @@ async function main(): Promise<number> {
       console.log(SCHEMA_HELP);
     } else if (helpCommand === "bootstrap") {
       console.log(BOOTSTRAP_HELP);
-    } else if (helpCommand === "browser") {
-      console.log(BROWSER_HELP);
     } else if (helpCommand === "resolve-conflicts") {
       console.log(RESOLVE_CONFLICTS_HELP);
     } else {
@@ -296,10 +269,6 @@ async function main(): Promise<number> {
     }
     if (command === "html") {
       const { success } = await runHtml(projectDir, outputDir);
-      return success ? 0 : 1;
-    }
-    if (command === "browser") {
-      const { success } = await runBrowser(projectDir, browserPort);
       return success ? 0 : 1;
     }
     if (command === "schema") {
@@ -347,7 +316,7 @@ async function main(): Promise<number> {
   }
 
   console.error(
-    "Usage: gitreqd validate | format | html | browser | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
+    "Usage: gitreqd validate | format | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
   );
   return 1;
 }
