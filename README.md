@@ -39,7 +39,6 @@ A common flow is: define/refine requirements with `/require`, then switch to `/i
 - `gitreqd validate` - check requirement YAML against the active schema.
 - `gitreqd format` - rewrite requirement YAML into canonical format.
 - `gitreqd html` - generate a static HTML report.
-- `gitreqd browser` - run a local web UI and JSON API for requirements.
 - `gitreqd schema` - print or export the effective requirement schema.
 - `gitreqd resolve-conflicts` - resolve requirement-file merge conflicts with optional LLM settings.
 

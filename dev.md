@@ -5,7 +5,6 @@ This page collects developer-focused documentation that was moved out of `README
 ## Current Components
 
 - **CLI** - Discover requirements, validate schema, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`.
-- **Browser UI** - Local Next.js app (`packages/web`) with split-pane UI and JSON API (`gitreqd browser`).
 - **VS Code extension** - Navigate `satisfies` links, use Go to Definition on requirement IDs, preview requirements, and scaffold new requirements.
 - **Pre-commit hook** - Optional hook script under `scripts/` to run `gitreqd validate` on commit.
 
@@ -21,9 +20,6 @@ Workspace TypeScript packages:
 
 - `packages/core` - `@gitreqd/core`: core engine (discovery, parse, validate, resolve).
 - `packages/cli` - `gitreqd`: CLI package and `gitreqd` binary.
-- `packages/browser-ui` - `@gitreqd/browser-ui`: shared React UI used by local browser and cloud surfaces.
-- `packages/browser-server` - `@gitreqd/browser-server`: REST helpers and file-backed requirement loading.
-- `packages/web` - `gitreqd-web`: local Next.js shell, API routes, and auth stub for `gitreqd browser`.
 - `packages/vscode` - `gitreqd-vscode`: extension source and packaging.
 - `requirements/` - product requirements for gitreqd itself.
 - `sample_projects/` - test data only.

@@ -3,8 +3,8 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   roots: ["<rootDir>/packages"],
-  testMatch: ["**/*.test.ts"],
-  moduleFileExtensions: ["ts", "js", "json"],
+  testMatch: ["**/*.test.ts", "**/*.test.tsx"],
+  moduleFileExtensions: ["ts", "tsx", "js", "json"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@gitreqd/core$": "<rootDir>/packages/core/src/index.ts",
