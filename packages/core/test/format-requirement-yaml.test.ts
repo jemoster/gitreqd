@@ -59,13 +59,15 @@ parameters:
     expect(once).not.toContain("rationale: |-");
   });
 
-  it("orders top-level keys as id, title, require, refinement, attributes, links, parameters", () => {
+  it("orders top-level keys as id, title, require, refinement, attributes, satisfied_by, verified_by, links, parameters", () => {
     const yaml = formatRequirementToYaml({
       id: "GRD-T-002",
       title: "Title",
       require: "The system shall do d.",
       refinement: "d",
       attributes: { status: "active" },
+      satisfied_by: [{ artifact: "src/a.ts" }],
+      verified_by: [{ artifact: "test/a.test.ts" }],
       links: [{ satisfies: "GRD-A" }],
       parameters: { p: 1 },
     });
@@ -75,7 +77,15 @@ parameters:
     expect(lines[2]).toMatch(/^require:/);
     expect(lines[3]).toMatch(/^refinement:/);
     expect(lines.some((l) => l.startsWith("attributes:"))).toBe(true);
-    expect(lines.indexOf("attributes:")).toBeLessThan(lines.findIndex((l) => l.startsWith("links:")));
+    expect(lines.indexOf("attributes:")).toBeLessThan(
+      lines.findIndex((l) => l.startsWith("satisfied_by:"))
+    );
+    expect(lines.findIndex((l) => l.startsWith("satisfied_by:"))).toBeLessThan(
+      lines.findIndex((l) => l.startsWith("verified_by:"))
+    );
+    expect(lines.findIndex((l) => l.startsWith("verified_by:"))).toBeLessThan(
+      lines.findIndex((l) => l.startsWith("links:"))
+    );
     expect(lines.findIndex((l) => l.startsWith("links:"))).toBeLessThan(
       lines.findIndex((l) => l.startsWith("parameters:"))
     );

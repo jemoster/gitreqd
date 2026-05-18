@@ -101,6 +101,7 @@ export type {
   Requirement,
   RequirementWithSource,
   Link,
+  ArtifactRef,
   ParameterValue,
   ProjectInfo,
   ValidationError,
@@ -119,4 +120,9 @@ export {
 } from "./llm-config.js";
 export type { LlmRuntimeConfig, ParseLlmConfigResult } from "./llm-config.js";
 
+export {
+  githubBlobUrlForArtifact,
+  posixJoinRepoPath,
+  type ArtifactLinkRenderOptions,
+} from "./artifact-links.js";
 export { generateFullHtml, generateSingleRequirementHtml } from "./html.js";

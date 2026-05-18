@@ -338,6 +338,9 @@ export async function resolveRequirementConflicts(
     refinement: oursObj.refinement,
     attributes: { ...oursAttrs },
     ...(oursObj.links !== undefined && { links: oursObj.links }),
+    ...(oursObj.satisfied_by !== undefined && { satisfied_by: oursObj.satisfied_by }),
+    ...(oursObj.verified_by !== undefined && { verified_by: oursObj.verified_by }),
+    ...(oursObj.parameters !== undefined && { parameters: oursObj.parameters }),
   };
   const attrs = { ...oursAttrs };
 

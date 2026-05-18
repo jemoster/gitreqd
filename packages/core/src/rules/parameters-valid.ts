@@ -9,6 +9,8 @@ const TOP_LEVEL_KEYS = new Set([
   "refinement",
   "attributes",
   "links",
+  "satisfied_by",
+  "verified_by",
   "parameters",
 ]);
 

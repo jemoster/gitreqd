@@ -21,7 +21,7 @@ import {
   STANDARD_PROFILE_ID,
 } from "@gitreqd/core";
 import type { RequirementProfile } from "@gitreqd/core";
-import type { ParameterValue, RequirementWithSource } from "@gitreqd/core";
+import type { ArtifactRef, ParameterValue, RequirementWithSource } from "@gitreqd/core";
 import { parse as parseYaml } from "yaml";
 import { isRequirementDocument } from "./requirement-document.js";
 import {
@@ -271,6 +271,8 @@ function requirementStructureKey(r: RequirementWithSource): string {
     id: r.id,
     title: r.title,
     links: r.links,
+    satisfied_by: r.satisfied_by,
+    verified_by: r.verified_by,
     parameters: r.parameters,
     attributes: attrs,
     hasRationale:
@@ -318,11 +320,32 @@ function parseRequirementFromText(
         ? (data.attributes as Record<string, unknown>)
         : undefined,
     links: Array.isArray(data.links) ? (data.links as RequirementWithSource["links"]) : undefined,
+    satisfied_by: normalizeArtifactRefsFromYaml(data.satisfied_by),
+    verified_by: normalizeArtifactRefsFromYaml(data.verified_by),
     parameters: parameters && Object.keys(parameters).length > 0 ? parameters : undefined,
     sourcePath: uri.fsPath,
   };
 
   return requirement;
+}
+
+/** GRD-SYS-016: Normalize satisfied_by / verified_by entries for preview HTML. */
+function normalizeArtifactRefsFromYaml(refs: unknown): ArtifactRef[] | undefined {
+  if (!Array.isArray(refs)) return undefined;
+  const out: ArtifactRef[] = [];
+  for (const item of refs) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const obj = item as Record<string, unknown>;
+    const artifact = obj.artifact != null ? String(obj.artifact).trim() : "";
+    if (!artifact) continue;
+    const entry: ArtifactRef = { artifact };
+    if (obj.description != null) {
+      const desc = String(obj.description).trim();
+      if (desc) entry.description = desc;
+    }
+    out.push(entry);
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 /** GRD-SYS-005: Normalize YAML parameters to Record<string, ParameterValue>. */

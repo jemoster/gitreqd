@@ -8,6 +8,12 @@ export interface Link {
   [key: string]: unknown;
 }
 
+/** GRD-SYS-016: Reference to an implementation or verification artifact (path or URL). */
+export interface ArtifactRef {
+  artifact: string;
+  description?: string;
+}
+
 /**
  * Requirement shape for YAML files. Runtime validation is enforced by the Zod schema
  * in `requirement-schema.ts` (GRD-SYS-009); this interface is the TypeScript contract.
@@ -21,6 +27,10 @@ export interface Requirement {
   refinement: string;
   attributes?: Record<string, unknown>;
   links?: Link[];
+  /** GRD-SYS-016: Artifacts that implement or satisfy this requirement. */
+  satisfied_by?: ArtifactRef[];
+  /** GRD-SYS-016: Artifacts that verify this requirement was met. */
+  verified_by?: ArtifactRef[];
   /** GRD-SYS-005: Named parameters for templating in text fields. */
   parameters?: Record<string, ParameterValue>;
 }

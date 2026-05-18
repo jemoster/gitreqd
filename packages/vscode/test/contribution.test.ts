@@ -61,6 +61,8 @@ describe("GRD-VSC-004 YAML schema for requirement files", () => {
     expect(schema.properties!.refinement).toBeDefined();
     expect(schema.properties!.attributes).toBeDefined();
     expect(schema.properties!.links).toBeDefined();
+    expect(schema.properties!.satisfied_by).toBeDefined();
+    expect(schema.properties!.verified_by).toBeDefined();
     expect(schema.properties!.parameters).toBeDefined();
   });
 });

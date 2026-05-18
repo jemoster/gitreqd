@@ -132,6 +132,71 @@ describe("generateFullHtml", () => {
     });
   });
 
+  describe("GRD-SYS-016", () => {
+    it("renders satisfied_by and verified_by artifact lists", () => {
+      const r = req("GRD-ART-001", "Artifacts", {
+        satisfied_by: [
+          { artifact: "packages/core/src/foo.ts", description: "Implements the feature." },
+          { artifact: "https://example.com/evidence" },
+        ],
+        verified_by: [{ artifact: "packages/core/test/foo.test.ts" }],
+      });
+      const html = generateFullHtml([r]);
+      const detail = html.slice(html.indexOf('id="GRD-ART-001"'), html.indexOf("</section>"));
+      expect(detail).toContain("Satisfied by");
+      expect(detail).toContain("<code>packages/core/src/foo.ts</code>");
+      expect(detail).toContain("Implements the feature.");
+      expect(detail).toContain('href="https://example.com/evidence"');
+      expect(detail).toContain("Verified by");
+      expect(detail).toContain("<code>packages/core/test/foo.test.ts</code>");
+    });
+
+    it("omits artifact sections when fields are absent", () => {
+      const r = req("GRD-ART-002", "No artifacts");
+      const html = generateFullHtml([r]);
+      const detail = html.slice(html.indexOf('id="GRD-ART-002"'), html.indexOf("</section>"));
+      expect(detail).not.toContain("Satisfied by");
+      expect(detail).not.toContain("Verified by");
+    });
+  });
+
+  describe("GRD-UI-009", () => {
+    it("renders GitHub blob links and opens external artifacts in a new window", () => {
+      const r = req("GRD-UI9-001", "Traceability", {
+        satisfied_by: [
+          { artifact: "packages/core/src/foo.ts", description: "Implementation." },
+          { artifact: "https://example.com/evidence" },
+        ],
+        verified_by: [{ artifact: "packages/core/test/foo.test.ts" }],
+      });
+      const html = generateSingleRequirementHtml(r, [r], {
+        artifactLinks: {
+          github: {
+            owner: "acme",
+            repo: "widgets",
+            commitSha: "abcdef1234567890",
+            projectRootRel: "apps/reqs",
+          },
+        },
+      });
+      expect(html).toContain('target="_blank" rel="noopener noreferrer"');
+      expect(html).toContain(
+        'href="https://github.com/acme/widgets/blob/abcdef1234567890/apps/reqs/packages/core/src/foo.ts"'
+      );
+      expect(html).toContain('href="https://example.com/evidence"');
+      expect(html).not.toContain("<code>packages/core/src/foo.ts</code>");
+    });
+
+    it("renders file paths as code when artifactLinks has no github context", () => {
+      const r = req("GRD-UI9-002", "Local paths", {
+        satisfied_by: [{ artifact: "src/local.ts" }],
+      });
+      const html = generateSingleRequirementHtml(r, [r], { artifactLinks: {} });
+      expect(html).toContain("<code>src/local.ts</code>");
+      expect(html).not.toContain('target="_blank"');
+    });
+  });
+
   describe("GRD-HTML-002", () => {
     it("includes a list of requirements that link to each requirement (reverse lookup)", () => {
       const requirements = [

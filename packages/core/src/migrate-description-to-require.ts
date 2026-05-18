@@ -70,6 +70,8 @@ export function migrateDescriptionToRequire(legacy: {
   refinement?: string;
   attributes?: Record<string, unknown>;
   links?: Requirement["links"];
+  satisfied_by?: Requirement["satisfied_by"];
+  verified_by?: Requirement["verified_by"];
   parameters?: Requirement["parameters"];
 }): MigrateDescriptionResult {
   if (legacy.require != null && legacy.require !== "") {
@@ -81,6 +83,8 @@ export function migrateDescriptionToRequire(legacy: {
     };
     if (legacy.attributes !== undefined) requirement.attributes = legacy.attributes;
     if (legacy.links !== undefined) requirement.links = legacy.links;
+    if (legacy.satisfied_by !== undefined) requirement.satisfied_by = legacy.satisfied_by;
+    if (legacy.verified_by !== undefined) requirement.verified_by = legacy.verified_by;
     if (legacy.parameters !== undefined) requirement.parameters = legacy.parameters;
     const ambiguity =
       countRfc2119Keywords(requirement.require) === 0
@@ -105,6 +109,8 @@ export function migrateDescriptionToRequire(legacy: {
         refinement: "",
         ...(legacy.attributes !== undefined && { attributes: legacy.attributes }),
         ...(legacy.links !== undefined && { links: legacy.links }),
+        ...(legacy.satisfied_by !== undefined && { satisfied_by: legacy.satisfied_by }),
+        ...(legacy.verified_by !== undefined && { verified_by: legacy.verified_by }),
         ...(legacy.parameters !== undefined && { parameters: legacy.parameters }),
       },
       ambiguity: "empty_description",
@@ -123,6 +129,8 @@ export function migrateDescriptionToRequire(legacy: {
         refinement: "",
         ...(legacy.attributes !== undefined && { attributes: legacy.attributes }),
         ...(legacy.links !== undefined && { links: legacy.links }),
+        ...(legacy.satisfied_by !== undefined && { satisfied_by: legacy.satisfied_by }),
+        ...(legacy.verified_by !== undefined && { verified_by: legacy.verified_by }),
         ...(legacy.parameters !== undefined && { parameters: legacy.parameters }),
       },
       ambiguity: "no_rfc2119_keyword",
@@ -148,6 +156,8 @@ export function migrateDescriptionToRequire(legacy: {
   };
   if (legacy.attributes !== undefined) requirement.attributes = legacy.attributes;
   if (legacy.links !== undefined) requirement.links = legacy.links;
+  if (legacy.satisfied_by !== undefined) requirement.satisfied_by = legacy.satisfied_by;
+  if (legacy.verified_by !== undefined) requirement.verified_by = legacy.verified_by;
   if (legacy.parameters !== undefined) requirement.parameters = legacy.parameters;
 
   return { requirement, ambiguity };

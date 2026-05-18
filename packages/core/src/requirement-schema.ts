@@ -5,7 +5,7 @@
  */
 import { z } from "zod/v3";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import type { Link, ParameterValue, Requirement } from "./types.js";
+import type { ArtifactRef, Link, ParameterValue, Requirement } from "./types.js";
 
 const yamlScalar = z.union([z.string(), z.number(), z.boolean()]);
 
@@ -18,6 +18,34 @@ function normalizeLinks(links: unknown): Link[] | undefined {
     }
     return item as Link;
   });
+}
+
+const artifactRefInnerSchema = z
+  .object({
+    artifact: yamlScalar
+      .transform(String)
+      .transform((s) => s.trim())
+      .pipe(z.string().min(1, { message: "Missing required field: artifact" })),
+    description: z
+      .union([yamlScalar, z.null()])
+      .optional()
+      .transform((v) => (v === undefined || v === null ? undefined : String(v).trim() || undefined)),
+  })
+  .strict();
+
+function normalizeArtifactRefs(refs: unknown): ArtifactRef[] | undefined {
+  if (refs == null) return undefined;
+  if (!Array.isArray(refs)) return undefined;
+  const out: ArtifactRef[] = [];
+  for (const item of refs) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const parsed = artifactRefInnerSchema.safeParse(item);
+    if (!parsed.success) continue;
+    const entry: ArtifactRef = { artifact: parsed.data.artifact };
+    if (parsed.data.description) entry.description = parsed.data.description;
+    out.push(entry);
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 function normalizeParameters(parameters: unknown): Record<string, ParameterValue> | undefined {
@@ -81,6 +109,14 @@ export const requirementFileInnerSchema = z
       .array(z.record(z.unknown()))
       .optional()
       .describe("Optional list of link objects (e.g. satisfies)."),
+    satisfied_by: z
+      .array(artifactRefInnerSchema)
+      .optional()
+      .describe("Optional artifacts that implement or satisfy this requirement."),
+    verified_by: z
+      .array(artifactRefInnerSchema)
+      .optional()
+      .describe("Optional artifacts that verify this requirement was met."),
     parameters: z
       .record(z.unknown())
       .optional()
@@ -104,6 +140,10 @@ export const requirementFileDataSchema = requirementFileInnerSchema.transform((d
   if (data.attributes !== undefined) out.attributes = data.attributes;
   const links = normalizeLinks(data.links);
   if (links !== undefined) out.links = links;
+  const satisfiedBy = normalizeArtifactRefs(data.satisfied_by);
+  if (satisfiedBy !== undefined) out.satisfied_by = satisfiedBy;
+  const verifiedBy = normalizeArtifactRefs(data.verified_by);
+  if (verifiedBy !== undefined) out.verified_by = verifiedBy;
   const parameters = normalizeParameters(data.parameters);
   if (parameters !== undefined) out.parameters = parameters;
   return out;
@@ -133,6 +173,6 @@ export function exportRequirementFileJsonSchema(
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "Gitreqd requirement",
     description:
-      "YAML format for a single requirement file (id, title, require, refinement, attributes, links). GRD-VSC-004.",
+      "YAML format for a single requirement file (id, title, require, refinement, attributes, links, satisfied_by, verified_by). GRD-VSC-004.",
   };
 }

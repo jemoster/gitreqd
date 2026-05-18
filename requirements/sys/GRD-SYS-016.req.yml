@@ -1,0 +1,45 @@
+id: GRD-SYS-016
+title: Requirement traceability to implementation and verification artifacts
+require: The requirement YAML schema shall define optional `satisfied_by` and `verified_by` fields on each requirement.
+refinement: |
+  Each field is optional and may be omitted when no artifacts are recorded.
+
+  `satisfied_by` records one or more artifacts that implement or otherwise satisfy the requirement.
+  `verified_by` records one or more artifacts that verify the requirement was met (for example tests, reports, or review evidence).
+
+  Each field shall be a YAML sequence of entries. Each entry shall include:
+  - `artifact` (string, required): a project-relative file path or a URL pointing at the artifact.
+  - `description` (string, optional): prose explaining how that artifact satisfies or verifies this requirement.
+
+  Multiple entries are allowed so a requirement may point at several implementation or verification artifacts.
+
+  These fields are distinct from `links`, which trace relationships between requirements (for example `satisfies`). `satisfied_by` and `verified_by` point at external artifacts, not at other requirement IDs.
+
+  Example:
+
+  ```yaml
+  satisfied_by:
+    - artifact: packages/core/src/requirement-schema.ts
+      description: Zod schema defines the requirement file shape.
+  verified_by:
+    - artifact: packages/core/test/requirement-schema.test.ts
+      description: Unit tests cover schema parsing and rejection of unknown keys.
+    - artifact: https://ci.example.com/runs/12345
+      description: CI run for the release that introduced the fields.
+  ```
+attributes:
+  rationale: |
+    Linking requirements to concrete implementation and verification artifacts improves
+    traceability from normative text to code and evidence without overloading requirement-to-requirement links.
+  status: active
+satisfied_by:
+  - artifact: packages/core/src/requirement-schema.ts
+    description: Zod schema defines satisfied_by and verified_by on each requirement file.
+  - artifact: packages/core/src/types.ts
+    description: TypeScript Requirement contract includes ArtifactRef and optional traceability fields.
+verified_by:
+  - artifact: packages/core/test/requirement-schema-artifacts.test.ts
+    description: Schema parsing, rejection of invalid entries, and JSON Schema export coverage.
+links:
+  - satisfies: GRD-SYS-001
+  - satisfies: GRD-SYS-009

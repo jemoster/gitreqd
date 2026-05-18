@@ -1,6 +1,12 @@
 import MarkdownIt from "markdown-it";
+import {
+  githubBlobUrlForArtifact,
+  type ArtifactLinkRenderOptions,
+} from "./artifact-links.js";
 import { resolveToSegments } from "./parameters.js";
-import type { RequirementWithSource } from "./types.js";
+import type { ArtifactRef, RequirementWithSource } from "./types.js";
+
+export type { ArtifactLinkRenderOptions } from "./artifact-links.js";
 
 /** GRD-SYS-005: Placeholder character range for param spans (U+E000–E0FF); replaced after markdown. */
 const PARAM_PLACEHOLDER_BASE = 0xe000;
@@ -190,7 +196,8 @@ function requirementDetailHtml(
   r: RequirementWithSource,
   linkedFromIds?: string[],
   requirementsById?: Map<string, RequirementWithSource>,
-  editableFieldMarkers?: boolean
+  editableFieldMarkers?: boolean,
+  artifactLinks?: ArtifactLinkRenderOptions
 ): string {
   const byId = requirementsById ?? new Map<string, RequirementWithSource>([[r.id, r]]);
   const resolve = (text: string, useMarkdown: boolean) =>
@@ -273,8 +280,13 @@ function requirementDetailHtml(
           .join("")
       : "";
 
+  const satisfiedByHtml = artifactRefsSectionHtml("Satisfied by", r.satisfied_by, byId, r.id, artifactLinks);
+  const verifiedByHtml = artifactRefsSectionHtml("Verified by", r.verified_by, byId, r.id, artifactLinks);
+
   const linksAtBottom =
-    [satisfiesHtml, linkedFromHtml, otherLinksHtml].filter(Boolean).join("\n      ");
+    [satisfiedByHtml, verifiedByHtml, satisfiesHtml, linkedFromHtml, otherLinksHtml]
+      .filter(Boolean)
+      .join("\n      ");
 
   /** GRD-SYS-005: Title, require, and refinement with parameter references resolved. */
   const titleHtml = resolve(r.title, false);
@@ -304,6 +316,53 @@ function requirementDetailHtml(
 
 function capitalizeLabel(key: string): string {
   return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+}
+
+/** GRD-SYS-016 / GRD-UI-009: Render artifact path or URL with optional description. */
+function artifactRefsListHtml(
+  refs: ArtifactRef[],
+  requirementsById: Map<string, RequirementWithSource>,
+  requirementId: string,
+  artifactLinks?: ArtifactLinkRenderOptions
+): string {
+  const resolve = (text: string) => resolveAndRenderText(text, requirementId, requirementsById, false);
+  const externalAttrs =
+    artifactLinks !== undefined ? ' target="_blank" rel="noopener noreferrer"' : "";
+  const items = refs
+    .map((ref) => {
+      const artifact = ref.artifact.trim();
+      if (!artifact) return "";
+      const isUrl = /^https?:\/\//i.test(artifact);
+      let artifactHtml: string;
+      if (isUrl) {
+        artifactHtml = `<a href="${escapeHtml(artifact)}"${externalAttrs}>${escapeHtml(artifact)}</a>`;
+      } else if (artifactLinks?.github) {
+        const href = githubBlobUrlForArtifact(artifact, artifactLinks.github);
+        artifactHtml = `<a href="${escapeHtml(href)}"${externalAttrs}>${escapeHtml(artifact)}</a>`;
+      } else {
+        artifactHtml = `<code>${escapeHtml(artifact)}</code>`;
+      }
+      const desc = ref.description?.trim();
+      if (desc) {
+        return `<li>${artifactHtml} <span class="artifact-desc">— ${resolve(desc)}</span></li>`;
+      }
+      return `<li>${artifactHtml}</li>`;
+    })
+    .filter(Boolean);
+  return items.join("");
+}
+
+function artifactRefsSectionHtml(
+  label: string,
+  refs: ArtifactRef[] | undefined,
+  requirementsById: Map<string, RequirementWithSource>,
+  requirementId: string,
+  artifactLinks?: ArtifactLinkRenderOptions
+): string {
+  if (!refs || refs.length === 0) return "";
+  const list = artifactRefsListHtml(refs, requirementsById, requirementId, artifactLinks);
+  if (!list) return "";
+  return `<div class="labeled-block artifact-refs-block"><span class="label">${escapeHtml(label)}</span><ul class="artifact-refs-list">${list}</ul></div>`;
 }
 
 /** GRD-HTML-001: HTML report represents the full set of information in the requirements file. GRD-SYS-010: Invoked via the active profile. */
@@ -361,7 +420,7 @@ ${details}
 export function generateSingleRequirementHtml(
   requirement: RequirementWithSource,
   allRequirements?: RequirementWithSource[],
-  options?: { editableFieldMarkers?: boolean }
+  options?: { editableFieldMarkers?: boolean; artifactLinks?: ArtifactLinkRenderOptions }
 ): string {
   // Use the same head, styling, and detail rendering as the full report (including markdown).
   // Only the scope differs: single requirement, no index/list.
@@ -372,7 +431,8 @@ export function generateSingleRequirementHtml(
     requirement,
     linkedFromIds,
     requirementsById,
-    options?.editableFieldMarkers === true
+    options?.editableFieldMarkers === true,
+    options?.artifactLinks
   );
   return `<!DOCTYPE html>
 <html lang="en">

@@ -63,7 +63,19 @@ Common optional fields:
 - `refinement` - supporting detail (Markdown supported in reports).
 - `attributes` - metadata such as status, owner, or rationale.
 - `links` - traceability links (for example `satisfies: OTHER-ID`).
+- `satisfied_by` - artifacts (file paths or URLs) that implement or satisfy the requirement, each with an optional description.
+- `verified_by` - artifacts (file paths or URLs) that verify the requirement was met, each with an optional description.
 - `parameters` - reusable named values for interpolation in string fields.
+
+Example artifact entry:
+
+```yaml
+satisfied_by:
+  - artifact: src/feature.ts
+    description: Primary implementation.
+verified_by:
+  - artifact: test/feature.test.ts
+```
 
 Parameter placeholders in strings:
 

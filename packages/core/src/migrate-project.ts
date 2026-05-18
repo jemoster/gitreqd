@@ -93,6 +93,8 @@ export async function migrateProjectRequirementFiles(
       description: obj.description as string | undefined,
       attributes: obj.attributes as Record<string, unknown> | undefined,
       links: obj.links as import("./types.js").Link[] | undefined,
+      satisfied_by: obj.satisfied_by as import("./types.js").Requirement["satisfied_by"],
+      verified_by: obj.verified_by as import("./types.js").Requirement["verified_by"],
       parameters: obj.parameters as import("./types.js").Requirement["parameters"],
     });
 

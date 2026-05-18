@@ -1,3 +1,4 @@
+import type { ArtifactLinkRenderOptions } from "../artifact-links.js";
 import type { RequirementSchemaComposeOptions } from "../requirement-schema.js";
 import type { RequirementWithSource, ValidationError } from "../types.js";
 
@@ -16,6 +17,6 @@ export interface RequirementProfile {
   generateSingleRequirementHtml(
     requirement: RequirementWithSource,
     allRequirements?: RequirementWithSource[],
-    options?: { editableFieldMarkers?: boolean }
+    options?: { editableFieldMarkers?: boolean; artifactLinks?: ArtifactLinkRenderOptions }
   ): string;
 }

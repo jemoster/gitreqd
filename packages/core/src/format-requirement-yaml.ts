@@ -3,7 +3,7 @@
  * normalized indentation, stable stringify). Used by the format CLI (GRD-CLI-006).
  */
 import { stringify } from "yaml";
-import type { Link, ParameterValue, Requirement } from "./types.js";
+import type { ArtifactRef, Link, ParameterValue, Requirement } from "./types.js";
 
 function sortObjectKeysDeep(value: unknown): unknown {
   if (value === null || typeof value !== "object") {
@@ -17,6 +17,15 @@ function sortObjectKeysDeep(value: unknown): unknown {
   const out: Record<string, unknown> = {};
   for (const k of keys) {
     out[k] = sortObjectKeysDeep(obj[k]);
+  }
+  return out;
+}
+
+/** GRD-SYS-016: artifact first, then description. */
+function artifactRefObjectForYaml(ref: ArtifactRef): Record<string, unknown> {
+  const out: Record<string, unknown> = { artifact: ref.artifact };
+  if (ref.description) {
+    out.description = ref.description;
   }
   return out;
 }
@@ -76,6 +85,14 @@ export function formatRequirementToYaml(requirement: Requirement): string {
     if (Object.keys(sorted).length > 0) {
       doc.attributes = sorted;
     }
+  }
+
+  if (requirement.satisfied_by != null && requirement.satisfied_by.length > 0) {
+    doc.satisfied_by = requirement.satisfied_by.map((ref) => artifactRefObjectForYaml(ref));
+  }
+
+  if (requirement.verified_by != null && requirement.verified_by.length > 0) {
+    doc.verified_by = requirement.verified_by.map((ref) => artifactRefObjectForYaml(ref));
   }
 
   if (requirement.links != null && requirement.links.length > 0) {

@@ -23,6 +23,12 @@ function requirementPayloadForYaml(r: RequirementWithSource): Requirement {
   if (r.attributes !== undefined) {
     payload.attributes = r.attributes;
   }
+  if (r.satisfied_by !== undefined) {
+    payload.satisfied_by = r.satisfied_by;
+  }
+  if (r.verified_by !== undefined) {
+    payload.verified_by = r.verified_by;
+  }
   if (r.links !== undefined) {
     payload.links = r.links;
   }
