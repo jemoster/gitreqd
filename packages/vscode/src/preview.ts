@@ -26,6 +26,7 @@ import { parse as parseYaml } from "yaml";
 import { isRequirementDocument } from "./requirement-document.js";
 import {
   applyYamlMarkdownFieldUpdate,
+  applyYamlRequireFieldUpdate,
   type EditableMarkdownField,
 } from "./yaml-field-patch.js";
 
@@ -248,7 +249,10 @@ function escapeJsonForScript(json: string): string {
 
 /** GRD-VSC-006: Markdown-backed fields edited in the webview. */
 function extractMarkdownFields(r: RequirementWithSource): Record<string, string> {
-  const out: Record<string, string> = { description: r.description };
+  const out: Record<string, string> = { require: r.require };
+  if (r.refinement) {
+    out.refinement = r.refinement;
+  }
   const attrs =
     r.attributes && typeof r.attributes === "object" ? (r.attributes as Record<string, unknown>) : {};
   if ("rationale" in attrs && attrs.rationale != null) {
@@ -288,13 +292,17 @@ function parseRequirementFromText(
 
   const id = data.id != null ? String(data.id) : undefined;
   const title = data.title != null ? String(data.title) : undefined;
-  const description = data.description != null ? String(data.description) : "";
+  const require = data.require != null ? String(data.require) : "";
+  const refinement = data.refinement != null ? String(data.refinement) : "";
 
   if (!id) {
     throw new Error("Missing required field: id");
   }
   if (!title) {
     throw new Error("Missing required field: title");
+  }
+  if (!require) {
+    throw new Error("Missing required field: require");
   }
 
   // GRD-SYS-005: Parse parameters (name -> string | number | boolean) so preview resolves {{ :param }}.
@@ -303,7 +311,8 @@ function parseRequirementFromText(
   const requirement: RequirementWithSource = {
     id,
     title,
-    description,
+    require,
+    refinement,
     attributes:
       typeof data.attributes === "object" && data.attributes !== null
         ? (data.attributes as Record<string, unknown>)
@@ -340,7 +349,7 @@ export class RequirementPreviewManager {
   /** GRD-VSC-006: When unchanged, YAML edits only sync Toast fields without replacing webview HTML. */
   private lastStructureKey: string | undefined;
   private fieldEditFlushTimer: ReturnType<typeof setTimeout> | undefined;
-  private pendingFieldEdits: Partial<Record<EditableMarkdownField, string>> = {};
+  private pendingFieldEdits: Partial<Record<EditableMarkdownField | "require", string>> = {};
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -448,7 +457,7 @@ export class RequirementPreviewManager {
         }
         if (
           msg.type === "fieldEdit" &&
-          (msg.field === "description" || msg.field === "rationale") &&
+          (msg.field === "require" || msg.field === "refinement" || msg.field === "rationale") &&
           typeof msg.value === "string"
         ) {
           this.queueFieldEdit(msg.field, msg.value);
@@ -495,7 +504,7 @@ export class RequirementPreviewManager {
     return html;
   }
 
-  private queueFieldEdit(field: EditableMarkdownField, value: string): void {
+  private queueFieldEdit(field: EditableMarkdownField | "require", value: string): void {
     this.pendingFieldEdits[field] = value;
     if (this.fieldEditFlushTimer) clearTimeout(this.fieldEditFlushTimer);
     this.fieldEditFlushTimer = setTimeout(() => {
@@ -508,7 +517,7 @@ export class RequirementPreviewManager {
     if (!this.panel || !this.currentDocumentUri) return;
     const pending = this.pendingFieldEdits;
     this.pendingFieldEdits = {};
-    const keys = Object.keys(pending) as EditableMarkdownField[];
+    const keys = Object.keys(pending) as (EditableMarkdownField | "require")[];
     if (keys.length === 0) return;
 
     const doc = vscode.workspace.textDocuments.find((d) => d.uri.toString() === this.currentDocumentUri);
@@ -519,7 +528,11 @@ export class RequirementPreviewManager {
     for (const field of keys) {
       const value = pending[field];
       if (value === undefined) continue;
-      next = applyYamlMarkdownFieldUpdate(next, field, value);
+      if (field === "require") {
+        next = applyYamlRequireFieldUpdate(next, value);
+      } else {
+        next = applyYamlMarkdownFieldUpdate(next, field, value);
+      }
     }
     if (next === text) return;
 

@@ -18,7 +18,7 @@ describe("GRD-CLI-006: runFormat", () => {
     fs.writeFileSync(path.join(projectRoot, ROOT_MARKER), "requirement_dirs:\n  - requirements\n", "utf-8");
     fs.writeFileSync(
       path.join(reqs, `GRD-CLI-FMT-001${REQUIREMENT_FILE_EXTENSION}`),
-      "id: GRD-CLI-FMT-001\ntitle: T\ndescription: 'x'\n",
+      "title: T\nid: GRD-CLI-FMT-001\nrequire: The system shall do x.\n",
       "utf-8"
     );
 

@@ -1,6 +1,6 @@
 /**
  * GRD-GIT-002: Merge-conflict resolution for requirement YAML files.
- * Reconstructs ours/theirs, compares title/description/rationale, uses LLM to merge differing fields,
+ * Reconstructs ours/theirs, compares title/require/refinement/rationale, uses LLM to merge differing fields,
  * and validates resolved content against the requirement schema before any write.
  */
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
@@ -19,7 +19,7 @@ export interface ResolveResult {
 
 /** Injected merge function for a single field (e.g. for tests without calling the real LLM). */
 export type MergeFieldFn = (
-  fieldName: "title" | "description" | "rationale",
+  fieldName: "title" | "require" | "refinement" | "rationale",
   oursYaml: string,
   theirsYaml: string,
   config: LlmRuntimeConfig
@@ -81,17 +81,19 @@ export function reconstructSides(content: string): { ours: string; theirs: strin
 
 function getTextFields(obj: Record<string, unknown>): {
   title: string;
-  description: string;
+  require: string;
+  refinement: string;
   rationale: string;
 } {
   const title = obj.title != null ? String(obj.title) : "";
-  const description = obj.description != null ? String(obj.description) : "";
+  const require = obj.require != null ? String(obj.require) : "";
+  const refinement = obj.refinement != null ? String(obj.refinement) : "";
   const attrs = obj.attributes;
   const rationale =
     attrs && typeof attrs === "object" && (attrs as Record<string, unknown>).rationale != null
       ? String((attrs as Record<string, unknown>).rationale)
       : "";
-  return { title, description, rationale };
+  return { title, require, refinement, rationale };
 }
 
 /** When set (e.g. 1 or true), log LLM request and response to stderr. */
@@ -113,7 +115,7 @@ const MERGE_RESPONSE_SCHEMA = {
 } as const;
 
 function buildMergePrompt(
-  fieldName: "title" | "description" | "rationale",
+  fieldName: "title" | "require" | "refinement" | "rationale",
   oursYaml: string,
   theirsYaml: string
 ): string {
@@ -167,7 +169,7 @@ function parseMergedValueJson(rawResponse: string): string {
  * GRD-SYS-014: Call Ollama to merge a single text field (structured JSON via `format`).
  */
 async function mergeFieldWithOllama(
-  fieldName: "title" | "description" | "rationale",
+  fieldName: "title" | "require" | "refinement" | "rationale",
   oursYaml: string,
   theirsYaml: string,
   config: Extract<LlmRuntimeConfig, { provider: "ollama" }>
@@ -222,7 +224,7 @@ async function mergeFieldWithOllama(
  * GRD-SYS-013: Call Anthropic Messages API to merge a single text field (JSON in assistant text).
  */
 async function mergeFieldWithClaude(
-  fieldName: "title" | "description" | "rationale",
+  fieldName: "title" | "require" | "refinement" | "rationale",
   oursYaml: string,
   theirsYaml: string,
   config: Extract<LlmRuntimeConfig, { provider: "claude" }>
@@ -282,7 +284,7 @@ async function mergeFieldWithClaude(
 }
 
 async function mergeFieldWithLLM(
-  fieldName: "title" | "description" | "rationale",
+  fieldName: "title" | "require" | "refinement" | "rationale",
   oursYaml: string,
   theirsYaml: string,
   config: LlmRuntimeConfig
@@ -295,7 +297,7 @@ async function mergeFieldWithLLM(
 
 /**
  * GRD-GIT-002: Resolve merge conflicts in requirement file content using LLM.
- * Reconstructs ours/theirs, compares title/description/rationale; for differing fields calls LLM (or options.mergeField if provided).
+ * Reconstructs ours/theirs, compares title/require/refinement/rationale; for differing fields calls LLM (or options.mergeField if provided).
  * Resolved content is validated against the requirement schema; on validation failure no changes are made.
  */
 export async function resolveRequirementConflicts(
@@ -332,7 +334,8 @@ export async function resolveRequirementConflicts(
   const merged: Record<string, unknown> = {
     id: oursObj.id,
     title: oursObj.title,
-    description: oursObj.description,
+    require: oursObj.require,
+    refinement: oursObj.refinement,
     attributes: { ...oursAttrs },
     ...(oursObj.links !== undefined && { links: oursObj.links }),
   };
@@ -341,8 +344,11 @@ export async function resolveRequirementConflicts(
   if (oFields.title !== tFields.title) {
     merged.title = await mergeField("title", sides.ours, sides.theirs, llmConfig);
   }
-  if (oFields.description !== tFields.description) {
-    merged.description = await mergeField("description", sides.ours, sides.theirs, llmConfig);
+  if (oFields.require !== tFields.require) {
+    merged.require = await mergeField("require", sides.ours, sides.theirs, llmConfig);
+  }
+  if (oFields.refinement !== tFields.refinement) {
+    merged.refinement = await mergeField("refinement", sides.ours, sides.theirs, llmConfig);
   }
   if (oFields.rationale !== tFields.rationale) {
     attrs.rationale = await mergeField("rationale", sides.ours, sides.theirs, llmConfig);

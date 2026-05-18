@@ -51,11 +51,11 @@ export function normalizeRequirementFileTextForCompare(text: string): string {
 }
 
 /**
- * Use block clip chomping (`|`) instead of strip (`|-`) for description and rationale so trailing
+ * Use block clip chomping (`|`) instead of strip (`|-`) for refinement and rationale so trailing
  * newlines in Markdown are not stripped on round-trip (consistent with GRD-VSC-006 preview writes).
  */
 export function preferClipBlockChompForMarkdownKeys(yaml: string): string {
-  return yaml.replace(/^([ \t]*(?:description|rationale):[ \t]*)\|-(\r?\n)/gm, "$1|$2");
+  return yaml.replace(/^([ \t]*(?:refinement|rationale):[ \t]*)\|-(\r?\n)/gm, "$1|$2");
 }
 
 /**
@@ -65,8 +65,11 @@ export function formatRequirementToYaml(requirement: Requirement): string {
   const doc: Record<string, unknown> = {
     id: requirement.id,
     title: requirement.title,
-    description: requirement.description,
+    require: requirement.require,
   };
+  if (requirement.refinement) {
+    doc.refinement = requirement.refinement;
+  }
 
   if (requirement.attributes !== undefined) {
     const sorted = sortObjectKeysDeep(requirement.attributes) as Record<string, unknown>;
@@ -75,7 +78,7 @@ export function formatRequirementToYaml(requirement: Requirement): string {
     }
   }
 
-  if (requirement.links !== undefined && requirement.links.length > 0) {
+  if (requirement.links != null && requirement.links.length > 0) {
     doc.links = requirement.links.map((link) => linkObjectForYaml(link));
   }
 

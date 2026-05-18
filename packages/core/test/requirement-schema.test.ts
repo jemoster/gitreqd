@@ -7,17 +7,29 @@ import {
 } from "../src/requirement-schema";
 
 describe("GRD-SYS-009 requirement schema (Zod)", () => {
-  it("parses minimal object with default empty description", () => {
+  it("parses minimal object with require and default empty refinement", () => {
     const r = requirementFileDataSchema.safeParse({
       id: "GRD-X-001",
       title: "T",
+      require: "The system shall do X.",
     });
     expect(r.success).toBe(true);
     if (r.success) {
       expect(r.data.id).toBe("GRD-X-001");
       expect(r.data.title).toBe("T");
-      expect(r.data.description).toBe("");
+      expect(r.data.require).toBe("The system shall do X.");
+      expect(r.data.refinement).toBe("");
     }
+  });
+
+  it("rejects legacy description key", () => {
+    const r = requirementFileDataSchema.safeParse({
+      id: "A",
+      title: "B",
+      require: "The system shall do X.",
+      description: "legacy",
+    });
+    expect(r.success).toBe(false);
   });
 
   it("rejects unknown top-level keys", () => {

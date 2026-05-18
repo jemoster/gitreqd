@@ -15,7 +15,10 @@ export interface Link {
 export interface Requirement {
   id: string;
   title: string;
-  description: string;
+  /** Single normative Shall/Should/May statement for this requirement ID. */
+  require: string;
+  /** Supporting prose (Markdown in HTML reports). */
+  refinement: string;
   attributes?: Record<string, unknown>;
   links?: Link[];
   /** GRD-SYS-005: Named parameters for templating in text fields. */

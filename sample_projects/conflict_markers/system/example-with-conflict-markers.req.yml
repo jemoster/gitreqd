@@ -1,6 +1,7 @@
 id: SYS-CONFLICT-EXAMPLE
 title: API Access Policy
-description: |
+require: The system shall enforce an API access policy for all endpoints.
+refinement: |
 <<<<<<< HEAD
   The system shall require authenticated login for all API endpoints.
   # TODO: consider allowing anonymous read access for public API endpoints.

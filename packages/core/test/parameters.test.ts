@@ -12,7 +12,8 @@ function r(
   return {
     id,
     title,
-    description: "",
+    require: "The system shall test.",
+    refinement: "",
     sourcePath: `/${id}.req.yml`,
     ...(params && { parameters: params }),
   };

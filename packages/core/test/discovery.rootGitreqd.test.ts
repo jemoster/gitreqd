@@ -32,7 +32,8 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
       [
         "id: TEST-A",
         "title: Test requirement A",
-        "description: A test requirement in reqs-a",
+        "require: The system shall test.",
+        "refinement: A test requirement in reqs-a",
         "",
       ].join("\n"),
       "utf-8"
@@ -42,7 +43,8 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
       [
         "id: TEST-B",
         "title: Test requirement B",
-        "description: A test requirement in reqs-b",
+        "require: The system shall test.",
+        "refinement: A test requirement in reqs-b",
         "",
       ].join("\n"),
       "utf-8"
@@ -66,8 +68,8 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
     fs.mkdirSync(nested, { recursive: true });
     const rootFile = path.join(projectRoot, "at-root.req.yml");
     const nestedFile = path.join(nested, "deep.req.yml");
-    fs.writeFileSync(rootFile, "id: ROOT\ntitle: t\ndescription: x\n", "utf-8");
-    fs.writeFileSync(nestedFile, "id: DEEP\ntitle: t\ndescription: x\n", "utf-8");
+    fs.writeFileSync(rootFile, "id: ROOT\ntitle: t\nrequire: The system shall test.\nrefinement: x\n", "utf-8");
+    fs.writeFileSync(nestedFile, "id: DEEP\ntitle: t\nrequire: The system shall test.\nrefinement: x\n", "utf-8");
     fs.writeFileSync(
       path.join(projectRoot, ROOT_MARKER),
       ["requirement_dirs:", "  - ."].join("\n"),
@@ -84,8 +86,8 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
     fs.mkdirSync(dirA);
     const fileYml = path.join(dirA, "A.req.yml");
     const fileYaml = path.join(dirA, "B.req.yaml");
-    fs.writeFileSync(fileYml, "id: A\ntitle: A\ndescription: x\n", "utf-8");
-    fs.writeFileSync(fileYaml, "id: B\ntitle: B\ndescription: y\n", "utf-8");
+    fs.writeFileSync(fileYml, "id: A\ntitle: A\nrequire: The system shall test.\nrefinement: x\n", "utf-8");
+    fs.writeFileSync(fileYaml, "id: B\ntitle: B\nrequire: The system shall test.\nrefinement: y\n", "utf-8");
     fs.writeFileSync(
       path.join(projectRoot, ROOT_MARKER),
       "requirement_dirs:\n  - reqs\n",

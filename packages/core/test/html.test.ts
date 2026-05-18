@@ -17,7 +17,8 @@ function req(
   return {
     id,
     title,
-    description: "Description text",
+    require: "The system shall meet this requirement.",
+    refinement: "",
     sourcePath: `/project/${id}${REQUIREMENT_FILE_EXTENSION}`,
     ...overrides,
   };
@@ -40,7 +41,7 @@ describe("generateFullHtml", () => {
     expect(html).toContain("class=\"requirement-detail\"");
     expect(html).toContain("class=\"meta\"");
     expect(html).toContain("class=\"source\"");
-    expect(html).toContain("class=\"description\"");
+    expect(html).toContain("class=\"require\"");
   });
 
   describe("GRD-HTML-001", () => {
@@ -71,9 +72,9 @@ describe("generateFullHtml", () => {
       expect(html).toContain("Satisfies");
     });
 
-    it("represents full requirement: id, title, description, attributes, links, source", () => {
+    it("represents full requirement: id, title, refinement, attributes, links, source", () => {
       const r = req("GRD-FULL-001", "Full requirement", {
-        description: "Full description text",
+        refinement: "Full refinement text",
         attributes: { status: "draft", rationale: "Test rationale." },
         links: [{ satisfies: "GRD-OTHER" }],
         sourcePath: "/project/reqs/GRD-FULL-001.req.yml",
@@ -81,7 +82,7 @@ describe("generateFullHtml", () => {
       const html = generateFullHtml([r]);
       expect(html).toContain("GRD-FULL-001");
       expect(html).toContain("Full requirement");
-      expect(html).toContain("Full description text");
+      expect(html).toContain("Full refinement text");
       expect(html).toContain("Status");
       expect(html).toContain("draft");
       expect(html).toContain("Rationale");
@@ -205,10 +206,10 @@ describe("generateFullHtml", () => {
     });
   });
 
-  describe("GRD-HTML-004: description and rationale rendered as Markdown", () => {
-    it("renders description as Markdown", () => {
+  describe("GRD-HTML-004: refinement and rationale rendered as Markdown", () => {
+    it("renders refinement as Markdown", () => {
       const r = req("GRD-MD-001", "Title", {
-        description: "Plain and **bold** and *italic* text.",
+        refinement: "Plain and **bold** and *italic* text.",
       });
       const html = generateFullHtml([r]);
       expect(html).toContain("<strong>bold</strong>");
@@ -218,7 +219,7 @@ describe("generateFullHtml", () => {
 
     it("renders rationale attribute as Markdown", () => {
       const r = req("GRD-MD-002", "Title", {
-        description: "Desc",
+        refinement: "Desc",
         attributes: { rationale: "Reason with `code` and **emphasis**." },
       });
       const html = generateFullHtml([r]);
@@ -227,9 +228,9 @@ describe("generateFullHtml", () => {
       expect(html).toContain("Rationale");
     });
 
-    it("escapes HTML in markdown source (description and rationale)", () => {
+    it("escapes HTML in markdown source (refinement and rationale)", () => {
       const r = req("GRD-MD-003", "Title", {
-        description: "Text with <script>alert(1)</script> here",
+        refinement: "Text with <script>alert(1)</script> here",
         attributes: { rationale: "Rationale with <b>tag</b>." },
       });
       const html = generateFullHtml([r]);
@@ -239,12 +240,12 @@ describe("generateFullHtml", () => {
   });
 
   describe("GRD-HTML-006: link requirement references in text", () => {
-    it("links requirement IDs referenced in description and rationale to definitions", () => {
+    it("links requirement IDs referenced in refinement and rationale to definitions", () => {
       const requirements = [
         req("GRD-HTML-001", "Target 1"),
         req("GRD-HTML-002", "Target 2"),
         req("GRD-REF-001", "Reference holder", {
-          description: "See GRD-HTML-001 for base behavior.",
+          refinement: "See GRD-HTML-001 for base behavior.",
           attributes: { rationale: "Also depends on GRD-HTML-002." },
         }),
       ];
@@ -259,7 +260,7 @@ describe("generateFullHtml", () => {
       const requirements = [
         req("GRD-HTML-001", "Target"),
         req("GRD-REF-002", "Reference holder", {
-          description: "Mentions GRD-UNKNOWN-999 as plain text.",
+          refinement: "Mentions GRD-UNKNOWN-999 as plain text.",
         }),
       ];
       const html = generateFullHtml(requirements);
@@ -280,12 +281,12 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
     expect(html).toContain("class=\"requirement-detail\"");
     expect(html).toContain("class=\"meta\"");
     expect(html).toContain("class=\"source\"");
-    expect(html).toContain("class=\"description\"");
+    expect(html).toContain("class=\"require\"");
   });
 
   it("shares base structure and styling with full report", () => {
     const r = req("GRD-X-001", "Title", {
-      description: "Body",
+      refinement: "Body",
       attributes: { status: "active" },
       links: [{ satisfies: "GRD-X-000" }],
     });
@@ -296,7 +297,7 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
     expect(single).toContain("requirement-detail");
     expect(single).toContain("meta");
     expect(single).toContain("source");
-    expect(single).toContain("description");
+    expect(single).toContain("refinement");
     // Same styling tokens as full report
     expect(single).toContain("font-family: system-ui, sans-serif");
     expect(single).toContain("max-width: 60rem");
@@ -308,7 +309,7 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
 
   it("escapes HTML in requirement fields", () => {
     const r = req("ID", "Title <script>", {
-      description: "Desc & \"quoted\"",
+      refinement: "Desc & \"quoted\"",
       sourcePath: "/p/ID.req.yml",
     });
     const html = generateSingleRequirementHtml(r);
@@ -318,14 +319,15 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
     expect(html).toContain("&quot;");
   });
 
-  it("GRD-VSC-006: optional markers tag description and rationale for the preview editor", () => {
+  it("GRD-VSC-006: optional markers tag refinement and rationale for the preview editor", () => {
     const r = req("GRD-E-001", "T", {
-      description: "Hello",
+      refinement: "Hello",
       attributes: { rationale: "Why" },
       sourcePath: "/p/req.req.yml",
     });
     const marked = generateSingleRequirementHtml(r, undefined, { editableFieldMarkers: true });
-    expect(marked).toContain('data-gitreqd-field="description"');
+    expect(marked).toContain('data-gitreqd-field="require"');
+    expect(marked).toContain('data-gitreqd-field="refinement"');
     expect(marked).toContain('data-gitreqd-field="rationale"');
     const plain = generateSingleRequirementHtml(r);
     expect(plain).not.toContain("data-gitreqd-field");
@@ -333,9 +335,9 @@ describe("generateSingleRequirementHtml (GRD-VSC-003)", () => {
 });
 
 describe("GRD-SYS-005: parameterization in HTML export", () => {
-  it("resolves local parameter in title and description and styles as param-value", () => {
+  it("resolves local parameter in title and refinement and styles as param-value", () => {
     const r = req("GRD-P-001", "Limit is {{ :limit }}", {
-      description: "The maximum count is {{ :limit }} items.",
+      refinement: "The maximum count is {{ :limit }} items.",
       parameters: { limit: 42 },
       sourcePath: "/p/GRD-P-001.req.yml",
     });
@@ -353,7 +355,7 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
       sourcePath: "/p/GRD-A.req.yml",
     });
     const rB = req("GRD-B", "Consumer", {
-      description: "Max from A is {{ GRD-A:max }}.",
+      refinement: "Max from A is {{ GRD-A:max }}.",
       sourcePath: "/p/GRD-B.req.yml",
     });
     const html = generateFullHtml([rA, rB]);
@@ -365,7 +367,7 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
 
   it("resolves parameters in rationale (attributes)", () => {
     const r = req("GRD-R-001", "Title", {
-      description: "Desc",
+      refinement: "Desc",
       attributes: { rationale: "Because {{ :reason }}." },
       parameters: { reason: "traceability" },
       sourcePath: "/p/GRD-R-001.req.yml",
@@ -378,7 +380,7 @@ describe("GRD-SYS-005: parameterization in HTML export", () => {
   it("single-requirement HTML resolves params when allRequirements provided", () => {
     const rA = req("GRD-A", "A", { parameters: { x: "10" }, sourcePath: "/a.req.yml" });
     const rB = req("GRD-B", "B", {
-      description: "Value: {{ GRD-A:x }}",
+      refinement: "Value: {{ GRD-A:x }}",
       sourcePath: "/b.req.yml",
     });
     const html = generateSingleRequirementHtml(rB, [rA, rB]);

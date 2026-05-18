@@ -12,7 +12,8 @@ describe("GRD-VALID-002: Filename and id matching", () => {
     return {
       id,
       title: "Test",
-      description: "",
+      require: "The system shall test.",
+      refinement: "",
       sourcePath,
     };
   }

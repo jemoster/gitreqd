@@ -25,4 +25,9 @@ Do not implement the requirement. Only define the requirement.
 
 ## YAML style
 
+Each requirement file uses:
+
+- `require` — one normative sentence with exactly one of shall, should, or may (for this requirement ID).
+- `refinement` — optional supporting detail (Markdown in reports); bullets and examples go here.
+
 When writing requirements YAML, do not include newlines to limit the line length. Assume instead that word-wrap will be used to maintain readability.

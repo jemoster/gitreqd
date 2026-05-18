@@ -9,6 +9,7 @@ import { runResolveConflicts } from "./resolve-conflicts-cmd.js";
 import { runBootstrap } from "./bootstrap-cmd.js";
 import { runSchema } from "./schema-cmd.js";
 import { runFormat } from "./format-cmd.js";
+import { runMigrate } from "./migrate-cmd.js";
 
 const DEFAULT_OUTPUT_DIR = ".";
 
@@ -23,6 +24,7 @@ Commands:
   schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
   resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
+  migrate           Migrate description field to require + refinement (GRD-SYS-015)
 
 Options (global):
   -h, --help           Show this help or command-specific help
@@ -114,6 +116,20 @@ Options:
   --project-dir <dir>  Project directory (default: current directory)
 `;
 
+const MIGRATE_HELP = `gitreqd migrate – migrate description to require + refinement (GRD-SYS-015)
+
+Usage: gitreqd migrate [options]
+
+Rewrites requirement files that still use the legacy \`description\` field into
+\`require\` (single normative statement) and \`refinement\` (supporting detail).
+Default is dry-run; use --write to apply changes.
+
+Options:
+  -h, --help           Show this help
+  --project-dir <dir>  Project directory to search (default: current directory)
+  --write              Write migrated files (otherwise dry-run only)
+`;
+
 const CLI_COMMANDS = [
   "validate",
   "format",
@@ -121,6 +137,7 @@ const CLI_COMMANDS = [
   "schema",
   "bootstrap",
   "resolve-conflicts",
+  "migrate",
 ] as const;
 
 type CliCommand = (typeof CLI_COMMANDS)[number];
@@ -144,6 +161,7 @@ function parseArgs(argv: string[]): {
   helpCommand: CliCommand | null;
   bootstrapForce: boolean;
   bootstrapCursorRules: boolean;
+  migrateWrite: boolean;
 } {
   const args = argv.slice(2);
   const command = parseCliCommand(args);
@@ -155,6 +173,7 @@ function parseArgs(argv: string[]): {
   let helpCommand: CliCommand | null = null;
   let bootstrapForce = false;
   let bootstrapCursorRules = false;
+  let migrateWrite = false;
 
   const hasExplicitCommand = args.some((a) => (CLI_COMMANDS as readonly string[]).includes(a));
 
@@ -183,6 +202,8 @@ function parseArgs(argv: string[]): {
       bootstrapForce = true;
     } else if (arg === "--cursor-rules") {
       bootstrapCursorRules = true;
+    } else if (arg === "--write") {
+      migrateWrite = true;
     }
   }
 
@@ -196,6 +217,7 @@ function parseArgs(argv: string[]): {
     helpCommand,
     bootstrapForce,
     bootstrapCursorRules,
+    migrateWrite,
   };
 }
 
@@ -237,6 +259,7 @@ async function main(): Promise<number> {
     helpCommand,
     bootstrapForce,
     bootstrapCursorRules,
+    migrateWrite,
   } = parseArgs(process.argv);
 
   if (showHelp) {
@@ -252,6 +275,8 @@ async function main(): Promise<number> {
       console.log(BOOTSTRAP_HELP);
     } else if (helpCommand === "resolve-conflicts") {
       console.log(RESOLVE_CONFLICTS_HELP);
+    } else if (helpCommand === "migrate") {
+      console.log(MIGRATE_HELP);
     } else {
       console.log(GENERAL_HELP);
     }
@@ -299,6 +324,10 @@ async function main(): Promise<number> {
       console.log(`Created: ${result.created.join(", ")}`);
       return 0;
     }
+    if (command === "migrate") {
+      const { exitCode } = await runMigrate(projectDir, { write: migrateWrite });
+      return exitCode;
+    }
     if (command === "resolve-conflicts") {
       const { success, resolved, errors } = await runResolveConflicts(projectDir);
       for (const err of errors) {
@@ -316,7 +345,7 @@ async function main(): Promise<number> {
   }
 
   console.error(
-    "Usage: gitreqd validate | format | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
+    "Usage: gitreqd validate | format | html | schema | bootstrap | resolve-conflicts | migrate [--project-dir <dir>] [--output <path>]"
   );
   return 1;
 }

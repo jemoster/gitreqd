@@ -1,10 +1,11 @@
 id: GRD-CLI-002
 title: CLI HTML report
-description: |
-  The CLI shall generate a static HTML report of all requirements with a list view,
+require: The CLI shall generate a static HTML report of all requirements with a list view,
+refinement: |
   optional detail view, and satisfies links.
 
   By default, the report shall be generated in the current working directory.
+
   The user shall be able to specify a different output directory using the --output flag.
 attributes:
   rationale: |

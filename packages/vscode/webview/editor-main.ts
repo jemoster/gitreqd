@@ -1,11 +1,11 @@
 /**
- * GRD-VSC-006: WYSIWYG editing for description and rationale in the preview webview (raw Markdown in the YAML editor).
+ * GRD-VSC-006: WYSIWYG editing for refinement and rationale; plain text for require in the preview webview.
  */
 import Editor from "@toast-ui/editor";
 
 declare function acquireVsCodeApi(): { postMessage: (msg: unknown) => void };
 
-type MarkdownField = "description" | "rationale";
+type MarkdownField = "refinement" | "rationale";
 
 interface BootstrapPayload {
   fields: Record<string, string | undefined>;
@@ -23,9 +23,40 @@ function debounce(fn: () => void, ms: number): () => void {
   };
 }
 
+function mountRequireEditor(value: string): void {
+  const container = document.querySelector('[data-gitreqd-field="require"]');
+  if (!container || !(container instanceof HTMLElement)) return;
+
+  container.innerHTML = "";
+  const textarea = document.createElement("textarea");
+  textarea.className = "gitreqd-require-editor";
+  textarea.value = value;
+  textarea.rows = 3;
+  textarea.style.width = "100%";
+  textarea.style.boxSizing = "border-box";
+  textarea.style.fontFamily = "inherit";
+  textarea.style.fontSize = "inherit";
+  textarea.style.resize = "vertical";
+
+  const notify = debounce(() => {
+    vscode.postMessage({
+      type: "fieldEdit",
+      field: "require",
+      value: textarea.value,
+    });
+  }, 280);
+
+  textarea.addEventListener("input", () => notify());
+  container.appendChild(textarea);
+}
+
 function mountEditors(payload: BootstrapPayload): void {
   const fields = payload.fields;
-  const keys: MarkdownField[] = ["description", "rationale"];
+  if (fields.require !== undefined) {
+    mountRequireEditor(fields.require);
+  }
+
+  const keys: MarkdownField[] = ["refinement", "rationale"];
   for (const key of keys) {
     const raw = fields[key];
     if (raw === undefined) continue;
@@ -81,12 +112,21 @@ window.addEventListener("message", (event: MessageEvent) => {
   const scrollTop = root.scrollTop;
   const scrollLeft = root.scrollLeft;
   let applied = false;
+
+  if (typeof msg.fields.require === "string") {
+    const container = document.querySelector('[data-gitreqd-field="require"]');
+    const textarea = container?.querySelector("textarea.gitreqd-require-editor");
+    if (textarea instanceof HTMLTextAreaElement && textarea.value !== msg.fields.require) {
+      textarea.value = msg.fields.require;
+      applied = true;
+    }
+  }
+
   for (const key of Object.keys(msg.fields) as MarkdownField[]) {
     const ed = editors[key];
     const next = msg.fields[key];
     if (!ed || typeof next !== "string") continue;
     if (ed.getMarkdown() !== next) {
-      /* cursorToEnd=false avoids focusing the webview / stealing input from the YAML editor (host sync). */
       ed.setMarkdown(next, false);
       applied = true;
     }

@@ -1,53 +1,57 @@
-import { applyYamlMarkdownFieldUpdate } from "../src/yaml-field-patch.js";
+import { applyYamlMarkdownFieldUpdate, applyYamlRequireFieldUpdate } from "../src/yaml-field-patch";
 
-describe("applyYamlMarkdownFieldUpdate (GRD-VSC-006)", () => {
-  it("updates description", () => {
-    const src = `id: A
+describe("yaml-field-patch", () => {
+  it("updates require", () => {
+    const src = `id: X
 title: T
-description: old
+require: old
 `;
-    const out = applyYamlMarkdownFieldUpdate(src, "description", "new");
-    expect(out).toContain("description: new");
+    const out = applyYamlRequireFieldUpdate(src, "The system shall do new.");
+    expect(out).toContain("require: The system shall do new.");
   });
 
-  it("uses | not |- for multiline description (clip chomp, matches formatter)", () => {
-    const src = `id: A
+  it("updates refinement", () => {
+    const src = `id: X
 title: T
-description: old
+require: The system shall .
+refinement: old
 `;
-    const out = applyYamlMarkdownFieldUpdate(src, "description", "Line1\nLine2");
-    expect(out).toMatch(/^description: \|(\r?\n)/m);
-    expect(out).not.toContain("description: |-");
+    const out = applyYamlMarkdownFieldUpdate(src, "refinement", "new");
+    expect(out).toContain("refinement: new");
   });
 
-  it("sets attributes.rationale, creating attributes if needed", () => {
-    const src = `id: A
+  it("uses | not |- for multiline refinement (clip chomp, matches formatter)", () => {
+    const src = `id: X
 title: T
-description: d
+require: The system shall .
+refinement: old
 `;
-    const out = applyYamlMarkdownFieldUpdate(src, "rationale", "because");
-    expect(out).toContain("rationale: because");
+    const out = applyYamlMarkdownFieldUpdate(src, "refinement", "Line1\nLine2");
+    expect(out).toMatch(/^refinement: \|(\r?\n)/m);
+    expect(out).not.toContain("refinement: |-");
   });
 
-  it("merges rationale into existing attributes", () => {
-    const src = `id: A
+  it("updates rationale under attributes", () => {
+    const src = `id: X
 title: T
-description: d
+require: The system shall .
+refinement: d
 attributes:
-  status: active
+  rationale: old
 `;
-    const out = applyYamlMarkdownFieldUpdate(src, "rationale", "why");
-    expect(out).toContain("status: active");
-    expect(out).toContain("rationale: why");
+    const out = applyYamlMarkdownFieldUpdate(src, "rationale", "new rationale");
+    expect(out).toContain("rationale:");
+    expect(out).toContain("new rationale");
   });
 
-  it("uses | not |- for multiline rationale", () => {
-    const src = `id: A
+  it("removes empty refinement key", () => {
+    const src = `id: X
 title: T
-description: d
+require: The system shall .
+refinement: |
+  old
 `;
-    const out = applyYamlMarkdownFieldUpdate(src, "rationale", "R1\nR2");
-    expect(out).toMatch(/rationale: \|(\r?\n)/);
-    expect(out).not.toContain("rationale: |-");
+    const out = applyYamlMarkdownFieldUpdate(src, "refinement", "");
+    expect(out).not.toMatch(/^refinement:/m);
   });
 });

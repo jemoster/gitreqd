@@ -3,6 +3,7 @@ import type { NamedGlobalRule, NamedRule, ValidationRule } from "./types.js";
 import { filenameIdMatch } from "./filename-id-match.js";
 import { linksAcyclic } from "./links-acyclic.js";
 import { parametersValid } from "./parameters-valid.js";
+import { requireValid } from "./require-valid.js";
 import { satisfiesReferencesExist } from "./satisfies-references-exist.js";
 import { uniqueIds } from "./unique-ids.js";
 
@@ -13,6 +14,7 @@ import { uniqueIds } from "./unique-ids.js";
 export const defaultRules: NamedRule[] = [
   { id: "GRD-VALID-002", run: filenameIdMatch },
   { id: "GRD-SYS-005", run: parametersValid },
+  { id: "GRD-SYS-015", run: requireValid },
 ];
 
 /**
@@ -62,5 +64,6 @@ export type { NamedGlobalRule, NamedRule, ValidationRule } from "./types.js";
 export { filenameIdMatch } from "./filename-id-match.js";
 export { linksAcyclic } from "./links-acyclic.js";
 export { parametersValid } from "./parameters-valid.js";
+export { requireValid } from "./require-valid.js";
 export { satisfiesReferencesExist } from "./satisfies-references-exist.js";
 export { uniqueIds } from "./unique-ids.js";

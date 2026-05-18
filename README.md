@@ -38,6 +38,7 @@ A common flow is: define/refine requirements with `/require`, then switch to `/i
 - `gitreqd bootstrap` - initialize `gitreqd.yaml` and `requirements/`.
 - `gitreqd validate` - check requirement YAML against the active schema.
 - `gitreqd format` - rewrite requirement YAML into canonical format.
+- `gitreqd migrate` - convert legacy `description` fields to `require` and `refinement`.
 - `gitreqd html` - generate a static HTML report.
 - `gitreqd schema` - print or export the effective requirement schema.
 - `gitreqd resolve-conflicts` - resolve requirement-file merge conflicts with optional LLM settings.
@@ -53,9 +54,13 @@ Required fields:
 - `id` - stable identifier, usually matching the filename (without suffix).
 - `title` - short requirement name.
 
+Required normative field:
+
+- `require` - single Shall, Should, or May statement for this requirement ID.
+
 Common optional fields:
 
-- `description` - requirement text (Markdown supported in reports).
+- `refinement` - supporting detail (Markdown supported in reports).
 - `attributes` - metadata such as status, owner, or rationale.
 - `links` - traceability links (for example `satisfies: OTHER-ID`).
 - `parameters` - reusable named values for interpolation in string fields.

@@ -5,7 +5,7 @@ import type { RequirementWithSource } from "./types.js";
 /** GRD-SYS-005: Placeholder character range for param spans (U+E000–E0FF); replaced after markdown. */
 const PARAM_PLACEHOLDER_BASE = 0xe000;
 
-/** GRD-HTML-004: Markdown renderer for description and rationale (html disabled for safety). */
+/** GRD-HTML-004: Markdown renderer for refinement and rationale (html disabled for safety). */
 const md = new MarkdownIt({ html: false });
 
 function escapeHtml(s: string): string {
@@ -93,7 +93,7 @@ function formatAttrValue(v: unknown): string {
   return escapeHtml(s).replace(/\n/g, "<br>");
 }
 
-/** GRD-HTML-004: Render markdown to HTML for description and rationale. */
+/** GRD-HTML-004: Render markdown to HTML for refinement and rationale. */
 function markdownToHtml(text: string): string {
   return md.render(text.trim()).trim();
 }
@@ -126,7 +126,7 @@ function autoLinkRequirementRefs(
 /**
  * GRD-SYS-005: Resolve parameter references in text and render to HTML. Parameterized values
  * are wrapped in spans with class "param-value" and link to source requirement for traceability.
- * If markdown is true, runs markdown on the resolved text (for description/rationale).
+ * If markdown is true, runs markdown on the resolved text (for refinement/rationale).
  */
 function resolveAndRenderText(
   text: string,
@@ -160,7 +160,7 @@ function resolveAndRenderText(
   return out;
 }
 
-/** Attributes shown in meta line (short); rationale is rendered below description. */
+/** Attributes shown in meta line (short); rationale is rendered below refinement. */
 const META_ATTR_KEYS = new Set(["status"]);
 
 /** GRD-HTML-002: Collect requirement ids that link to each requirement (reverse lookup). */
@@ -276,18 +276,26 @@ function requirementDetailHtml(
   const linksAtBottom =
     [satisfiesHtml, linkedFromHtml, otherLinksHtml].filter(Boolean).join("\n      ");
 
-  /** GRD-SYS-005: Title and description with parameter references resolved; parameterized values visually distinct and linked to source. */
+  /** GRD-SYS-005: Title, require, and refinement with parameter references resolved. */
   const titleHtml = resolve(r.title, false);
-  const descriptionHtml = resolve(r.description, true);
+  const requireHtml = resolve(r.require, false);
+  const refinementHtml = r.refinement ? resolve(r.refinement, true) : "";
 
   return `
     <section id="${escapeHtml(r.id)}" class="requirement-detail">
       <h2>${escapeHtml(r.id)} – ${titleHtml}</h2>
       ${metaHtml}
       ${parametersHtml}
-      <div class="labeled-block"><span class="label">Description</span><div class="description"${
-        editableFieldMarkers ? ' data-gitreqd-field="description"' : ""
-      }>${descriptionHtml}</div></div>
+      <div class="labeled-block"><span class="label">Require</span><div class="require"${
+        editableFieldMarkers ? ' data-gitreqd-field="require"' : ""
+      }>${requireHtml}</div></div>
+      ${
+        refinementHtml
+          ? `<div class="labeled-block"><span class="label">Refinement</span><div class="refinement"${
+              editableFieldMarkers ? ' data-gitreqd-field="refinement"' : ""
+            }>${refinementHtml}</div></div>`
+          : ""
+      }
       ${rationaleHtml}
       ${linksAtBottom}
       <p class="source"><span class="label">Source file</span> ${escapeHtml(r.sourcePath)}</p>
@@ -324,9 +332,9 @@ export function generateFullHtml(requirements: RequirementWithSource[]): string 
     .label { font-weight: 600; color: #444; }
     .labeled-block { margin-top: 0.75rem; }
     .labeled-block .label { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
-    .description p, .rationale p { margin: 0.4em 0; }
-    .description p:first-child, .rationale p:first-child { margin-top: 0; }
-    .description p:last-child, .rationale p:last-child { margin-bottom: 0; }
+    .require, .refinement p, .rationale p { margin: 0.4em 0; }
+    .refinement p:first-child, .rationale p:first-child { margin-top: 0; }
+    .refinement p:last-child, .rationale p:last-child { margin-bottom: 0; }
     .rationale { margin-top: 0; }
     .satisfies-list, .linked-from-list { margin: 0.25rem 0 0 1.25rem; padding: 0; }
     .index-category { font-weight: 600; color: #333; }
@@ -348,7 +356,7 @@ ${details}
 }
 
 /** GRD-VSC-003: Single-requirement preview shares base structure/styling with full report.
- *  GRD-HTML-004: Description and rationale are rendered as Markdown (same as full report).
+ *  GRD-HTML-004: Refinement and rationale are rendered as Markdown (same as full report).
  *  GRD-VSC-006: Pass `editableFieldMarkers: true` in the VSCode preview so the webview can attach WYSIWYG editors. */
 export function generateSingleRequirementHtml(
   requirement: RequirementWithSource,
@@ -379,9 +387,9 @@ export function generateSingleRequirementHtml(
     .label { font-weight: 600; color: #444; }
     .labeled-block { margin-top: 0.75rem; }
     .labeled-block .label { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
-    .description p, .rationale p { margin: 0.4em 0; }
-    .description p:first-child, .rationale p:first-child { margin-top: 0; }
-    .description p:last-child, .rationale p:last-child { margin-bottom: 0; }
+    .require, .refinement p, .rationale p { margin: 0.4em 0; }
+    .refinement p:first-child, .rationale p:first-child { margin-top: 0; }
+    .refinement p:last-child, .rationale p:last-child { margin-bottom: 0; }
     .rationale { margin-top: 0; }
     .satisfies-list, .linked-from-list { margin: 0.25rem 0 0 1.25rem; padding: 0; }
     .param-value { background: #e8f4f8; padding: 0.1em 0.3em; border-radius: 3px; font-weight: 500; }

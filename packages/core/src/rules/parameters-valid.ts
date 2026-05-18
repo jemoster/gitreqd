@@ -5,7 +5,8 @@ import type { ValidationRule } from "./types.js";
 const TOP_LEVEL_KEYS = new Set([
   "id",
   "title",
-  "description",
+  "require",
+  "refinement",
   "attributes",
   "links",
   "parameters",

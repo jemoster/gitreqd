@@ -9,7 +9,8 @@ function req(overrides: Partial<RequirementWithSource> & { id: string; sourcePat
   return {
     id,
     title: "Title",
-    description: "",
+    require: "The system shall test.",
+    refinement: "",
     sourcePath,
     ...rest,
   } as RequirementWithSource;
@@ -53,14 +54,14 @@ describe("GRD-SYS-005: parametersValid", () => {
     expect(errors[0]!.message).toContain("title");
   });
 
-  it("returns error when parameter name overlaps with description", () => {
+  it("returns error when parameter name overlaps with refinement", () => {
     const r = req({
       id: "R",
       sourcePath: "/r.req.yml",
-      parameters: { description: "x" },
+      parameters: { refinement: "x" },
     });
     const errors = parametersValid(r);
     expect(errors).toHaveLength(1);
-    expect(errors[0]!.message).toContain("description");
+    expect(errors[0]!.message).toContain("refinement");
   });
 });

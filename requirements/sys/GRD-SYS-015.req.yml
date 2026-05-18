@@ -1,0 +1,17 @@
+id: GRD-SYS-015
+title: Requirement fields require and refinement
+require: The requirement YAML schema shall define a required `require` field and an optional `refinement` field.
+refinement: |
+  The `require` field shall hold a single normative statement (one shall, should, or may) for the requirement ID.
+  The `refinement` field shall hold supporting detail (Markdown in reports).
+  The legacy `description` field shall not be accepted after migration.
+  The CLI shall provide a `gitreqd migrate` command to convert files that still use `description`.
+  Validation shall reject a `require` value that contains zero or more than one RFC2119 keyword.
+attributes:
+  rationale: |
+    Separating the normative statement from supporting prose makes requirements easier to review,
+    trace, and validate.
+  status: active
+links:
+  - satisfies: GRD-SYS-001
+  - satisfies: GRD-SYS-009

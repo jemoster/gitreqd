@@ -1,11 +1,11 @@
 /**
- * GRD-VSC-006: Apply Markdown field edits from the preview webview back into requirement YAML.
- * Block scalars for description/rationale use `|` (clip) like the project formatter, not `|-` (strip).
+ * GRD-VSC-006: Apply field edits from the preview webview back into requirement YAML.
+ * Block scalars for refinement/rationale use `|` (clip) like the project formatter, not `|-` (strip).
  */
 import { preferClipBlockChompForMarkdownKeys } from "@gitreqd/core";
 import { parseDocument, Scalar } from "yaml";
 
-export type EditableMarkdownField = "description" | "rationale";
+export type EditableMarkdownField = "refinement" | "rationale";
 
 function scalarForMarkdownField(value: string): string | Scalar {
   if (!value.includes("\n")) {
@@ -16,14 +16,24 @@ function scalarForMarkdownField(value: string): string | Scalar {
   return node;
 }
 
+export function applyYamlRequireFieldUpdate(content: string, value: string): string {
+  const doc = parseDocument(content);
+  doc.set("require", value.includes("\n") ? scalarForMarkdownField(value) : value);
+  return String(doc);
+}
+
 export function applyYamlMarkdownFieldUpdate(
   content: string,
   field: EditableMarkdownField,
   value: string
 ): string {
   const doc = parseDocument(content);
-  if (field === "description") {
-    doc.set("description", scalarForMarkdownField(value));
+  if (field === "refinement") {
+    if (value.trim()) {
+      doc.set("refinement", scalarForMarkdownField(value));
+    } else {
+      doc.delete("refinement");
+    }
   } else {
     doc.setIn(["attributes", "rationale"], scalarForMarkdownField(value));
   }

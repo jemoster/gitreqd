@@ -57,7 +57,8 @@ describe("GRD-VSC-004 YAML schema for requirement files", () => {
     expect(schema.properties).toBeDefined();
     expect(schema.properties!.id).toBeDefined();
     expect(schema.properties!.title).toBeDefined();
-    expect(schema.properties!.description).toBeDefined();
+    expect(schema.properties!.require).toBeDefined();
+    expect(schema.properties!.refinement).toBeDefined();
     expect(schema.properties!.attributes).toBeDefined();
     expect(schema.properties!.links).toBeDefined();
     expect(schema.properties!.parameters).toBeDefined();
@@ -82,7 +83,7 @@ describe("GRD-VSC-005 Add new requirement from explorer context menu", () => {
     expect(newReqEntry!.group).toBe("Gitreqd");
   });
 
-  it("newRequirementYamlTemplate produces YAML matching requirement schema (id, title, description, attributes, links)", async () => {
+  it("newRequirementYamlTemplate produces YAML matching requirement schema (id, title, require, refinement, attributes, links)", async () => {
     const { newRequirementYamlTemplate } = await import(
       "../src/new-requirement-template.js"
     );
@@ -90,7 +91,8 @@ describe("GRD-VSC-005 Add new requirement from explorer context menu", () => {
     const yaml = newRequirementYamlTemplate(id);
     expect(yaml).toContain(`id: ${id}`);
     expect(yaml).toContain("title:");
-    expect(yaml).toContain("description:");
+    expect(yaml).toContain("require:");
+    expect(yaml).toContain("refinement:");
     expect(yaml).toContain("attributes:");
     expect(yaml).toContain("links:");
     const { parse } = await import("yaml");
@@ -98,7 +100,7 @@ describe("GRD-VSC-005 Add new requirement from explorer context menu", () => {
     expect(parsed).toBeDefined();
     expect(parsed.id).toBe(id);
     expect(typeof parsed.title).toBe("string");
-    expect("description" in parsed).toBe(true);
+    expect("require" in parsed).toBe(true);
     expect(parsed.attributes).toBeDefined();
     expect(Array.isArray(parsed.links)).toBe(true);
   });

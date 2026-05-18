@@ -17,7 +17,8 @@ function requirementPayloadForYaml(r: RequirementWithSource): Requirement {
   const payload: Requirement = {
     id: r.id,
     title: r.title,
-    description: r.description,
+    require: r.require,
+    refinement: r.refinement,
   };
   if (r.attributes !== undefined) {
     payload.attributes = r.attributes;

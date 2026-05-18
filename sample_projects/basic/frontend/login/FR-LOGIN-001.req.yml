@@ -1,10 +1,9 @@
 id: FR-LOGIN-001
 title: Login
-description: |
-  The login page shall be accessible at /login and require a valid email and password.
+require: The login page shall be accessible at /login and require a valid email and password.
 attributes:
-  status: active
   rationale: |
     Users need to login to access the system.
+  status: active
 links:
   - satisfies: SYS-001

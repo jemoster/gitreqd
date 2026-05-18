@@ -1,7 +1,7 @@
 id: GRD-HTML-003
 title: HTML Top-Level Index
-description: |
-  The HTML report shall include top-level index of requirements.  This index shall be a hierarchical list of requirements, grouped by category.
+require: The HTML report shall include top-level index of requirements.
+refinement: This index shall be a hierarchical list of requirements, grouped by category.
 attributes:
   rationale: |
     Simplify navigation by grouping requirements.

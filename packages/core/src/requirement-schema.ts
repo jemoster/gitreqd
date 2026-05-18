@@ -57,11 +57,22 @@ export const requirementFileInnerSchema = z
           .min(1, { message: "Missing required field: title" })
           .describe("Short title of the requirement.")
       ),
-    description: z
+    require: yamlScalar
+      .transform(String)
+      .transform((s) => s.trim())
+      .pipe(
+        z
+          .string()
+          .min(1, { message: "Missing required field: require" })
+          .describe(
+            "Single normative statement for this requirement (one Shall, Should, or May)."
+          )
+      ),
+    refinement: z
       .union([yamlScalar, z.null()])
       .optional()
       .transform((v) => (v === undefined || v === null ? "" : String(v)))
-      .describe("Full description of the requirement. Supports Markdown in HTML report output."),
+      .describe("Supporting detail for the requirement. Supports Markdown in HTML report output."),
     attributes: z
       .record(z.unknown())
       .optional()
@@ -87,7 +98,8 @@ export const requirementFileDataSchema = requirementFileInnerSchema.transform((d
   const out: Requirement = {
     id: data.id,
     title: data.title,
-    description: data.description,
+    require: data.require,
+    refinement: data.refinement,
   };
   if (data.attributes !== undefined) out.attributes = data.attributes;
   const links = normalizeLinks(data.links);
@@ -121,6 +133,6 @@ export function exportRequirementFileJsonSchema(
     $schema: "http://json-schema.org/draft-07/schema#",
     title: "Gitreqd requirement",
     description:
-      "YAML format for a single requirement file (id, title, description, attributes, links). GRD-VSC-004.",
+      "YAML format for a single requirement file (id, title, require, refinement, attributes, links). GRD-VSC-004.",
   };
 }

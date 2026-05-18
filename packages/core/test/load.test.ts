@@ -38,12 +38,12 @@ describe("loadRequirements", () => {
       );
       fs.writeFileSync(
         path.join(htmlDir, `GRD-HTML-001${REQUIREMENT_FILE_EXTENSION}`),
-        "id: GRD-HTML-001\ntitle: HTML report\ndescription: Full report\n",
+        "id: GRD-HTML-001\ntitle: HTML report\nrequire: The system shall produce a full report.\n",
         "utf-8"
       );
       fs.writeFileSync(
         path.join(sysDir, `GRD-SYS-001${REQUIREMENT_FILE_EXTENSION}`),
-        "id: GRD-SYS-001\ntitle: Core\ndescription: Core behavior\n",
+        "id: GRD-SYS-001\ntitle: Core\nrequire: The system shall provide core behavior.\n",
         "utf-8"
       );
 
@@ -68,7 +68,7 @@ describe("loadRequirements", () => {
       );
       fs.writeFileSync(
         path.join(reqsDir, `GRD-TOP-001${REQUIREMENT_FILE_EXTENSION}`),
-        "id: GRD-TOP-001\ntitle: Top\ndescription: At top\n",
+        "id: GRD-TOP-001\ntitle: Top\nrequire: The system shall be at top.\n",
         "utf-8"
       );
 
@@ -91,7 +91,7 @@ describe("loadRequirements", () => {
       );
       fs.writeFileSync(
         path.join(deepDir, `GRD-CLI-SUB-001${REQUIREMENT_FILE_EXTENSION}`),
-        "id: GRD-CLI-SUB-001\ntitle: Nested\ndescription: Nested req\n",
+        "id: GRD-CLI-SUB-001\ntitle: Nested\nrequire: The system shall be nested.\n",
         "utf-8"
       );
 
@@ -109,7 +109,8 @@ describe("GRD-SYS-005: parameters in requirement YAML", () => {
     const content = `
 id: GRD-PARAM-001
 title: Param requirement
-description: Limit is {{ :limit }}.
+require: Limit is {{ :limit }} shall apply.
+refinement: ""
 parameters:
   limit: 100
   name: foo
@@ -119,7 +120,7 @@ parameters:
     expect("error" in result).toBe(false);
     const req = "requirement" in result ? result.requirement : null;
     expect(req?.parameters).toEqual({ limit: 100, name: "foo", enabled: true });
-    expect(req?.description).toContain("{{ :limit }}");
+    expect(req?.require).toContain("{{ :limit }}");
   });
 
   it("loads requirement file with parameters from disk", async () => {
@@ -135,7 +136,7 @@ parameters:
       path.join(reqsDir, `GRD-SYS-005${REQUIREMENT_FILE_EXTENSION}`),
       `id: GRD-SYS-005
 title: Requirement Parameterization
-description: Use {{ :syntax }} in text.
+require: The system shall use {{ :syntax }} in text.
 parameters:
   syntax: "{{ :param }}"
 `,

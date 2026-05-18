@@ -12,7 +12,8 @@ describe("Validation rulesets (GRD-VALID-001)", () => {
     return {
       id,
       title: "Test",
-      description: "",
+      require: "The system shall test.",
+      refinement: "",
       sourcePath,
     };
   }

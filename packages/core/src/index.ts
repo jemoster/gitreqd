@@ -65,6 +65,19 @@ export {
 } from "./format-requirement-yaml.js";
 export { formatProjectRequirementFiles } from "./format-project.js";
 export type { FormatProjectResult } from "./format-project.js";
+export {
+  migrateDescriptionToRequire,
+  hasLegacyDescriptionField,
+} from "./migrate-description-to-require.js";
+export type {
+  MigrateDescriptionResult,
+  MigrateAmbiguityReason,
+} from "./migrate-description-to-require.js";
+export { migrateProjectRequirementFiles } from "./migrate-project.js";
+export type {
+  MigrateProjectResult,
+  MigrateProjectFileResult,
+} from "./migrate-project.js";
 export { validateRequirements } from "./validate.js";
 export {
   defaultRules,
@@ -75,6 +88,7 @@ export {
   linksAcyclic,
   uniqueIds,
   parametersValid,
+  requireValid,
   satisfiesReferencesExist,
 } from "./rules/index.js";
 export type {

@@ -1,8 +1,9 @@
 id: GRD-VALID-004
 title: Link reference ids must exist
-description: |
-  The tool shall validate that every reference id listed under a requirement's
+require: The tool shall validate that every reference id listed under a requirement's
+refinement: |
   "links" (e.g. satisfies) exists as another requirement in the project.
+
   Unknown ids shall be reported with the source requirement path and the missing id.
 attributes:
   rationale: |

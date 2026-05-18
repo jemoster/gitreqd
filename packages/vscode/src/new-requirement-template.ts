@@ -1,12 +1,13 @@
 /**
  * GRD-VSC-005: Template for a new requirement YAML file.
- * Content matches the requirement schema (id, title, description, attributes, links)
+ * Content matches the requirement schema (id, title, require, refinement, attributes, links)
  * so the created file gets full editor support (validation, completion) from the YAML schema.
  */
 export function newRequirementYamlTemplate(id: string): string {
   return `id: ${id}
 title: ''
-description: |
+require: The system shall .
+refinement: |
   
 attributes:
   status: active

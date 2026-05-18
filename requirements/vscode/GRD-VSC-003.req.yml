@@ -1,14 +1,16 @@
 id: GRD-VSC-003
 title: Requirement editor
-description: |
-  The VSCode extension shall provide a dedicated requirement editor webview.
-
+require: The VSCode extension shall provide a dedicated requirement editor webview.
+refinement: |
   Launch mechanism — Editor title action (Editor button):
+
   The extension shall contribute a single icon in the top-right corner of the editor tab (editor/title contribution). When the user clicks this icon, the extension shall open the requirement editor webview in a side-by-side column (split view), so the user can edit YAML in the editor and see the rendered Editor alongside.
 
   The button shall be shown when the active editor is a YAML file.
 
-  The "Editor" view shall display an HTML representation of the requirement, rendered from the current YAML content. The Editor shall show the requirement for the document for which the user opened the Editor; when the user opens Editor for another requirement file, that file's Editor is shown (in the same or a separate panel).
+  The "Editor" view shall display an HTML representation of the requirement, rendered from the current YAML content.
+
+  The Editor shall show the requirement for the document for which the user opened the Editor; when the user opens Editor for another requirement file, that file's Editor is shown (in the same or a separate panel).
 
   The HTML used in the "Editor" view shall share a common base structure, styling, and components with the HTML that is generated for the full requirements report, so that individual requirement Editors are visually and structurally consistent with the full report output.
 

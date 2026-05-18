@@ -18,7 +18,8 @@ describe("GRD-SYS-011: formatRequirementToYaml", () => {
   it("is idempotent for parsed requirements", () => {
     const yaml = `id: GRD-T-001
 title: T
-description: |-
+require: The system shall do one and two.
+refinement: |-
   One
   Two
 attributes:
@@ -44,24 +45,26 @@ parameters:
     }
   });
 
-  it("uses block clip chomping (|) for multiline description, not strip (|-)", () => {
+  it("uses block clip chomping (|) for multiline refinement, not strip (|-)", () => {
     const once = formatRequirementToYaml({
       id: "GRD-T-Pipe",
       title: "T",
-      description: "One\nTwo",
+      require: "The system shall do one and two.",
+      refinement: "One\nTwo",
       attributes: { rationale: "A\nB" },
     });
-    expect(once).toMatch(/^description: \|(\r?\n)/m);
-    expect(once).not.toContain("description: |-");
+    expect(once).toMatch(/^refinement: \|(\r?\n)/m);
+    expect(once).not.toContain("refinement: |-");
     expect(once).toMatch(/^([ \t]*)rationale: \|(\r?\n)/m);
     expect(once).not.toContain("rationale: |-");
   });
 
-  it("orders top-level keys as id, title, description, attributes, links, parameters", () => {
+  it("orders top-level keys as id, title, require, refinement, attributes, links, parameters", () => {
     const yaml = formatRequirementToYaml({
       id: "GRD-T-002",
       title: "Title",
-      description: "d",
+      require: "The system shall do d.",
+      refinement: "d",
       attributes: { status: "active" },
       links: [{ satisfies: "GRD-A" }],
       parameters: { p: 1 },
@@ -69,7 +72,8 @@ parameters:
     const lines = yaml.split("\n").filter((l) => l.length > 0);
     expect(lines[0]).toMatch(/^id:/);
     expect(lines[1]).toMatch(/^title:/);
-    expect(lines[2]).toMatch(/^description:/);
+    expect(lines[2]).toMatch(/^require:/);
+    expect(lines[3]).toMatch(/^refinement:/);
     expect(lines.some((l) => l.startsWith("attributes:"))).toBe(true);
     expect(lines.indexOf("attributes:")).toBeLessThan(lines.findIndex((l) => l.startsWith("links:")));
     expect(lines.findIndex((l) => l.startsWith("links:"))).toBeLessThan(
@@ -81,7 +85,8 @@ parameters:
     const yaml = formatRequirementToYaml({
       id: "GRD-T-003",
       title: "T",
-      description: "",
+      require: "The system shall do x.",
+      refinement: "",
       attributes: { zebra: 1, apple: 2 },
       parameters: { z: false, a: true },
     });
@@ -101,7 +106,8 @@ describe("normalizeRequirementFileTextForCompare", () => {
     const canonical = formatRequirementToYaml({
       id: "GRD-T-004",
       title: "T",
-      description: "x",
+      require: "The system shall do x.",
+      refinement: "",
     });
     const messy = `${canonical.trimEnd().replace(/\n/g, "\r\n")}  \r\n\r\n`;
     expect(normalizeRequirementFileTextForCompare(messy)).toBe(normalizeRequirementFileTextForCompare(canonical));
@@ -119,9 +125,9 @@ describe("GRD-CLI-006: formatProjectRequirementFiles", () => {
   }
 
   it("rewrites non-canonical files and skips already-canonical files", async () => {
-    const projectRoot = makeProject(`id: GRD-FMT-001
-title: One
-description: 'x'
+    const projectRoot = makeProject(`title: One
+id: GRD-FMT-001
+require: The system shall do x.
 `);
     const filePath = path.join(
       projectRoot,
@@ -150,7 +156,7 @@ description: 'x'
     fs.writeFileSync(path.join(projectRoot, ROOT_MARKER), "requirement_dirs:\n  - requirements\n", "utf-8");
     fs.writeFileSync(
       path.join(reqs, `GRD-GOOD${REQUIREMENT_FILE_EXTENSION}`),
-      "id: GRD-GOOD\ntitle: Ok\ndescription: x\n",
+      "id: GRD-GOOD\ntitle: Ok\nrequire: The system shall do x.\n",
       "utf-8"
     );
     fs.writeFileSync(

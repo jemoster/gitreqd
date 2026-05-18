@@ -12,7 +12,7 @@ import type { LlmRuntimeConfig } from "../src/llm-config.js";
 describe("GRD-GIT-002: merge-conflict resolution", () => {
   describe("reconstructSides", () => {
     it("returns null when content has no conflict markers", () => {
-      const content = "id: X\ntitle: Y\ndescription: Z\n";
+      const content = "id: X\ntitle: Y\nrequire: The system shall do Z.\n";
       expect(reconstructSides(content)).toBeNull();
     });
 
@@ -20,7 +20,8 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
       const content = [
         "id: A",
         "title: One",
-        "description: |",
+        "require: The system shall do one.",
+        "refinement: |",
         "<<<<<<< HEAD",
         "  Ours line.",
         "=======",
@@ -43,29 +44,30 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
     it("reconstructs multiple conflict regions", () => {
       const content = [
         "id: M",
+        "require: The system shall do m.",
         "<<<<<<< H",
         "title: OursTitle",
         "=======",
         "title: TheirsTitle",
         ">>>>>>> B",
         "<<<<<<< H",
-        "description: OursDesc",
+        "refinement: OursRef",
         "=======",
-        "description: TheirsDesc",
+        "refinement: TheirsRef",
         ">>>>>>> B",
       ].join("\n");
       const sides = reconstructSides(content);
       expect(sides).not.toBeNull();
       expect(sides!.ours).toContain("OursTitle");
-      expect(sides!.ours).toContain("OursDesc");
+      expect(sides!.ours).toContain("OursRef");
       expect(sides!.theirs).toContain("TheirsTitle");
-      expect(sides!.theirs).toContain("TheirsDesc");
+      expect(sides!.theirs).toContain("TheirsRef");
     });
   });
 
   describe("hasConflictMarkers", () => {
     it("returns false for plain YAML", () => {
-      expect(hasConflictMarkers("id: X\ntitle: Y\n")).toBe(false);
+      expect(hasConflictMarkers("id: X\ntitle: Y\nrequire: The system shall.\n")).toBe(false);
     });
 
     it("returns true when conflict markers are present", () => {
@@ -78,27 +80,32 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
     const filePath = "/fake/GRD-CONFLICT-001.req.yml";
     const llmConfig: LlmRuntimeConfig = { provider: "ollama", base_url: "http://localhost:11434", model: "test" };
 
-    /** Mock merge: no LLM call, no logging. */
     function mockMergeField(returns: Record<string, string>): MergeFieldFn {
       return async (fieldName) => Promise.resolve(returns[fieldName] ?? "");
     }
 
     it("returns error when content has no valid conflict markers", async () => {
-      const result = await resolveRequirementConflicts("id: X\ntitle: Y\n", filePath, llmConfig, { mergeField: mockMergeField({}) });
+      const result = await resolveRequirementConflicts(
+        "id: X\ntitle: Y\nrequire: The system shall.\n",
+        filePath,
+        llmConfig,
+        { mergeField: mockMergeField({}) }
+      );
       expect("error" in result).toBe(true);
       if ("error" in result) expect(result.error.message).toContain("No valid conflict markers");
     });
 
-    it("resolves when title/description/rationale are identical in both sides (no LLM call)", async () => {
+    it("resolves when title/require/refinement/rationale are identical in both sides (no LLM call)", async () => {
       const content = [
         "id: SAME-001",
         "title: Same title",
-        "description: |",
-        "  Same description.",
+        "require: The system shall stay the same.",
+        "refinement: |",
+        "  Same refinement.",
         "<<<<<<< HEAD",
-        "  Same description.",
+        "  Same refinement.",
         "=======",
-        "  Same description.",
+        "  Same refinement.",
         ">>>>>>> branch",
         "attributes:",
         "  status: active",
@@ -116,21 +123,22 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
       if ("resolved" in result) {
         expect(result.resolved).toContain("SAME-001");
         expect(result.resolved).toContain("Same title");
-        expect(result.resolved).toMatch(/Same description/);
+        expect(result.resolved).toMatch(/Same refinement/);
         expect(result.resolved).toMatch(/Same rationale/);
         expect(result.resolved).toMatch(/status:\s*active/);
         expect(result.resolved).toMatch(/links:\s*\[\]/);
       }
     });
 
-    it("preserves all fields (id, title, description, attributes, links) in merged output", async () => {
+    it("preserves all fields (id, title, require, refinement, attributes, links) in merged output", async () => {
       const content = [
         "id: PRESERVE-001",
         "title: T",
+        "require: The system shall preserve.",
         "<<<<<<< H",
-        "description: Desc",
+        "refinement: Ours",
         "=======",
-        "description: Other",
+        "refinement: Theirs",
         ">>>>>>> B",
         "attributes:",
         "  status: active",
@@ -138,13 +146,13 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         "links: []",
       ].join("\n");
       const result = await resolveRequirementConflicts(content, filePath, llmConfig, {
-        mergeField: mockMergeField({ description: "Merged desc." }),
+        mergeField: mockMergeField({ refinement: "Merged refinement." }),
       });
       expect("resolved" in result).toBe(true);
       if ("resolved" in result) {
         expect(result.resolved).toContain("PRESERVE-001");
         expect(result.resolved).toContain("T");
-        expect(result.resolved).toContain("Merged desc");
+        expect(result.resolved).toContain("Merged refinement");
         expect(result.resolved).toMatch(/status:\s*active/);
         expect(result.resolved).toMatch(/rationale/);
         expect(result.resolved).toMatch(/links:\s*\[\]/);
@@ -159,7 +167,7 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
         "=======",
         "title: T",
         ">>>>>>> B",
-        "description: d",
+        "require: The system shall.",
         "<<<<<<< H",
         "=======",
         ">>>>>>> B",
@@ -179,24 +187,25 @@ describe("GRD-GIT-002: merge-conflict resolution", () => {
       const content = [
         "id: MERGE-001",
         "title: Title",
+        "require: The system shall merge.",
         "<<<<<<< HEAD",
-        "description: |",
-        "  Ours description.",
+        "refinement: |",
+        "  Ours refinement.",
         "=======",
-        "description: |",
-        "  Theirs description.",
+        "refinement: |",
+        "  Theirs refinement.",
         ">>>>>>> branch",
         "attributes:",
         "  rationale: Merged rationale.",
         "links: []",
       ].join("\n");
       const result = await resolveRequirementConflicts(content, filePath, llmConfig, {
-        mergeField: mockMergeField({ description: "Merged description from both sides." }),
+        mergeField: mockMergeField({ refinement: "Merged refinement from both sides." }),
       });
       expect("resolved" in result).toBe(true);
       if ("resolved" in result) {
         expect(result.resolved).toContain("MERGE-001");
-        expect(result.resolved).toContain("Merged description from both sides");
+        expect(result.resolved).toContain("Merged refinement from both sides");
       }
     });
   });
