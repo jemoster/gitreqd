@@ -2,11 +2,13 @@ id: GRD-CLI-008
 title: Essential command-line interface
 require: The product shall provide a command-line interface whose essential commands are bootstrap, validate, html, and schema.
 refinement: |
+  Those commands are specified by GRD-CLI-004 (bootstrap), GRD-CLI-001 (validate), GRD-CLI-002 (html), and GRD-CLI-005 (schema). GRD-CLI-003 (project root discovery) applies to commands that operate on an existing project.
+
   Additional commands may exist in a given implementation; they are specified by other requirements and are not required of an implementation of the essential CLI.
 
   The essential CLI is specified independently of programming language.
+
+  This requirement is temporary. It can be removed once non-essential CLI commands are no longer specified.
 attributes:
-  rationale: A language-independent essential command set allows the same CLI functions to be implemented in more than one language.
+  rationale: A language-independent essential command set allows the same CLI functions to be implemented in more than one language, without changing the existing command requirements.
   status: active
-links:
-  - satisfies: GRD-SYS-002

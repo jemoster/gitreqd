@@ -5,6 +5,5 @@ attributes:
   rationale: Users need to run validation from the terminal and get actionable errors.
   status: active
 links:
-  - satisfies: GRD-CLI-008
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003

@@ -13,5 +13,4 @@ attributes:
     without running the tool.
   status: active
 links:
-  - satisfies: GRD-CLI-008
   - satisfies: GRD-CLI-001
