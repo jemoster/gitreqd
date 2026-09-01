@@ -182,10 +182,10 @@ pub fn resolve_text(
 mod tests {
     use super::*;
     use crate::types::{ParameterValue, Requirement, RequirementWithSource};
-    use std::collections::BTreeMap;
+    use indexmap::IndexMap;
     use std::path::PathBuf;
 
-    fn r(id: &str, params: Option<BTreeMap<String, ParameterValue>>) -> RequirementWithSource {
+    fn r(id: &str, params: Option<IndexMap<String, ParameterValue>>) -> RequirementWithSource {
         RequirementWithSource::from_requirement(
             Requirement {
                 id: id.to_string(),
@@ -212,7 +212,7 @@ mod tests {
     fn returns_plain_segment_when_no_template() {
         let req = r(
             "A",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "x".into(),
                 ParameterValue::String("1".into()),
             )])),
@@ -228,7 +228,7 @@ mod tests {
     fn resolves_local_parameter() {
         let req = r(
             "R",
-            Some(BTreeMap::from([
+            Some(IndexMap::from([
                 ("limit".into(), ParameterValue::Integer(10)),
                 ("name".into(), ParameterValue::String("foo".into())),
             ])),
@@ -250,7 +250,7 @@ mod tests {
     fn resolves_cross_requirement() {
         let a = r(
             "GRD-A",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "max".into(),
                 ParameterValue::Integer(100),
             )])),
@@ -279,7 +279,7 @@ mod tests {
     fn quoted_literals() {
         let req = r(
             "R",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "x".into(),
                 ParameterValue::String("X".into()),
             )])),
@@ -296,7 +296,7 @@ mod tests {
             &{
                 let req2 = r(
                     "R",
-                    Some(BTreeMap::from([(
+                    Some(IndexMap::from([(
                         "name".into(),
                         ParameterValue::String("resolved".into()),
                     )])),
@@ -314,7 +314,7 @@ mod tests {
     fn does_not_substitute_inside_quoted_literals() {
         let req = r(
             "R",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "name".into(),
                 ParameterValue::String("resolved".into()),
             )])),
@@ -345,7 +345,7 @@ mod tests {
     fn resolve_text_concatenates() {
         let req = r(
             "R",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "x".into(),
                 ParameterValue::String("X".into()),
             )])),
@@ -354,7 +354,7 @@ mod tests {
         assert_eq!(resolve_text("a {{ :x }} b", "R", &by_id), "a X b");
         let req = r(
             "R",
-            Some(BTreeMap::from([(
+            Some(IndexMap::from([(
                 "limit".into(),
                 ParameterValue::Integer(10),
             )])),
@@ -370,7 +370,7 @@ mod tests {
     fn coerces_number_and_boolean() {
         let req = r(
             "R",
-            Some(BTreeMap::from([
+            Some(IndexMap::from([
                 ("n".into(), ParameterValue::Integer(42)),
                 ("flag".into(), ParameterValue::Bool(true)),
             ])),

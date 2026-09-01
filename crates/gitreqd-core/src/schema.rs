@@ -2,8 +2,9 @@
 //! GRD-SYS-005: parameters (string | number | boolean).
 //! JSON Schema for editors is exported from the same field model.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
+use indexmap::IndexMap;
 use serde_yaml::Value;
 
 use crate::types::{ArtifactRef, Link, ParameterValue, Requirement};
@@ -134,12 +135,12 @@ fn parse_links(value: &Value) -> Result<Option<Vec<Link>>, String> {
     }
 }
 
-fn parse_parameters(value: &Value) -> Option<BTreeMap<String, ParameterValue>> {
+fn parse_parameters(value: &Value) -> Option<IndexMap<String, ParameterValue>> {
     let mapping = match value {
         Value::Mapping(m) => m,
         _ => return None,
     };
-    let mut out = BTreeMap::new();
+    let mut out = IndexMap::new();
     for (k, v) in mapping {
         let key = match k {
             Value::String(s) if !s.trim().is_empty() => s.clone(),
@@ -168,12 +169,12 @@ fn parse_parameters(value: &Value) -> Option<BTreeMap<String, ParameterValue>> {
     }
 }
 
-fn parse_attributes(value: &Value) -> Option<BTreeMap<String, serde_json::Value>> {
+fn parse_attributes(value: &Value) -> Option<IndexMap<String, serde_json::Value>> {
     let mapping = match value {
         Value::Mapping(m) => m,
         _ => return None,
     };
-    let mut out = BTreeMap::new();
+    let mut out = IndexMap::new();
     for (k, v) in mapping {
         let key = match k {
             Value::String(s) => s.clone(),

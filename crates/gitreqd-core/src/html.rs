@@ -3,7 +3,7 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::OnceLock;
 
-use pulldown_cmark::{html as md_html, Options, Parser};
+use pulldown_cmark::{html as md_html, Event, Options, Parser};
 use regex::Regex;
 
 use crate::parameters::{resolve_to_segments, SegmentKind};
@@ -127,13 +127,88 @@ fn format_attr_value(v: &serde_json::Value) -> String {
     escape_html(&s).replace('\n', "<br>")
 }
 
-/// GRD-HTML-004: Render markdown to HTML for refinement and rationale. HTML in the source is escaped.
+fn parameter_value_html(value: &crate::types::ParameterValue) -> String {
+    escape_html(&value.as_display_string()).replace('\n', "<br>")
+}
+
+/// GRD-HTML-004: Render markdown to HTML for refinement and rationale, matching the
+/// TypeScript report (`markdown-it` with `html: false`): HTML in the source is escaped,
+/// CommonMark plus tables/strikethrough, quotes escaped as `&quot;`.
 fn markdown_to_html(text: &str) -> String {
-    let escaped_src = escape_html(text.trim());
-    let parser = Parser::new_ext(&escaped_src, Options::empty());
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_TABLES);
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    let parser = Parser::new_ext(text.trim(), options).map(|event| match event {
+        // markdown-it `html: false` treats raw HTML as text rather than passing it through.
+        Event::Html(html) | Event::InlineHtml(html) => Event::Text(html),
+        other => other,
+    });
     let mut out = String::new();
     md_html::push_html(&mut out, parser);
-    out.trim().to_string()
+    normalize_markdown_it_html(&out).trim().to_string()
+}
+
+fn img_void_pattern() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"<img([^>]*?)\s*/>").expect("img void pattern"))
+}
+
+fn table_block_pattern() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"(?s)<table\b.*?</table>").expect("table block pattern"))
+}
+
+/// Align pulldown-cmark HTML with markdown-it (`xhtmlOut: false`, strikethrough `<s>`,
+/// pretty-printed tables, quotes escaped in text nodes).
+fn normalize_markdown_it_html(html: &str) -> String {
+    let mut s = html.replace("<br />", "<br>");
+    s = s.replace("<hr />", "<hr>");
+    s = s.replace("<del>", "<s>");
+    s = s.replace("</del>", "</s>");
+    s = img_void_pattern().replace_all(&s, "<img$1>").into_owned();
+    s = pretty_print_markdown_it_tables(&s);
+    escape_quotes_outside_tags(&s)
+}
+
+fn pretty_print_markdown_it_tables(html: &str) -> String {
+    table_block_pattern()
+        .replace_all(html, |caps: &regex::Captures| {
+            let mut table = caps[0].to_string();
+            for (from, to) in [
+                ("<table>", "<table>\n"),
+                ("<thead>", "<thead>\n"),
+                ("<tbody>", "<tbody>\n"),
+                ("<tr>", "<tr>\n"),
+                ("</tr>", "</tr>\n"),
+                ("</th>", "</th>\n"),
+                ("</td>", "</td>\n"),
+                ("</thead>", "</thead>\n"),
+                ("</tbody>", "</tbody>\n"),
+            ] {
+                table = table.replace(from, to);
+            }
+            while table.contains("\n\n") {
+                table = table.replace("\n\n", "\n");
+            }
+            if table.ends_with('\n') {
+                table.pop();
+            }
+            table
+        })
+        .into_owned()
+}
+
+fn escape_quotes_outside_tags(html: &str) -> String {
+    split_keeping_tags(html)
+        .into_iter()
+        .map(|token| {
+            if token.starts_with('<') {
+                token.to_string()
+            } else {
+                token.replace('"', "&quot;")
+            }
+        })
+        .collect()
 }
 
 fn id_pattern() -> &'static Regex {
@@ -385,7 +460,7 @@ fn requirement_detail_html(
                     format!(
                         "<tr><td>{}</td><td>{}</td></tr>",
                         escape_html(name),
-                        escape_html(&value.as_display_string())
+                        parameter_value_html(value)
                     )
                 })
                 .collect();
@@ -630,6 +705,7 @@ pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
 mod tests {
     use super::*;
     use crate::types::{ArtifactRef, Link, ParameterValue, Requirement, RequirementWithSource};
+    use indexmap::IndexMap;
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
@@ -667,7 +743,7 @@ mod tests {
     #[test]
     fn includes_attributes_and_links() {
         let mut r = req("GRD-HTML-001", "HTML report");
-        r.attributes = Some(BTreeMap::from([
+        r.attributes = Some(IndexMap::from([
             ("status".into(), serde_json::json!("active")),
             (
                 "rationale".into(),
@@ -684,7 +760,7 @@ mod tests {
     #[test]
     fn parameters_table() {
         let mut r = req("GRD-TBL-001", "Table requirement");
-        r.parameters = Some(BTreeMap::from([
+        r.parameters = Some(IndexMap::from([
             ("alpha".into(), ParameterValue::String("one".into())),
             ("beta".into(), ParameterValue::String("two".into())),
         ]));
@@ -776,7 +852,7 @@ mod tests {
 
         let mut r = req("GRD-MD-002", "Title");
         r.refinement = "Desc".into();
-        r.attributes = Some(BTreeMap::from([(
+        r.attributes = Some(IndexMap::from([(
             "rationale".into(),
             serde_json::json!("Reason with `code` and **emphasis**."),
         )]));
@@ -786,20 +862,92 @@ mod tests {
 
         let mut r = req("GRD-MD-003", "Title");
         r.refinement = "Text with <script>alert(1)</script> here".into();
-        r.attributes = Some(BTreeMap::from([(
+        r.attributes = Some(IndexMap::from([(
             "rationale".into(),
             serde_json::json!("Rationale with <b>tag</b>."),
         )]));
         let html = generate_full_html(&[r]);
         assert!(!html.contains("<script>"));
         assert!(html.contains("&lt;script&gt;"));
+        assert!(!html.contains("<b>tag</b>"));
+        assert!(html.contains("&lt;b&gt;tag&lt;/b&gt;"));
+    }
+
+    #[test]
+    fn markdown_matches_typescript_markdown_it() {
+        let cases = [
+            (
+                "a < b",
+                "<p>a &lt; b</p>",
+            ),
+            (
+                "foo <script>alert(1)</script> bar",
+                "<p>foo &lt;script&gt;alert(1)&lt;/script&gt; bar</p>",
+            ),
+            (
+                "C++ <algorithm> header",
+                "<p>C++ &lt;algorithm&gt; header</p>",
+            ),
+            (
+                "`code with <tags>`",
+                "<p><code>code with &lt;tags&gt;</code></p>",
+            ),
+            (
+                "the \"Editor\" view",
+                "<p>the &quot;Editor&quot; view</p>",
+            ),
+            (
+                "foo & bar",
+                "<p>foo &amp; bar</p>",
+            ),
+            (
+                "already-escaped &amp; bar",
+                "<p>already-escaped &amp; bar</p>",
+            ),
+            (
+                "See <http://example.com>",
+                "<p>See <a href=\"http://example.com\">http://example.com</a></p>",
+            ),
+            (
+                "~~old~~",
+                "<p><s>old</s></p>",
+            ),
+            (
+                "| Name | Value |\n| --- | --- |\n| x | 1 |",
+                "<table>\n<thead>\n<tr>\n<th>Name</th>\n<th>Value</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>x</td>\n<td>1</td>\n</tr>\n</tbody>\n</table>",
+            ),
+        ];
+        for (src, expected) in cases {
+            assert_eq!(markdown_to_html(src), expected, "markdown source: {src:?}");
+        }
+    }
+
+    #[test]
+    fn parameters_keep_yaml_insertion_order() {
+        let mut r = req("GRD-ORD-001", "Order");
+        r.parameters = Some(IndexMap::from([
+            (
+                "native_binary_os".into(),
+                ParameterValue::String("Linux".into()),
+            ),
+            (
+                "native_binary_arch".into(),
+                ParameterValue::String("x86_64".into()),
+            ),
+        ]));
+        let html = generate_full_html(&[r]);
+        let os = html.find("<tr><td>native_binary_os</td>").expect("os row");
+        let arch = html
+            .find("<tr><td>native_binary_arch</td>")
+            .expect("arch row");
+        assert!(os < arch, "parameter rows should keep insertion order");
     }
 
     #[test]
     fn auto_link_known_ids() {
         let mut holder = req("GRD-REF-001", "Reference holder");
         holder.refinement = "See GRD-HTML-001 for base behavior.".into();
-        holder.attributes = Some(BTreeMap::from([(
+        holder.attributes = Some(IndexMap::from([(
             "rationale".into(),
             serde_json::json!("Also depends on GRD-HTML-002."),
         )]));
@@ -819,7 +967,7 @@ mod tests {
     fn param_values_in_html() {
         let mut r = req("GRD-P-001", "Limit is {{ :limit }}");
         r.refinement = "The maximum count is {{ :limit }} items.".into();
-        r.parameters = Some(BTreeMap::from([(
+        r.parameters = Some(IndexMap::from([(
             "limit".into(),
             ParameterValue::Integer(42),
         )]));

@@ -3,6 +3,8 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use indexmap::IndexMap;
+
 /// GRD-SYS-005: Parameter value type (string, number, or boolean).
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParameterValue {
@@ -83,14 +85,14 @@ pub struct Requirement {
     pub require: String,
     /// Supporting prose (Markdown in HTML reports).
     pub refinement: String,
-    pub attributes: Option<BTreeMap<String, serde_json::Value>>,
+    pub attributes: Option<IndexMap<String, serde_json::Value>>,
     pub links: Option<Vec<Link>>,
     /// GRD-SYS-016: Artifacts that implement or satisfy this requirement.
     pub satisfied_by: Option<Vec<ArtifactRef>>,
     /// GRD-SYS-016: Artifacts that verify this requirement was met.
     pub verified_by: Option<Vec<ArtifactRef>>,
     /// GRD-SYS-005: Named parameters for templating in text fields.
-    pub parameters: Option<BTreeMap<String, ParameterValue>>,
+    pub parameters: Option<IndexMap<String, ParameterValue>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -99,11 +101,11 @@ pub struct RequirementWithSource {
     pub title: String,
     pub require: String,
     pub refinement: String,
-    pub attributes: Option<BTreeMap<String, serde_json::Value>>,
+    pub attributes: Option<IndexMap<String, serde_json::Value>>,
     pub links: Option<Vec<Link>>,
     pub satisfied_by: Option<Vec<ArtifactRef>>,
     pub verified_by: Option<Vec<ArtifactRef>>,
-    pub parameters: Option<BTreeMap<String, ParameterValue>>,
+    pub parameters: Option<IndexMap<String, ParameterValue>>,
     /// Path to the YAML file this requirement was loaded from.
     pub source_path: PathBuf,
     /// GRD-SYS-004: Path segments from the requirement_dir that contains this file

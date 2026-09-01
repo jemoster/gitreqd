@@ -91,6 +91,7 @@ pub fn validate_requirements(requirements: &[RequirementWithSource]) -> Vec<Vali
 mod tests {
     use super::*;
     use crate::types::{Link, Requirement, RequirementWithSource};
+    use indexmap::IndexMap;
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 
@@ -271,7 +272,7 @@ mod tests {
     #[test]
     fn parameters_valid_overlap() {
         let mut r = req("R", "/r.req.yml");
-        r.parameters = Some(BTreeMap::from([(
+        r.parameters = Some(IndexMap::from([(
             "id".into(),
             crate::types::ParameterValue::String("value".into()),
         )]));
