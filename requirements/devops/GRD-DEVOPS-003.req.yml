@@ -12,9 +12,9 @@ attributes:
     When package versions, git tags, and artifact names diverge, users cannot tell which release they installed and VS Code may not replace a prior extension install.
   status: active
 satisfied_by:
-  - artifact: scripts/bump-version.sh
+  - artifact: scripts/bump-version.py
     description: Sets the shared version across workspace packages, lockfiles, and README install URLs.
-  - artifact: scripts/assert-release-tag.sh
+  - artifact: scripts/assert-release-tag.py
     description: Fails a release job when the tag or packed artifact names do not match the shared version.
   - artifact: .github/workflows/release-cli.yml
     description: Release jobs assert the tag and CLI artifact names before upload.

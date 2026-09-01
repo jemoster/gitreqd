@@ -10,7 +10,7 @@ The core, CLI, and VS Code packages share one version. When a Rust workspace is 
 2. Set the shared version (updates workspace package files, lockfiles, and README install URLs):
 
 ```bash
-./scripts/bump-version.sh X.Y.Z
+./scripts/bump-version.py X.Y.Z
 ```
 
 3. Commit the version bump and merge the release-ready changes to the default branch.

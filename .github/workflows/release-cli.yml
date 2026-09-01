@@ -35,7 +35,7 @@ jobs:
       # GRD-DEVOPS-003: tag must be v${version} and tarball names must include that version.
       - name: Assert tag and CLI artifact names
         if: github.event_name == 'release'
-        run: bash ./scripts/assert-release-tag.sh "${{ github.event.release.tag_name }}" cli
+        run: python3 ./scripts/assert-release-tag.py "${{ github.event.release.tag_name }}" cli
 
       - name: Upload CLI tarballs to release
         if: github.event_name == 'release'
@@ -73,7 +73,7 @@ jobs:
       # GRD-DEVOPS-003: tag must match the shared package version.
       - name: Assert tag and native CLI binary
         if: github.event_name == 'release'
-        run: bash ./scripts/assert-release-tag.sh "${{ github.event.release.tag_name }}" native
+        run: python3 ./scripts/assert-release-tag.py "${{ github.event.release.tag_name }}" native
       - name: Upload native CLI binary to release
         if: github.event_name == 'release'
         env:

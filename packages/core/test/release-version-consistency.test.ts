@@ -7,8 +7,8 @@ import os from "node:os";
 import path from "node:path";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
-const BUMP_SCRIPT = path.join(REPO_ROOT, "scripts", "bump-version.sh");
-const ASSERT_SCRIPT = path.join(REPO_ROOT, "scripts", "assert-release-tag.sh");
+const BUMP_SCRIPT = path.join(REPO_ROOT, "scripts", "bump-version.py");
+const ASSERT_SCRIPT = path.join(REPO_ROOT, "scripts", "assert-release-tag.py");
 const CLI_RELEASE_WORKFLOW = path.join(REPO_ROOT, ".github", "workflows", "release-cli.yml");
 const VSCODE_RELEASE_WORKFLOW = path.join(REPO_ROOT, ".github", "workflows", "release-vscode.yml");
 const RELEASE_GUIDE = path.join(REPO_ROOT, "release.md");
@@ -53,10 +53,10 @@ function fixturePackageJson(name: string, version: string, withCoreDep: boolean)
 
 function seedVersionTree(tmpDir: string, version: string): void {
   fs.mkdirSync(path.join(tmpDir, "scripts"), { recursive: true });
-  fs.copyFileSync(BUMP_SCRIPT, path.join(tmpDir, "scripts", "bump-version.sh"));
-  fs.copyFileSync(ASSERT_SCRIPT, path.join(tmpDir, "scripts", "assert-release-tag.sh"));
-  fs.chmodSync(path.join(tmpDir, "scripts", "bump-version.sh"), 0o755);
-  fs.chmodSync(path.join(tmpDir, "scripts", "assert-release-tag.sh"), 0o755);
+  fs.copyFileSync(BUMP_SCRIPT, path.join(tmpDir, "scripts", "bump-version.py"));
+  fs.copyFileSync(ASSERT_SCRIPT, path.join(tmpDir, "scripts", "assert-release-tag.py"));
+  fs.chmodSync(path.join(tmpDir, "scripts", "bump-version.py"), 0o755);
+  fs.chmodSync(path.join(tmpDir, "scripts", "assert-release-tag.py"), 0o755);
 
   writeJson(path.join(tmpDir, "packages", "core", "package.json"), fixturePackageJson("@gitreqd/core", version, false));
   writeJson(path.join(tmpDir, "packages", "cli", "package.json"), fixturePackageJson("gitreqd", version, true));
@@ -120,10 +120,10 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(readme).toContain(`/releases/download/v${version}/gitreqd-${version}.tgz`);
   });
 
-  it("bump-version.sh updates packages, lockfiles, and README install URLs", () => {
+  it("bump-version.py updates packages, lockfiles, and README install URLs", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "0.1.0");
-    execFileSync("bash", [path.join(tmpDir, "scripts", "bump-version.sh"), "9.8.7"], {
+    execFileSync("python3", [path.join(tmpDir, "scripts", "bump-version.py"), "9.8.7"], {
       cwd: tmpDir,
       stdio: "pipe",
     });
@@ -157,7 +157,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     );
   });
 
-  it("bump-version.sh rewrites README tags that already disagree with package.json", () => {
+  it("bump-version.py rewrites README tags that already disagree with package.json", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "0.1.0");
     fs.writeFileSync(
@@ -169,7 +169,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
         "",
       ].join("\n")
     );
-    execFileSync("bash", [path.join(tmpDir, "scripts", "bump-version.sh"), "9.8.7"], {
+    execFileSync("python3", [path.join(tmpDir, "scripts", "bump-version.py"), "9.8.7"], {
       cwd: tmpDir,
       stdio: "pipe",
     });
@@ -180,13 +180,13 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(readme).not.toContain("0.1.0");
   });
 
-  it("assert-release-tag.sh accepts a matching tag and required artifact names", () => {
+  it("assert-release-tag.py accepts a matching tag and required artifact names", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "1.2.3");
     fs.mkdirSync(path.join(tmpDir, "release"), { recursive: true });
     fs.writeFileSync(path.join(tmpDir, "release", "gitreqd-1.2.3.tgz"), "");
     fs.writeFileSync(path.join(tmpDir, "release", "gitreqd-core-1.2.3.tgz"), "");
-    const out = execFileSync("bash", [path.join(tmpDir, "scripts", "assert-release-tag.sh"), "v1.2.3", "cli"], {
+    const out = execFileSync("python3", [path.join(tmpDir, "scripts", "assert-release-tag.py"), "v1.2.3", "cli"], {
       cwd: tmpDir,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
@@ -195,30 +195,30 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(out).toContain("1.2.3");
   });
 
-  it("assert-release-tag.sh rejects a tag that does not match the package version", () => {
+  it("assert-release-tag.py rejects a tag that does not match the package version", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "1.2.3");
     expect(() =>
-      execFileSync("bash", [path.join(tmpDir, "scripts", "assert-release-tag.sh"), "v9.9.9"], {
+      execFileSync("python3", [path.join(tmpDir, "scripts", "assert-release-tag.py"), "v9.9.9"], {
         cwd: tmpDir,
         stdio: "pipe",
       })
     ).toThrow();
   });
 
-  it("release workflows invoke assert-release-tag.sh before upload", () => {
+  it("release workflows invoke assert-release-tag.py before upload", () => {
     const cliWorkflow = fs.readFileSync(CLI_RELEASE_WORKFLOW, "utf-8");
-    expect(cliWorkflow).toContain("bash ./scripts/assert-release-tag.sh");
+    expect(cliWorkflow).toContain("python3 ./scripts/assert-release-tag.py");
     expect(cliWorkflow).toContain('"${{ github.event.release.tag_name }}" cli');
     expect(cliWorkflow).toContain('"${{ github.event.release.tag_name }}" native');
     const vscodeWorkflow = fs.readFileSync(VSCODE_RELEASE_WORKFLOW, "utf-8");
-    expect(vscodeWorkflow).toContain("bash ./scripts/assert-release-tag.sh");
+    expect(vscodeWorkflow).toContain("python3 ./scripts/assert-release-tag.py");
     expect(vscodeWorkflow).toContain('"${{ github.event.release.tag_name }}" vscode');
   });
 
   it("release guide documents the bump script as the version-update step", () => {
     const guide = fs.readFileSync(RELEASE_GUIDE, "utf-8");
-    expect(guide).toContain("./scripts/bump-version.sh X.Y.Z");
+    expect(guide).toContain("./scripts/bump-version.py X.Y.Z");
     expect(guide).toContain("git tag vX.Y.Z");
     expect(guide).toContain("Publish the GitHub Release");
   });
