@@ -86,6 +86,40 @@ fn html_writes_index() {
 }
 
 #[test]
+fn html_dot_output_prints_normalized_path() {
+    let root = repo_root();
+    let tmp = std::env::temp_dir().join(format!("gitreqd-bin-html-dot-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let out = Command::new(bin())
+        .current_dir(&tmp)
+        .args([
+            "html",
+            "--project-dir",
+            root.join("sample_projects/basic").to_str().unwrap(),
+            "--output",
+            ".",
+        ])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        out.status.success(),
+        "html failed: stdout={stdout} stderr={stderr}"
+    );
+    let expected = tmp.join("index.html");
+    assert!(
+        stdout.contains(&format!("Wrote {}", expected.display())),
+        "expected normalized path in stdout, got {stdout}"
+    );
+    assert!(
+        !stdout.contains("/./"),
+        "output path should not contain /./, got {stdout}"
+    );
+}
+
+#[test]
 fn validate_this_repository() {
     let root = repo_root();
     let out = Command::new(bin())

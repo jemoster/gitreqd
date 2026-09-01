@@ -15,8 +15,8 @@ pub mod types;
 
 pub use discovery::{
     discover_project, discover_project_root, discover_project_root_candidates,
-    discover_requirement_paths, find_root_marker_path, get_requirement_dirs, ROOT_MARKER,
-    ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
+    discover_requirement_paths, find_root_marker_path, get_requirement_dirs, normalize_path,
+    ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
 };
 pub use error::{DiscoverResult, Error};
 pub use html::generate_full_html;

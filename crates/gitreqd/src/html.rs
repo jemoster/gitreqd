@@ -1,7 +1,8 @@
 //! GRD-CLI-002: CLI HTML report.
 
 use gitreqd_core::{
-    discover_project_root_candidates, load_active_profile, load_requirements, ROOT_MARKER_HINT,
+    discover_project_root_candidates, load_active_profile, load_requirements, normalize_path,
+    ROOT_MARKER_HINT,
 };
 use std::fs;
 use std::io::{self, Write};
@@ -56,8 +57,9 @@ pub fn run_html(project_dir: &Path, output_dir: &Path) -> io::Result<bool> {
     } else {
         cwd.join(output_dir)
     };
+    let out_dir = normalize_path(&out_dir);
     fs::create_dir_all(&out_dir)?;
-    let html_path = out_dir.join("index.html");
+    let html_path = normalize_path(&out_dir.join("index.html"));
     let html = profile.generate_full_html(&result.requirements);
     fs::write(&html_path, html)?;
     writeln!(

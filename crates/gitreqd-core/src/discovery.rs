@@ -31,7 +31,9 @@ pub fn find_root_marker_path(project_root: &Path) -> Option<PathBuf> {
     None
 }
 
-fn normalize_path(path: &Path) -> PathBuf {
+/// Collapse `.` and `..` lexically without touching the filesystem.
+/// Matches Node `path.resolve` collapsing for joined relative segments such as `.`.
+pub fn normalize_path(path: &Path) -> PathBuf {
     let mut out = PathBuf::new();
     for c in path.components() {
         match c {
@@ -284,6 +286,18 @@ mod tests {
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
+    }
+
+    #[test]
+    fn normalize_path_drops_dot_segments() {
+        assert_eq!(
+            normalize_path(Path::new("/workspace/./index.html")),
+            PathBuf::from("/workspace/index.html")
+        );
+        assert_eq!(
+            normalize_path(Path::new("/workspace/.")),
+            PathBuf::from("/workspace")
+        );
     }
 
     #[test]
