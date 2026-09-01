@@ -24,6 +24,5 @@ refinement: |
 attributes:
   rationale: A WYSIWYG option lowers the barrier for contributors who are uncomfortable with Markdown syntax, while a plain Markdown mode preserves full control, diff-friendly editing, and alignment with existing tooling that treats text as Markdown text.
   status: active
-  applicability: vscode
 links:
   - satisfies: GRD-VSC-003

@@ -19,7 +19,7 @@ Add new categories as needed (e.g. GRD-WEB-* or GRD-RUST-*) when you add formal 
 
 The essential CLI is the command-line contract a future Rust application should implement. It is defined by observable command names, options, inputs, outputs, and exit status — not by TypeScript, Node.js, npm, or a TypeScript in-process API.
 
-A complete essential CLI shall satisfy every requirement whose `attributes.applicability` is `essential-cli`:
+A complete essential CLI shall satisfy **GRD-CLI-008** and the requirements that GRD-CLI-008 and the four essential commands depend on:
 
 - **Command set and process contract:** GRD-CLI-008
 - **Commands:** GRD-CLI-001 (`validate`), GRD-CLI-002 (`html`), GRD-CLI-003 (project root discovery), GRD-CLI-004 (`bootstrap`), GRD-CLI-005 (`schema`)
@@ -27,30 +27,20 @@ A complete essential CLI shall satisfy every requirement whose `attributes.appli
 - **Validation rules:** GRD-VALID-001, GRD-VALID-002, GRD-VALID-003, GRD-VALID-004, GRD-VALID-005
 - **HTML report:** GRD-HTML-001, GRD-HTML-002, GRD-HTML-003, GRD-HTML-004, GRD-HTML-005, GRD-HTML-006
 
-An essential CLI implementation **shall not** be required to satisfy:
+An essential CLI implementation is not required to satisfy:
 
 - TypeScript-only requirements (GRD-TS-*, GRD-CLI-007 npm distribution, GRD-VSC-*, npm-based GRD-DEVOPS-001)
 - Additional CLI commands (GRD-CLI-006 `format`, GRD-GIT-002 `resolve-conflicts`)
 - YAML formatter internals (GRD-SYS-011) or LLM provider configuration (GRD-SYS-012, GRD-SYS-013, GRD-SYS-014), except as needed by those additional commands
 
-When defining a Rust (or other language) implementation, add implementation-specific requirements (for example GRD-RUST-*) that **satisfy** GRD-CLI-008 and the essential-cli set. Do not duplicate the behavioral requirements.
+When defining a Rust (or other language) implementation, add implementation-specific requirements (for example GRD-RUST-*) that **satisfy** GRD-CLI-008. Do not duplicate the behavioral requirements.
 
 The current TypeScript packages implement a **superset**: the essential CLI plus `format`, `resolve-conflicts`, the VSCode extension, and npm distribution.
-
-## Applicability attribute
-
-Requirement files use `attributes.applicability` with one of:
-
-- `essential-cli` — required of any essential CLI implementation (including a future Rust CLI)
-- `cli-extended` — additional CLI capabilities not in the essential command set
-- `typescript` — TypeScript implementation only
-- `vscode` — VSCode extension
-- `git` — Git extras
-- `devops` — CI / release automation
 
 ## Adding requirements
 
 - One YAML file per requirement.
 - File name should match the requirement id (e.g. `GRD-SYS-001.req.yml` or `GRD-SYS-001.req.yaml`).
 - Use the same schema as project requirements: `id`, `title`, `require`, `refinement`, `attributes`, `links`, `satisfied_by`, `verified_by`.
+- In `attributes`, use the existing keys `status` and `rationale`.
 - In `links`, use `satisfies: <id>` to reference other requirements (e.g. `satisfies: GRD-SYS-001`).

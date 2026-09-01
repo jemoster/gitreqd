@@ -6,6 +6,5 @@ attributes:
   rationale: |
     Unique ids are required to reference requirements and to avoid ambiguity.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-VALID-001

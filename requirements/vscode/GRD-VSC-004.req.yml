@@ -6,6 +6,5 @@ attributes:
   rationale: |
     A schema improves editing experience with validation and hints while authoring requirement YAML.
   status: active
-  applicability: vscode
 links:
   - satisfies: GRD-VSC-001

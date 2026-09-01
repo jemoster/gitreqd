@@ -6,6 +6,5 @@ refinement: |
   so users can navigate directly from textual references to the linked requirement.
 attributes:
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-HTML-001

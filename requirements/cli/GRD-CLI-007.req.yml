@@ -6,6 +6,5 @@ refinement: |
 attributes:
   rationale: Users should be able to install the TypeScript CLI in one command from a GitHub-hosted source location when a registry-published package is unavailable or undesired, while preserving a consistent installation path and a predictable release source.
   status: active
-  applicability: typescript
 links:
   - satisfies: GRD-SYS-008

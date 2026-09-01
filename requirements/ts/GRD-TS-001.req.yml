@@ -9,6 +9,5 @@ attributes:
   rationale: |
     The VSCode extension runs in-process with TypeScript and needs a library API. That constraint must not leak into the essential CLI contract used by a future Rust application.
   status: active
-  applicability: typescript
 links:
   - satisfies: GRD-SYS-002

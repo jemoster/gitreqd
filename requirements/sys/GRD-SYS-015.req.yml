@@ -11,7 +11,6 @@ attributes:
     Separating the normative statement from supporting prose makes requirements easier to review,
     trace, and validate.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-001
   - satisfies: GRD-SYS-009

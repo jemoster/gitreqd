@@ -9,6 +9,5 @@ attributes:
   rationale: |
     Broken references make traceability invalid and confuse users.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-VALID-001

@@ -23,6 +23,5 @@ attributes:
   rationale: |
     A language-independent essential command set lets a future Rust CLI implement the same user-facing functions as the current TypeScript CLI without taking on TypeScript-only commands or distribution.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002

@@ -17,7 +17,6 @@ attributes:
   rationale: |
     Stakeholders and teams need a shareable, readable report of requirements without running an interactive tool.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-CLI-008
   - satisfies: GRD-CLI-003

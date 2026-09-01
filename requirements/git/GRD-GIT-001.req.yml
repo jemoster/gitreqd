@@ -5,4 +5,3 @@ attributes:
   rationale: |
     Aid the user to review requirement changes between two commits.  This supports changing requirements in a way similar to how git diff supports code changes between two commits.
   status: active
-  applicability: git

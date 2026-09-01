@@ -11,4 +11,3 @@ attributes:
   rationale: |
     Users need a single, repeatable way to obtain an installable artifact and install the tool on a machine so that multiple repositories can use the same installation without building from source per repo.
   status: active
-  applicability: cli-extended

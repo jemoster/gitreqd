@@ -7,6 +7,5 @@ attributes:
   rationale: |
     Keeping Zod as a TypeScript implementation detail allows a Rust CLI to validate and export the same schema without a JavaScript runtime.
   status: active
-  applicability: typescript
 links:
   - satisfies: GRD-SYS-009

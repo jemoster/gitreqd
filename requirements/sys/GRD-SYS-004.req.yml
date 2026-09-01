@@ -6,6 +6,5 @@ attributes:
   rationale: |
     Group requirements into categories for easier navigation.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002

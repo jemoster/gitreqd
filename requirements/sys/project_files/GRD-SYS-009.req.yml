@@ -12,6 +12,5 @@ refinement: |
 attributes:
   rationale: Encode the schema as a single source of truth that can be implemented in more than one programming language.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002

@@ -8,4 +8,3 @@ attributes:
     Parsing is the foundation for validation, reporting, and all consumers
     (CLI, VSCode, web, CI).
   status: active
-  applicability: essential-cli

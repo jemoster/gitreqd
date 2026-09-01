@@ -81,6 +81,5 @@ attributes:
     route traffic through a proxy or use an Anthropic-compatible endpoint without
     requiring a code change.
   status: active
-  applicability: cli-extended
 links:
   - satisfies: GRD-SYS-012

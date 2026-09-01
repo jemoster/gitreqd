@@ -14,7 +14,6 @@ refinement: |
 attributes:
   rationale: Teams need a single terminal invocation to normalize all requirement YAML in a repo, matching CI and editor behavior without editing files one at a time.
   status: active
-  applicability: cli-extended
 links:
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003

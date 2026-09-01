@@ -15,7 +15,6 @@ attributes:
   rationale: |
     Teams need to feed the schema into editors, CI, or documentation tools without relying on ad hoc scripts; a first-class CLI option keeps the behavior aligned with the project and usable from any essential CLI implementation.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-CLI-008
   - satisfies: GRD-CLI-003

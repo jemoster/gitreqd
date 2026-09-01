@@ -74,6 +74,5 @@ attributes:
     silent failures where the tool falls back to a model that was never intended
     or is not fit for the task.
   status: active
-  applicability: cli-extended
 links:
   - satisfies: GRD-SYS-012

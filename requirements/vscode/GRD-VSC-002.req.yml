@@ -12,6 +12,5 @@ attributes:
     Following links is essential for navigating between related requirements
     and understanding dependency structure without manual file lookup.
   status: active
-  applicability: vscode
 links:
   - satisfies: GRD-VSC-001

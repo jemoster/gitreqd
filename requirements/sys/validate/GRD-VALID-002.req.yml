@@ -6,6 +6,5 @@ attributes:
   rationale: |
     This ensures that requirements are easy to find and identify.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-VALID-001

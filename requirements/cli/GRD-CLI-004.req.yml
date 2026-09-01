@@ -27,7 +27,6 @@ attributes:
   rationale: |
     Users need a quick way to start a new gitreqd project without manually creating {{ GRD-SYS-007:root_marker_filename }} and the requirements directory structure.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-CLI-008
   - satisfies: GRD-SYS-007

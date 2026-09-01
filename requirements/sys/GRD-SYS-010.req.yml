@@ -17,6 +17,5 @@ attributes:
   rationale: |
     A single profile mechanism lets the same core capabilities serve generic use and regulated domains without forking the tool, while keeping YAML structure, validation, and reports aligned per profile.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002

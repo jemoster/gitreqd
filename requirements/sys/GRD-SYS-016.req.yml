@@ -32,7 +32,6 @@ attributes:
     Linking requirements to concrete implementation and verification artifacts improves
     traceability from normative text to code and evidence without overloading requirement-to-requirement links.
   status: active
-  applicability: essential-cli
 satisfied_by:
   - artifact: packages/core/src/requirement-schema.ts
     description: Zod schema defines satisfied_by and verified_by on each requirement file.

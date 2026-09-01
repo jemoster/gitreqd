@@ -11,6 +11,5 @@ attributes:
   rationale: |
     Shared capabilities keep discovery, loading, validation, and link resolution consistent across consumers without requiring every implementation to expose a TypeScript library.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-001

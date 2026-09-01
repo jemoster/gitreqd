@@ -13,7 +13,6 @@ attributes:
   rationale: |
     Users need the CLI to reliably locate the correct project root before running validation or generating reports.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-CLI-008
   - satisfies: GRD-SYS-002

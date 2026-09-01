@@ -5,6 +5,5 @@ attributes:
   rationale: |
     Allow rich formatting in requirement text for readability.
   status: active
-  applicability: essential-cli
 links:
   - satisfies: GRD-HTML-001

@@ -8,7 +8,6 @@ attributes:
   rationale: |
     Showing the title on hover lets users confirm which requirement they are about to open or which id they are reading about, without navigating away or opening another file.
   status: active
-  applicability: vscode
 links:
   - satisfies: GRD-VSC-001
   - satisfies: GRD-VSC-002

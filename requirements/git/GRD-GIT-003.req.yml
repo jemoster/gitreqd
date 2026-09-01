@@ -11,4 +11,3 @@ attributes:
   rationale: |
     Give users a single, repeatable way to enable local validation on commit without manually copying or symlinking the hook. Reduces invalid requirement YAML from being committed.
   status: active
-  applicability: git

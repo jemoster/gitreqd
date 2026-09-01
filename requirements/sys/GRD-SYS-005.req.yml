@@ -37,4 +37,3 @@ attributes:
   rationale: |
     Parameterization allows for more flexible and maintainable requirement definitions by enabling the reuse of values across multiple requirements.
   status: active
-  applicability: essential-cli

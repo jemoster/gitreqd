@@ -16,7 +16,6 @@ refinement: |
 attributes:
   rationale: A canonical formatter reduces noisy diffs, improves review quality, and keeps requirement YAML files consistent across different editors and contributors.
   status: active
-  applicability: cli-extended
 links:
   - satisfies: GRD-SYS-001
   - satisfies: GRD-SYS-009
