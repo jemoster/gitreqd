@@ -37,3 +37,39 @@ npm install -g "https://github.com/<org>/<repo>/releases/download/vX.Y.Z/<artifa
 ```
 
 4. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `gitreqd`.
+
+## Testing release generation
+
+Use these steps before (or instead of) publishing a GitHub Release.
+
+### Local packaging (same scripts as CI)
+
+```bash
+./scripts/package.sh
+./scripts/package-native-cli.sh
+```
+
+Confirm `release/` contains CLI `.tgz` files and `gitreqd-linux-x86_64`. On Linux x86_64, run `./release/gitreqd-linux-x86_64 --help`.
+
+### Download the native binary from a branch or pull request
+
+The Tests workflow packages the native CLI and uploads it as a workflow artifact named `gitreqd-linux-x86_64`.
+
+From the GitHub UI: open the Actions run for the branch, open the `cargo test` job, and download the `gitreqd-linux-x86_64` artifact.
+
+From the CLI (replace the run id with the latest Tests run for the branch):
+
+```bash
+gh run list --workflow=test.yml --branch <branch> --limit 1
+gh run download <run-id> --name gitreqd-linux-x86_64
+chmod +x gitreqd-linux-x86_64
+./gitreqd-linux-x86_64 --help
+```
+
+### Dry-run the CLI release workflow
+
+Actions → **Release CLI artifacts** → **Run workflow**. Manual `workflow_dispatch` runs the same packaging as a published release, then uploads `cli-tarballs` and `gitreqd-linux-x86_64` as workflow artifacts. It does not create or modify a GitHub Release.
+
+### Full GitHub Release path
+
+Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes the `.tgz` files and `gitreqd-linux-x86_64`.

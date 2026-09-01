@@ -89,9 +89,9 @@ Build the Linux x86_64 native CLI binary locally:
 ./scripts/package-native-cli.sh
 ```
 
-The script writes `release/gitreqd-linux-x86_64`. Copy it onto `PATH` (for example `/usr/local/bin/gitreqd`). Publishing a GitHub Release uploads this asset via the CLI release workflow.
+The script writes `release/gitreqd-linux-x86_64`. Copy it onto `PATH` (for example `/usr/local/bin/gitreqd`). Publishing a GitHub Release uploads this asset via the CLI release workflow. Pull request CI also uploads that binary as a downloadable Actions artifact.
 
-For GitHub-based releases and the concise release checklist, use `release.md`.
+For GitHub-based releases, branch artifact download, and how to dry-run packaging, use `release.md`.
 
 ### VS Code Extension
 

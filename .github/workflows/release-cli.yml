@@ -1,8 +1,10 @@
 # GRD-CLI-007: Publish CLI install artifacts to GitHub Releases for direct npm install from source URLs.
+# workflow_dispatch runs the same packaging and uploads workflow artifacts (no GitHub Release).
 name: Release CLI artifacts
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,6 +33,7 @@ jobs:
         run: bash ./scripts/package.sh
 
       - name: Upload CLI tarballs to release
+        if: github.event_name == 'release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -42,6 +45,14 @@ jobs:
             exit 1
           fi
           gh release upload "${{ github.event.release.tag_name }}" "${tgz_files[@]}" --clobber
+
+      - name: Upload CLI tarballs as workflow artifacts
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-tarballs
+          path: release/*.tgz
+          if-no-files-found: error
 
   native-cli-binary:
     # GRD-CLI-009: Publish a native gitreqd CLI binary for Linux x86_64 as a GitHub Release asset.
@@ -55,6 +66,7 @@ jobs:
       - name: Package native CLI binary
         run: bash ./scripts/package-native-cli.sh
       - name: Upload native CLI binary to release
+        if: github.event_name == 'release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -65,3 +77,10 @@ jobs:
             exit 1
           fi
           gh release upload "${{ github.event.release.tag_name }}" "${asset}" --clobber
+      - name: Upload native CLI binary as workflow artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitreqd-linux-x86_64
+          path: release/gitreqd-linux-x86_64
+          if-no-files-found: error
