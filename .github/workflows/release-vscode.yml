@@ -25,6 +25,9 @@ jobs:
         run: npm run build
       - name: Package VSCode extension
         run: npm run package -w gitreqd-vscode
+      # GRD-DEVOPS-003: tag must be v${version} and the VSIX filename must include that version.
+      - name: Assert tag and VSIX filename
+        run: bash ./scripts/assert-release-tag.sh "${{ github.event.release.tag_name }}" vscode
       - name: Upload VSIX to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

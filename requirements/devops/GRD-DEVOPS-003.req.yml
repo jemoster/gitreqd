@@ -1,0 +1,27 @@
+id: GRD-DEVOPS-003
+title: Align package versions with the GitHub release tag
+require: The core, CLI, and VS Code packages shall share one version that matches the GitHub release tag and the names of the npm and VS Code packaged artifacts.
+refinement: |
+  The shared version is the `version` field of `@gitreqd/core`, `gitreqd`, and `gitreqd-vscode`. CLI and VS Code dependencies on `@gitreqd/core` shall use that same version.
+
+  When a Rust workspace is present, `[workspace.package] version` shall match the shared version.
+
+  The GitHub release tag shall be `v` followed by that version (for example tag `v1.2.3` for version `1.2.3`). Packed npm tarball and VSIX filenames shall include that version (for example `gitreqd-1.2.3.tgz`, `gitreqd-core-1.2.3.tgz`, `gitreqd-vscode-1.2.3.vsix`).
+attributes:
+  rationale: |
+    When package versions, git tags, and artifact names diverge, users cannot tell which release they installed and VS Code may not replace a prior extension install.
+  status: active
+satisfied_by:
+  - artifact: scripts/bump-version.sh
+    description: Sets the shared version across workspace packages, lockfiles, and README install URLs.
+  - artifact: scripts/assert-release-tag.sh
+    description: Fails a release job when the tag or packed artifact names do not match the shared version.
+  - artifact: .github/workflows/release-cli.yml
+    description: Release jobs assert the tag and CLI artifact names before upload.
+  - artifact: .github/workflows/release-vscode.yml
+    description: Release job asserts the tag and VSIX filename before upload.
+  - artifact: release.md
+    description: Exclusive maintainer guide for bumping, tagging, and publishing a release.
+verified_by:
+  - artifact: packages/core/test/release-version-consistency.test.ts
+    description: Checks lockstep versions, README URLs, bump-script behavior, and release workflow assertions.
