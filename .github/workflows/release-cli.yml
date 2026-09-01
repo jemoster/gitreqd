@@ -32,6 +32,11 @@ jobs:
       - name: Package CLI artifacts
         run: bash ./scripts/package.sh
 
+      # GRD-DEVOPS-003: tag must be v${version} and tarball names must include that version.
+      - name: Assert tag and CLI artifact names
+        if: github.event_name == 'release'
+        run: python3 ./scripts/assert-release-tag.py "${{ github.event.release.tag_name }}" cli
+
       - name: Upload CLI tarballs to release
         if: github.event_name == 'release'
         env:
@@ -65,6 +70,10 @@ jobs:
         uses: dtolnay/rust-toolchain@1.83.0
       - name: Package native CLI binary
         run: bash ./scripts/package-native-cli.sh
+      # GRD-DEVOPS-003: tag must match the shared package version.
+      - name: Assert tag and native CLI binary
+        if: github.event_name == 'release'
+        run: python3 ./scripts/assert-release-tag.py "${{ github.event.release.tag_name }}" native
       - name: Upload native CLI binary to release
         if: github.event_name == 'release'
         env:

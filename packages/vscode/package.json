@@ -1,6 +1,6 @@
 {
   "name": "gitreqd-vscode",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "VSCode extension for gitreqd — follow links in requirement files",
   "main": "dist/extension.js",
   "scripts": {
@@ -28,7 +28,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@gitreqd/core": "0.1.0",
+    "@gitreqd/core": "0.4.0",
     "@toast-ui/editor": "^3.2.2",
     "yaml": "^2.6.1"
   },
