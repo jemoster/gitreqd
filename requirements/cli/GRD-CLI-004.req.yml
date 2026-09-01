@@ -1,28 +1,16 @@
 id: GRD-CLI-004
-title: CLI bootstrap command
-require: The CLI shall provide a `bootstrap` command that initializes a directory with the basic files for a gitreqd project.
+title: CLI bootstrap project
+require: The CLI shall provide a bootstrap command that initializes a directory with the basic files for a gitreqd project.
 refinement: |
-  The command name shall be `bootstrap`.
+  * The target directory shall be the current working directory by default, or a directory specified by the user (e.g. via an option or argument).
 
-  The target directory shall be the current working directory by default, or the directory specified by `--project-dir`.
+  * The bootstrap shall create the project root marker file ({{ GRD-SYS-007:root_marker_filename }}) in the target directory, with minimal valid content consistent with the {{ GRD-SYS-007:root_marker_filename }} schema (e.g. requirement_dirs including the requirements folder).
 
-  The target directory shall already exist and shall be a directory; otherwise the command shall fail with an error.
+  * The bootstrap shall create a requirements folder in the target directory (e.g. requirements/).
 
-  The bootstrap shall create the project root marker file (`gitreqd.yaml`) in the target directory, with minimal valid content consistent with the {{ GRD-SYS-007:root_marker_filename }} schema, including `requirement_dirs` listing the requirements folder.
+  * If the target directory already contains a {{ GRD-SYS-007:root_marker_filename }} or the requirements folder, the CLI behavior (overwrite, skip, or error) shall be specified and consistent.
 
-  The bootstrap shall create a `requirements` folder in the target directory if it does not already exist as a directory.
-
-  If the target directory already contains a {{ GRD-SYS-007:root_marker_filename }} and `--force` is not given, the command shall fail with an error that mentions `--force`.
-
-  If `--force` is given, the command shall overwrite `gitreqd.yaml`.
-
-  If a `requirements` folder already exists, the command shall not fail and shall not delete existing contents.
-
-  If a path named `requirements` exists and is not a directory, the command shall fail.
-
-  When `--cursor-rules` is given, the command shall copy packaged `.cursor/rules` templates into the target directory.
-
-  When `--cursor-rules` is not given and standard input is a TTY, the command shall ask whether to add `.cursor` rules. When standard input is not a TTY, the command shall not add `.cursor` rules unless `--cursor-rules` is given.
+  * Confirm with the user if .cursor rules should be added to the target directory.
 attributes:
   rationale: |
     Users need a quick way to start a new gitreqd project without manually creating {{ GRD-SYS-007:root_marker_filename }} and the requirements directory structure.

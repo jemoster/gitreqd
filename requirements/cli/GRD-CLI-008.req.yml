@@ -2,26 +2,11 @@ id: GRD-CLI-008
 title: Essential command-line interface
 require: The product shall provide a command-line interface whose essential commands are bootstrap, validate, html, and schema.
 refinement: |
-  These four commands constitute the essential CLI. An implementation of the essential CLI shall provide all four commands.
+  Additional commands may exist in a given implementation; they are specified by other requirements and are not required of an implementation of the essential CLI.
 
-  Additional commands (for example format or resolve-conflicts) may exist in a given implementation. Additional commands are specified by other requirements and are not part of the essential CLI.
-
-  The essential CLI is specified independently of programming language. Satisfying the essential CLI requirements does not require TypeScript, Node.js, npm, or a TypeScript in-process API.
-
-  The command names shall be `bootstrap`, `validate`, `html`, and `schema`.
-
-  When no command name is given, the CLI shall run `validate`.
-
-  Global options shall include `--project-dir <dir>` (default: the current working directory) and `-h` / `--help`.
-
-  `gitreqd --help` and `gitreqd <command> --help` shall print usage for the interface or that command and exit with status 0.
-
-  A successful command shall exit with status 0. A failed command (validation errors, missing project root, invalid arguments that the command cannot honor, or I/O failure) shall exit with status 1 and write diagnostics to standard error.
-
-  Two implementations of the essential CLI, given the same project inputs, shall agree on validation success or failure, on the meaning of validation diagnostics (file path, optional line, and error), on the information content of the HTML report specified by GRD-HTML-*, and on the exported JSON Schema structure for the standard profile.
+  The essential CLI is specified independently of programming language.
 attributes:
-  rationale: |
-    A language-independent essential command set lets a future Rust CLI implement the same user-facing functions as the current TypeScript CLI without taking on TypeScript-only commands or distribution.
+  rationale: A language-independent essential command set allows the same CLI functions to be implemented in more than one language.
   status: active
 links:
   - satisfies: GRD-SYS-002

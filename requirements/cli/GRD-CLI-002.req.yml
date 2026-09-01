@@ -1,23 +1,17 @@
 id: GRD-CLI-002
-title: CLI html command
-require: The CLI shall provide an `html` command that generates a static HTML report of all discovered requirements.
+title: CLI HTML report
+require: The CLI shall generate a static HTML report of all requirements with a list view,
 refinement: |
-  The command name shall be `html`.
+  optional detail view, and satisfies links.
 
-  The report shall include a list view, per-requirement detail, and satisfies links, and shall otherwise conform to GRD-HTML-*.
+  By default, the report shall be generated in the current working directory.
 
-  By default, the report shall be written as `index.html` in the current working directory.
-
-  The user shall be able to specify a different output directory using `--output` or `-o`.
-
-  The command shall use the same project root discovery as other essential CLI commands. If no project root is found, the command shall fail with a diagnostic on standard error.
-
-  If the project fails validation, the command shall fail, write diagnostics to standard error, and shall not write the HTML report.
+  The user shall be able to specify a different output directory using the --output flag.
 attributes:
   rationale: |
-    Stakeholders and teams need a shareable, readable report of requirements without running an interactive tool.
+    Stakeholders and teams need a shareable, readable report of requirements
+    without running the tool.
   status: active
 links:
   - satisfies: GRD-CLI-008
-  - satisfies: GRD-CLI-003
-  - satisfies: GRD-HTML-001
+  - satisfies: GRD-CLI-001

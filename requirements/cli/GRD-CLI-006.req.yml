@@ -1,12 +1,12 @@
 id: GRD-CLI-006
 title: CLI format all requirement YAML files
-require: The CLI shall provide a command (or subcommand) that formats every requirement YAML file discovered for the project using the same discovery rules as other CLI commands that operate on the full requirement set (e.g. validation).
+require: The CLI shall provide a command (or subcommand) that formats every requirement YAML file discovered for the project using the same discovery rules as other CLI commands that operate on the full requirement set (e.g.
 refinement: |
-  This command is an additional CLI capability. It is not part of the essential CLI defined by GRD-CLI-008. An implementation of only the essential commands (bootstrap, validate, html, and schema) is not required to provide format.
+  validation).
 
-  The command name shall be `format`.
+  The command shall use the same project root discovery as other CLI commands (e.g.
 
-  The command shall use the same project root discovery as other CLI commands (e.g. from the current directory or `--project-dir`).
+  from the current directory or `--project-dir`).
 
   The command shall rewrite each discovered requirement file in place according to the formatting rules defined for requirement YAML (see GRD-SYS-011).
 

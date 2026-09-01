@@ -1,16 +1,12 @@
 id: GRD-SYS-009
 title: Requirement Schema
-require: The tool shall define a single source of truth for the requirement YAML file schema.
+require: The tool shall encode a schema for the requirement YAML file.
 refinement: |
-  The schema shall describe the structure and constraints of a requirement file, including id, title, require, refinement, attributes, links, satisfied_by, verified_by, parameters, and any fields contributed by the active profile.
+  This shall be a single source of truth for this tool.
 
-  The schema may be composed at runtime based on project configuration.
+  The schema may be composed at runtime based on configuration.
 
-  The schema shall be exportable as JSON Schema for editors and other consumers.
-
-  Implementations may encode the schema in a language-native validation library provided that validation results and exported JSON Schema are consistent with this source of truth.
+  The schema used shall be exportable to other needed schemas such as JSON Schema.
 attributes:
-  rationale: Encode the schema as a single source of truth that can be implemented in more than one programming language.
+  rationale: Encode the schema in a common format that allows for a single source of truth.
   status: active
-links:
-  - satisfies: GRD-SYS-002

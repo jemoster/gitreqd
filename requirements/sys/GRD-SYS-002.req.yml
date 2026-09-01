@@ -1,15 +1,9 @@
 id: GRD-SYS-002
-title: Core project capabilities
-require: The tool shall discover a project, load its requirements, validate them, and resolve links between them.
-refinement: |
-  These capabilities are the shared core used by the essential CLI commands and by other consumers (editor extensions, CI).
-
-  They are specified by observable behavior (which files are discovered, which documents are valid, which link targets exist), not by a particular programming language or in-process API.
-
-  A given implementation language may expose these capabilities as an in-process API, a command-line interface, or both.
+title: Discover, load, validate, and resolve
+require: The core shall discover a project, load requirements, validate, and resolve links so that CLI, VSCode, web portal, and CI can share consistent behavior.
 attributes:
   rationale: |
-    Shared capabilities keep discovery, loading, validation, and link resolution consistent across consumers without requiring every implementation to expose a TypeScript library.
+    A single engine avoids duplication and keeps behavior consistent across all consumers.
   status: active
 links:
   - satisfies: GRD-SYS-001

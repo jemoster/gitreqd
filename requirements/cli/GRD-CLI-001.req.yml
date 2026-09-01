@@ -1,16 +1,6 @@
 id: GRD-CLI-001
-title: CLI validate command
-require: The CLI shall provide a `validate` command that loads all requirements discovered for a project and validates them, reporting errors with file and line where possible.
-refinement: |
-  The command name shall be `validate`.
-
-  Validation shall include schema compliance and the project validation rulesets (unique IDs, filename-ID match, satisfies reference existence, and acyclic links).
-
-  Diagnostics shall be written to standard error. Each diagnostic shall include the requirement file path and, when a line is known, the line number.
-
-  When validation succeeds, the CLI shall write a short success summary to standard output, including the number of requirements validated.
-
-  The command shall use the same project root discovery as other essential CLI commands. If no project root is found, the command shall fail with a diagnostic on standard error.
+title: CLI validate requirements
+require: The CLI shall load all requirements discovered for a project and validate their schema, reporting errors with file and line where possible.
 attributes:
   rationale: Users need to run validation from the terminal and get actionable errors.
   status: active
@@ -18,4 +8,3 @@ links:
   - satisfies: GRD-CLI-008
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003
-  - satisfies: GRD-VALID-001
