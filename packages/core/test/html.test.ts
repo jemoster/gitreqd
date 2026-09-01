@@ -302,6 +302,29 @@ describe("generateFullHtml", () => {
       expect(html).not.toContain("<script>");
       expect(html).toContain("&lt;script&gt;");
     });
+
+    it("escapes angle brackets in markdown the same way as inline code and comparisons", () => {
+      const r = req("GRD-MD-004", "Title", {
+        refinement: [
+          "Comparisons use A < B and C > D.",
+          "",
+          "Inline code: `code with <tags>`.",
+          "",
+          "Quotes: the \"Editor\" view.",
+          "",
+          "Ampersands: foo & bar and already-escaped &amp; bar.",
+        ].join("\n"),
+      });
+      const html = generateFullHtml([r]);
+      expect(html).toContain("A &lt; B");
+      expect(html).toContain("C &gt; D");
+      expect(html).toContain("<code>code with &lt;tags&gt;</code>");
+      expect(html).not.toContain("&amp;lt;");
+      expect(html).toContain("&quot;Editor&quot;");
+      expect(html).toContain("foo &amp; bar");
+      expect(html).toContain("already-escaped &amp; bar");
+      expect(html).not.toContain("&amp;amp;");
+    });
   });
 
   describe("GRD-HTML-006: link requirement references in text", () => {

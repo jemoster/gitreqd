@@ -26,3 +26,23 @@ jobs:
         run: npm run package -w gitreqd-vscode
       - name: Run tests
         run: npm test
+
+  rust-test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.83.0
+      - name: Run cargo tests
+        run: cargo test --workspace
+      # GRD-CLI-009: same native-binary package step as the release workflow; catches packaging regressions on PRs.
+      - name: Package native Linux CLI binary
+        run: bash ./scripts/package-native-cli.sh
+      - name: Upload native Linux CLI binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitreqd-linux-x86_64
+          path: release/gitreqd-linux-x86_64
+          if-no-files-found: error

@@ -12,3 +12,14 @@ refinement: |
 attributes:
   rationale: A language-independent essential command set allows the same CLI functions to be implemented in more than one language, without changing the existing command requirements.
   status: active
+satisfied_by:
+  - artifact: crates/gitreqd/src/main.rs
+    description: Rust CLI binary exposing bootstrap, validate, html, and schema.
+  - artifact: crates/gitreqd-core/src/lib.rs
+    description: Rust core library used by the essential CLI (discovery, parse, validate, HTML, schema export).
+verified_by:
+  - artifact: crates/gitreqd/tests/cli.rs
+    description: Library-level tests for bootstrap, schema, validate, and html.
+  - artifact: crates/gitreqd/tests/bin_commands.rs
+    description: Binary tests for help, sample project validate/schema/html, and this repository.
+

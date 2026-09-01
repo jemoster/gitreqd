@@ -4,7 +4,7 @@ This page collects developer-focused documentation that was moved out of `README
 
 ## Current Components
 
-- **CLI** - Discover requirements, validate schema, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`.
+- **CLI** - Discover requirements, validate schema, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`. The TypeScript package provides the full command set; the Rust crates provide the essential commands (`bootstrap`, `validate`, `html`, `schema`).
 - **VS Code extension** - Navigate `satisfies` links, use Go to Definition on requirement IDs, preview requirements, and scaffold new requirements.
 - **Pre-commit hook** - Optional hook script under `scripts/` to run `gitreqd validate` on commit.
 
@@ -21,12 +21,20 @@ Workspace TypeScript packages:
 - `packages/core` - `@gitreqd/core`: core engine (discovery, parse, validate, resolve).
 - `packages/cli` - `gitreqd`: CLI package and `gitreqd` binary.
 - `packages/vscode` - `gitreqd-vscode`: extension source and packaging.
+
+Rust crates (independent essential CLI):
+
+- `crates/gitreqd-core` - core engine (discovery, parse, validate, HTML, schema export).
+- `crates/gitreqd` - `gitreqd` binary with bootstrap, validate, html, and schema.
+
+Shared product data:
+
 - `requirements/` - product requirements for gitreqd itself.
 - `sample_projects/` - test data only.
 
 ## Build From Source
 
-From repo root:
+TypeScript (full CLI including format and resolve-conflicts):
 
 ```bash
 npm install
@@ -45,6 +53,20 @@ cd packages/cli
 npm link
 ```
 
+Rust (essential commands: bootstrap, validate, html, schema):
+
+```bash
+cargo build --workspace
+cargo test --workspace
+cargo run -p gitreqd -- validate --project-dir sample_projects/basic
+```
+
+Install a local Rust binary onto PATH:
+
+```bash
+cargo install --path crates/gitreqd
+```
+
 ## Distribution
 
 ### CLI Packages
@@ -61,7 +83,15 @@ Install from generated artifacts:
 npm install -g ./release/*.tgz
 ```
 
-For GitHub-based releases and the concise release checklist, use `release.md`.
+Build the Linux x86_64 native CLI binary locally:
+
+```bash
+./scripts/package-native-cli.sh
+```
+
+The script writes `release/gitreqd-linux-x86_64`. Copy it onto `PATH` (for example `/usr/local/bin/gitreqd`). Publishing a GitHub Release uploads this asset via the CLI release workflow. Pull request CI also uploads that binary as a downloadable Actions artifact.
+
+For GitHub-based releases, branch artifact download, and how to dry-run packaging, use `release.md`.
 
 ### VS Code Extension
 
