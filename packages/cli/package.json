@@ -1,6 +1,6 @@
 {
   "name": "gitreqd",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Requirement management tool — discover, validate, and report requirements from YAML in your repo",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@gitreqd/core": "0.1.0",
+    "@gitreqd/core": "0.4.0",
     "yaml": "^2.6.1"
   },
   "devDependencies": {

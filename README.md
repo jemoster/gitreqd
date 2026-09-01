@@ -10,8 +10,8 @@ Install the latest published release directly from GitHub assets:
 
 ```bash
 npm install -g \
-  "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz" \
-  "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"
+  "https://github.com/jemoster/gitreqd/releases/download/v0.4.0/gitreqd-core-0.4.0.tgz" \
+  "https://github.com/jemoster/gitreqd/releases/download/v0.4.0/gitreqd-0.4.0.tgz"
 ```
 
 A Rust implementation of the essential commands (`bootstrap`, `validate`, `html`, `schema`) is also in this repository.

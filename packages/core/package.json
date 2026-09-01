@@ -1,6 +1,6 @@
 {
   "name": "@gitreqd/core",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Core engine for gitreqd — discovery, parse, validate, resolve",
   "type": "module",
   "main": "dist/index.js",
