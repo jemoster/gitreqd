@@ -1,7 +1,6 @@
 id: GRD-SYS-002
-title: Programmatic API
-require: The core shall expose a programmatic API for discover project, load requirements,
-refinement: validate, and resolve links so that CLI, VSCode, web portal, and CI can share the same engine.
+title: Discover, load, validate, and resolve
+require: The core shall discover a project, load requirements, validate, and resolve links so that CLI, VSCode, web portal, and CI can share consistent behavior.
 attributes:
   rationale: |
     A single engine avoids duplication and keeps behavior consistent across all consumers.

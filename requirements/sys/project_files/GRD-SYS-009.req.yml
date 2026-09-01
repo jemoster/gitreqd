@@ -1,6 +1,6 @@
 id: GRD-SYS-009
 title: Requirement Schema
-require: The tool shall encode a schema for the requirement YAML file in Zod.
+require: The tool shall encode a schema for the requirement YAML file.
 refinement: |
   This shall be a single source of truth for this tool.
 
