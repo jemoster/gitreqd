@@ -53,7 +53,7 @@ if old == new:
     sys.exit(0)
 
 def write_json(path: pathlib.Path, data: object) -> None:
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 for path in pkg_paths:
     pkg = json.loads(path.read_text(encoding="utf-8"))
@@ -116,7 +116,12 @@ def rewrite_text(rel: str) -> None:
     if not path.is_file():
         return
     text = path.read_text(encoding="utf-8")
-    text = text.replace(f"/releases/download/v{old}/", f"/releases/download/v{new}/")
+    # README tags may already disagree with package.json; always point install URLs at v${new}.
+    text = re.sub(
+        r"/releases/download/v\d+\.\d+\.\d+/",
+        f"/releases/download/v{new}/",
+        text,
+    )
     text = text.replace(f"gitreqd-core-{old}.tgz", f"gitreqd-core-{new}.tgz")
     text = text.replace(f"gitreqd-vscode-{old}.vsix", f"gitreqd-vscode-{new}.vsix")
     text = text.replace(f"gitreqd-{old}.tgz", f"gitreqd-{new}.tgz")

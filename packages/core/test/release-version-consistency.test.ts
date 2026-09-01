@@ -40,7 +40,11 @@ function writeJson(filePath: string, data: unknown): void {
 }
 
 function fixturePackageJson(name: string, version: string, withCoreDep: boolean): Record<string, unknown> {
-  const pkg: Record<string, unknown> = { name, version };
+  const pkg: Record<string, unknown> = {
+    name,
+    version,
+    description: "gitreqd — fixture",
+  };
   if (withCoreDep) {
     pkg.dependencies = { "@gitreqd/core": version };
   }
@@ -125,6 +129,9 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     });
 
     expect(readJson(path.join(tmpDir, "packages", "core", "package.json")).version).toBe("9.8.7");
+    const corePkgText = fs.readFileSync(path.join(tmpDir, "packages", "core", "package.json"), "utf-8");
+    expect(corePkgText).toContain("gitreqd — fixture");
+    expect(corePkgText).not.toContain("\\u2014");
     expect(readJson(path.join(tmpDir, "packages", "cli", "package.json")).version).toBe("9.8.7");
     expect(readJson(path.join(tmpDir, "packages", "vscode", "package.json")).version).toBe("9.8.7");
     const cliDeps = readJson(path.join(tmpDir, "packages", "cli", "package.json")).dependencies as Record<
@@ -148,6 +155,29 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(fs.readFileSync(path.join(tmpDir, "packages", "vscode", "README.md"), "utf-8")).toContain(
       "gitreqd-vscode-9.8.7.vsix"
     );
+  });
+
+  it("bump-version.sh rewrites README tags that already disagree with package.json", () => {
+    const tmpDir = makeTempDir();
+    seedVersionTree(tmpDir, "0.1.0");
+    fs.writeFileSync(
+      path.join(tmpDir, "README.md"),
+      [
+        "npm install -g \\",
+        '  "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz" \\',
+        '  "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"',
+        "",
+      ].join("\n")
+    );
+    execFileSync("bash", [path.join(tmpDir, "scripts", "bump-version.sh"), "9.8.7"], {
+      cwd: tmpDir,
+      stdio: "pipe",
+    });
+    const readme = fs.readFileSync(path.join(tmpDir, "README.md"), "utf-8");
+    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-core-9.8.7.tgz");
+    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-9.8.7.tgz");
+    expect(readme).not.toContain("v0.2.0");
+    expect(readme).not.toContain("0.1.0");
   });
 
   it("assert-release-tag.sh accepts a matching tag and required artifact names", () => {
