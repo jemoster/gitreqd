@@ -17,5 +17,6 @@ attributes:
   rationale: |
     Reduce manual conflict resolution effort by leveraging Cursor to propose or apply resolutions during merges. Requiring schema compliance ensures that automatic resolution does not produce invalid requirement files.
   status: active
+  applicability: cli-extended
 links:
   - satisfies: GRD-GIT-001

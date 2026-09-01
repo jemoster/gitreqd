@@ -9,3 +9,4 @@ attributes:
   rationale: |
     Running tests on PRs catches regressions before merge and gives reviewers a clear pass/fail signal. Making test results visible on the PR supports branch protection rules that require checks to pass before merging.
   status: active
+  applicability: typescript

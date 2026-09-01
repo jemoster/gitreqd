@@ -5,10 +5,16 @@ refinement: |
   * If no project root is found, the CLI shall exit with an error.
 
   * The CLI shall stop searching for a project root as soon as the first {{ GRD-SYS-007:root_marker_filename }} file is found.
+
+  * The given path shall be the directory specified by `--project-dir` when that option is present, otherwise the current working directory.
+
+  This discovery rule applies to essential CLI commands that operate on an existing project (`validate`, `html`, and `schema`). The `bootstrap` command uses `--project-dir` (or the current working directory) as the directory to initialize and does not walk up looking for an existing project root.
 attributes:
   rationale: |
     Users need the CLI to reliably locate the correct project root before running validation or generating reports.
   status: active
+  applicability: essential-cli
 links:
+  - satisfies: GRD-CLI-008
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003

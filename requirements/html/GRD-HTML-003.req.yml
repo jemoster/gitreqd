@@ -6,5 +6,6 @@ attributes:
   rationale: |
     Simplify navigation by grouping requirements.
   status: active
+  applicability: essential-cli
 links:
   - satisfies: GRD-HTML-001

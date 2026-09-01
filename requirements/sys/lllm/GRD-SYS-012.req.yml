@@ -9,3 +9,4 @@ attributes:
   rationale: |
     Centralizing external LLM configuration in project settings ensures consistent behavior across LLM-powered features and avoids hardcoded provider assumptions.
   status: active
+  applicability: cli-extended

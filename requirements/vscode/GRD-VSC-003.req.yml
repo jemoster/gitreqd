@@ -19,5 +19,6 @@ attributes:
   rationale: |
     A split Editor/YAML experience allows users to both directly edit the underlying requirement YAML and immediately see a rendered representation in a form consistent with exported reports. Sharing a common HTML base between the per-requirement Editor and the full report minimizes duplication, reduces divergence in presentation, and ensures that what users see in the editor accurately reflects the generated documentation.
   status: active
+  applicability: vscode
 links:
   - satisfies: GRD-VSC-001

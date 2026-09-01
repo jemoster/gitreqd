@@ -41,6 +41,7 @@ attributes:
   rationale: |
     Explicit configuration of requirement directories makes discovery predictable and avoids coupling to ad-hoc filesystem layouts.
   status: active
+  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002
 parameters:

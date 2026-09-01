@@ -1,27 +1,22 @@
 id: GRD-SYS-010
-title: Profiles API for standard and user-defined profiles
-require: The tool shall be structured so that behavior for requirement YAML documents and downstream
+title: Profiles for standard and user-defined requirement interpretation
+require: The tool shall interpret requirement YAML documents, validate them, and generate outputs according to a single active profile selected by project configuration.
 refinement: |
-  consumers is driven by an **profiles API**.  Only a single standard profile is active according to project configuration.  The active profile shall define or contribute the following:
+  Only a single standard profile is active according to project configuration. The active profile shall define or contribute the following:
 
-  * **Requirement document fields** — which fields are required, optional, or constrained in
+  * **Requirement document fields** — which fields are required, optional, or constrained in requirement YAML documents (including any standard-specific or custom fields beyond the core shape).
 
-  requirement YAML documents (including any standard-specific or custom fields beyond the core
+  * **Output generation** — how tools such as HTML report generation shall produce output for requirements governed by that profile (structure, sections, and presentation rules as applicable).
 
-  shape).
+  * **Validation** — validation rules and checks applied to requirements under that profile, including integration with the project’s validation rulesets.
 
-  * **Output generation** — how tools such as HTML report generation shall produce output for
+  The profile mechanism shall be structured to allow for the addition of new profiles in the future.
 
-  requirements governed by that profile (structure, sections, and presentation rules as
-
-  applicable).
-
-  * **Validation** — validation rules and checks applied to requirements under that profile,
-
-  including integration with the project’s validation rulesets.
-
-  The profiles API shall be structured to allow for the addition of new profiles in the future.
+  Profile behavior is specified independently of programming language. Implementations may realize profiles as in-process modules, configuration, or both.
 attributes:
   rationale: |
-    A single extensions API lets the same core engine serve generic use and regulated domains without forking the tool, while keeping YAML structure, validation, and reports aligned per profile.
-  status: ACTIVE
+    A single profile mechanism lets the same core capabilities serve generic use and regulated domains without forking the tool, while keeping YAML structure, validation, and reports aligned per profile.
+  status: active
+  applicability: essential-cli
+links:
+  - satisfies: GRD-SYS-002

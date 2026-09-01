@@ -5,3 +5,4 @@ refinement: When a requirement defines a `parameters` map the preview shall disp
 attributes:
   rationale: HTML output is easily consumed and distributed outside of a coding environment.
   status: active
+  applicability: essential-cli

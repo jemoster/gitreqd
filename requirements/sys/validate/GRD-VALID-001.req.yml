@@ -5,3 +5,4 @@ attributes:
   rationale: |
     Users need a set of rules to validate their requirements.
   status: active
+  applicability: essential-cli

@@ -16,6 +16,7 @@ attributes:
     Creating new requirements from the explorer with a schema-based template reduces
     manual copy-paste and ensures new files conform to the requirement format.
   status: active
+  applicability: vscode
 links:
   - satisfies: GRD-VSC-001
   - satisfies: GRD-VSC-004

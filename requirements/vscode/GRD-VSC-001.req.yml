@@ -7,3 +7,4 @@ attributes:
     IDE integration improves discoverability and workflow when editing and
     navigating requirement files as part of development.
   status: active
+  applicability: vscode

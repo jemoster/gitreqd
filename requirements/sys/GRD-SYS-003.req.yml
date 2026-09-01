@@ -8,5 +8,6 @@ attributes:
     Enables the tool to work in any repo that opts in by adding the marker
     and to ignore requirements outside the project.
   status: active
+  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-002

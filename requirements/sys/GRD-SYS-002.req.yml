@@ -1,10 +1,16 @@
 id: GRD-SYS-002
-title: Programmatic API
-require: The core shall expose a programmatic API for discover project, load requirements,
-refinement: validate, and resolve links so that CLI, VSCode, web portal, and CI can share the same engine.
+title: Core project capabilities
+require: The tool shall discover a project, load its requirements, validate them, and resolve links between them.
+refinement: |
+  These capabilities are the shared core used by the essential CLI commands and by other consumers (editor extensions, CI).
+
+  They are specified by observable behavior (which files are discovered, which documents are valid, which link targets exist), not by a particular programming language or in-process API.
+
+  A given implementation language may expose these capabilities as an in-process API, a command-line interface, or both.
 attributes:
   rationale: |
-    A single engine avoids duplication and keeps behavior consistent across all consumers.
+    Shared capabilities keep discovery, loading, validation, and link resolution consistent across consumers without requiring every implementation to expose a TypeScript library.
   status: active
+  applicability: essential-cli
 links:
   - satisfies: GRD-SYS-001

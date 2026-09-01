@@ -1,8 +1,11 @@
 id: GRD-CLI-007
-title: Install CLI directly from source reference
-require: The project distribution shall publish the installable CLI source artifacts through GitHub release assets and support installing the gitreqd CLI directly from a source reference using npm (for example a GitHub git URL or GitHub-hosted tarball URL) so users can install and run the CLI without manually downloading or cloning the repository first.
+title: Install TypeScript CLI directly from source reference
+require: The TypeScript project distribution shall publish the installable CLI source artifacts through GitHub release assets and support installing the gitreqd CLI directly from a source reference using npm (for example a GitHub git URL or GitHub-hosted tarball URL) so users can install and run the TypeScript CLI without manually downloading or cloning the repository first.
+refinement: |
+  This requirement applies to the TypeScript/npm distribution only. A command-line implementation in another language may use a different distribution mechanism and is not required to be installable via npm.
 attributes:
-  rationale: Users should be able to install the CLI in one command from a GitHub-hosted source location when a registry-published package is unavailable or undesired, while preserving a consistent installation path and a predictable release source.
+  rationale: Users should be able to install the TypeScript CLI in one command from a GitHub-hosted source location when a registry-published package is unavailable or undesired, while preserving a consistent installation path and a predictable release source.
   status: active
+  applicability: typescript
 links:
   - satisfies: GRD-SYS-008

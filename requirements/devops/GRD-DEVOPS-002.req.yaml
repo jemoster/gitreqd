@@ -13,3 +13,4 @@ attributes:
   rationale: |
     Shipping the extension as a release artifact gives users and testers a reproducible, versioned installable without cloning and building from source, and aligns the published binary with the tagged source for that release.
   status: active
+  applicability: vscode
