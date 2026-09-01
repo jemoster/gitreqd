@@ -14,7 +14,9 @@ npm install -g \
   "https://github.com/jemoster/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"
 ```
 
-A Rust implementation of the essential commands (`bootstrap`, `validate`, `html`, `schema`) is also in this repository:
+A Rust implementation of the essential commands (`bootstrap`, `validate`, `html`, `schema`) is also in this repository.
+
+On Linux x86_64, download `gitreqd-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. To build from source instead:
 
 ```bash
 cargo install --path crates/gitreqd

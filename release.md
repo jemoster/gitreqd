@@ -29,9 +29,11 @@ Use semantic versioning for `vX.Y.Z`.
 ## 4) Verify artifacts and install path
 
 1. Confirm release automation completed successfully.
-2. Confirm required artifacts are attached to the release, including CLI `.tgz` assets produced by workflow automation.
+2. Confirm required artifacts are attached to the release, including CLI `.tgz` assets and the Linux x86_64 native CLI binary (`gitreqd-linux-x86_64`) produced by workflow automation.
 3. Validate direct install from a GitHub-hosted source tarball URL, for example:
 
 ```bash
 npm install -g "https://github.com/<org>/<repo>/releases/download/vX.Y.Z/<artifact>.tgz"
 ```
+
+4. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `gitreqd`.

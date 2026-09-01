@@ -42,3 +42,26 @@ jobs:
             exit 1
           fi
           gh release upload "${{ github.event.release.tag_name }}" "${tgz_files[@]}" --clobber
+
+  native-cli-binary:
+    # GRD-CLI-009: Publish a native gitreqd CLI binary for Linux x86_64 as a GitHub Release asset.
+    name: Build and upload Linux x86_64 CLI binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.83.0
+      - name: Package native CLI binary
+        run: bash ./scripts/package-native-cli.sh
+      - name: Upload native CLI binary to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          asset="release/gitreqd-linux-x86_64"
+          if [ ! -f "${asset}" ]; then
+            echo "ERROR: Native CLI binary not found: ${asset}"
+            exit 1
+          fi
+          gh release upload "${{ github.event.release.tag_name }}" "${asset}" --clobber

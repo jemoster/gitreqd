@@ -6,3 +6,11 @@ attributes:
   status: active
 links:
   - satisfies: GRD-SYS-008
+satisfied_by:
+  - artifact: scripts/package-native-cli.sh
+    description: Builds the Linux x86_64 gitreqd binary into release/gitreqd-linux-x86_64.
+  - artifact: .github/workflows/release-cli.yml
+    description: Release job uploads the native Linux x86_64 CLI binary as a GitHub Release asset.
+verified_by:
+  - artifact: packages/core/test/release-native-cli-artifacts.test.ts
+    description: Asserts the packaging script, release workflow, and release guide cover the native binary asset.

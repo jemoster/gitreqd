@@ -37,3 +37,6 @@ jobs:
         uses: dtolnay/rust-toolchain@1.83.0
       - name: Run cargo tests
         run: cargo test --workspace
+      # GRD-CLI-009: same native-binary package step as the release workflow; catches packaging regressions on PRs.
+      - name: Package native Linux CLI binary
+        run: bash ./scripts/package-native-cli.sh

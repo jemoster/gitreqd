@@ -83,6 +83,14 @@ Install from generated artifacts:
 npm install -g ./release/*.tgz
 ```
 
+Build the Linux x86_64 native CLI binary locally:
+
+```bash
+./scripts/package-native-cli.sh
+```
+
+The script writes `release/gitreqd-linux-x86_64`. Copy it onto `PATH` (for example `/usr/local/bin/gitreqd`). Publishing a GitHub Release uploads this asset via the CLI release workflow.
+
 For GitHub-based releases and the concise release checklist, use `release.md`.
 
 ### VS Code Extension
