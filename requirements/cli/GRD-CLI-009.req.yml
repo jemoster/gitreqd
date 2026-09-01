@@ -1,0 +1,16 @@
+id: GRD-CLI-009
+title: Publish native CLI binary as GitHub Release asset
+require: The project distribution shall publish a native gitreqd CLI binary for {{ GRD-SYS-008:native_binary_os }} {{ GRD-SYS-008:native_binary_arch }} as a GitHub Release asset.
+refinement: |
+  {{ GRD-SYS-008:native_binary_os }} {{ GRD-SYS-008:native_binary_arch }} is 64-bit x86 (amd64). It is the only required native-binary target; other operating systems and architectures are not required.
+
+  This native binary is distinct from the npm-installable CLI source artifacts specified by GRD-CLI-007.
+
+  The binary shall be built by the project's release automation on GitHub (for example GitHub Actions triggered by a published GitHub Release) rather than relying on a manual local build for the published artifact.
+
+  Users shall be able to download the binary from the GitHub Release page for that version without cloning the repository or installing Node.js.
+attributes:
+  rationale: Users who prefer a native executable need a versioned, downloadable Linux 64-bit binary on the release page so they can install the CLI on a host without npm.
+  status: active
+links:
+  - satisfies: GRD-SYS-008
