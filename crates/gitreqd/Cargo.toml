@@ -1,0 +1,21 @@
+[package]
+name = "gitreqd"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Requirement management CLI — discover, validate, and report requirements from YAML"
+publish = false
+
+[lib]
+name = "gitreqd_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "gitreqd"
+path = "src/main.rs"
+
+[dependencies]
+gitreqd-core.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true

@@ -26,3 +26,14 @@ jobs:
         run: npm run package -w gitreqd-vscode
       - name: Run tests
         run: npm test
+
+  rust-test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.83.0
+      - name: Run cargo tests
+        run: cargo test --workspace
