@@ -1,5 +1,7 @@
 //! Core API for gitreqd. Used by the CLI (GRD-CLI-008).
 
+extern crate gitreqd_macros as gitreqd;
+
 pub mod discovery;
 pub mod error;
 pub mod html;
@@ -11,6 +13,7 @@ pub mod requirement_files;
 pub mod rules;
 pub mod schema;
 pub mod schema_compose;
+pub mod source_links;
 pub mod types;
 
 pub use discovery::{
@@ -19,7 +22,7 @@ pub use discovery::{
     ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
 };
 pub use error::{DiscoverResult, Error};
-pub use html::generate_full_html;
+pub use html::{generate_full_html, generate_full_html_with_source_links};
 pub use load::{get_requirements_with_links, load_requirements};
 pub use parameters::{resolve_text, resolve_to_segments, ResolvedSegment, SegmentKind};
 pub use parse::{parse_requirement_content, parse_requirement_data, parse_requirement_file};
@@ -39,7 +42,9 @@ pub use rules::{
 };
 pub use schema::{export_requirement_file_json_schema, parse_requirement_value};
 pub use schema_compose::requirement_schema_compose_options_for_project;
+pub use source_links::collect_rust_source_links;
 pub use types::{
     ArtifactRef, Link, LoadResult, ParameterValue, ProjectInfo, Requirement,
-    RequirementSchemaComposeOptions, RequirementWithSource, ValidationError,
+    RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, SourceLinkKind,
+    ValidationError,
 };

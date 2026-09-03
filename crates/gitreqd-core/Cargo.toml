@@ -15,3 +15,6 @@ walkdir.workspace = true
 regex.workspace = true
 pulldown-cmark = { workspace = true, features = ["html"] }
 indexmap.workspace = true
+syn.workspace = true
+proc-macro2.workspace = true
+gitreqd-macros.workspace = true

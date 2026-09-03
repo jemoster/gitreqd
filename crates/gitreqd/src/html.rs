@@ -1,9 +1,10 @@
 //! GRD-CLI-002: CLI HTML report.
 
 use gitreqd_core::{
-    discover_project_root_candidates, load_active_profile, load_requirements, normalize_path,
-    ROOT_MARKER_HINT,
+    collect_rust_source_links, discover_project_root_candidates, load_active_profile,
+    load_requirements, normalize_path, ROOT_MARKER_HINT,
 };
+use std::collections::HashSet;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -60,7 +61,16 @@ pub fn run_html(project_dir: &Path, output_dir: &Path) -> io::Result<bool> {
     let out_dir = normalize_path(&out_dir);
     fs::create_dir_all(&out_dir)?;
     let html_path = normalize_path(&out_dir.join("index.html"));
-    let html = profile.generate_full_html(&result.requirements);
+    let known_ids: HashSet<String> = result.requirements.iter().map(|r| r.id.clone()).collect();
+    // GRD-HTML-007: HTML consumes collected source-link records; this CLI command is the composition point.
+    let source_links = match collect_rust_source_links(root, &known_ids) {
+        Ok(links) => links,
+        Err(err) => {
+            writeln!(io::stderr(), "{err}")?;
+            Vec::new()
+        }
+    };
+    let html = profile.generate_full_html(&result.requirements, &source_links);
     fs::write(&html_path, html)?;
     writeln!(
         io::stdout(),

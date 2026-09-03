@@ -125,6 +125,7 @@ version = "0.4.0"
 dependencies = [
  "clap",
  "gitreqd-core",
+ "gitreqd-macros",
  "serde_json",
  "serde_yaml",
 ]
@@ -133,14 +134,26 @@ dependencies = [
 name = "gitreqd-core"
 version = "0.4.0"
 dependencies = [
+ "gitreqd-macros",
  "indexmap",
+ "proc-macro2",
  "pulldown-cmark",
  "regex",
  "serde",
  "serde_json",
  "serde_yaml",
+ "syn 2.0.119",
  "thiserror",
  "walkdir",
+]
+
+[[package]]
+name = "gitreqd-macros"
+version = "0.4.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]

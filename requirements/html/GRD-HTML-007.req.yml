@@ -1,0 +1,20 @@
+id: GRD-HTML-007
+title: Source links in the HTML report
+require: The HTML report shall present the source-link records associated with each requirement.
+refinement: |
+  This consumer reads source-link records as defined by GRD-SYS-017. It does not define how records are produced.
+
+  For each requirement, include the records whose `requirement_id` matches that requirement:
+
+  - Records with kind `implements` appear under **Implemented by**.
+  - Records with kind `verifies` appear under **Verified by**.
+
+  Each presented record identifies the source using `path`, `item`, and `linespace`. Omit a section when that requirement has no records of the corresponding kind.
+
+  How records are collected, and which producers exist, is out of scope for this requirement.
+attributes:
+  rationale: The HTML report should show where a requirement is implemented and verified whenever source-link records exist, without depending on a particular producer.
+  status: active
+links:
+  - satisfies: GRD-HTML-001
+  - satisfies: GRD-SYS-017

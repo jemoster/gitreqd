@@ -75,6 +75,50 @@ pub struct ArtifactRef {
     pub description: Option<String>,
 }
 
+/// Kind of a collected source-link record.
+#[gitreqd::implements("GRD-SYS-017")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum SourceLinkKind {
+    Implements,
+    Verifies,
+}
+
+/// GRD-SYS-017: Collected association of a requirement with a located source artifact.
+#[gitreqd::implements("GRD-SYS-017")]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SourceLink {
+    pub requirement_id: String,
+    pub kind: SourceLinkKind,
+    pub path: String,
+    pub item: String,
+    pub linespace: Vec<u32>,
+}
+
+impl SourceLink {
+    /// Build a record, keeping `linespace` unique and strictly increasing.
+    /// Returns `None` when `linespace` is empty.
+    pub fn new(
+        requirement_id: impl Into<String>,
+        kind: SourceLinkKind,
+        path: impl Into<String>,
+        item: impl Into<String>,
+        mut linespace: Vec<u32>,
+    ) -> Option<Self> {
+        if linespace.is_empty() {
+            return None;
+        }
+        linespace.sort_unstable();
+        linespace.dedup();
+        Some(Self {
+            requirement_id: requirement_id.into(),
+            kind,
+            path: path.into(),
+            item: item.into(),
+            linespace,
+        })
+    }
+}
+
 /// Requirement shape for YAML files. Runtime validation is enforced by the schema
 /// in `schema` (GRD-SYS-009); this struct is the Rust contract.
 #[derive(Debug, Clone, PartialEq)]

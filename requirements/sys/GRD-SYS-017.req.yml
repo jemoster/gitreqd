@@ -1,0 +1,20 @@
+id: GRD-SYS-017
+title: Source-link record
+require: The core shall define a source-link record that associates a requirement with a located source artifact and a link kind.
+refinement: |
+  A source-link record is collected data shared by producers (which create records) and consumers (which read them). It is not a requirement YAML field. It is distinct from `satisfied_by` and `verified_by` (GRD-SYS-016) and from requirement-to-requirement `links`.
+
+  Each record includes:
+
+  - `requirement_id` (string, required): the ID of a loaded requirement.
+  - `kind` (required): `implements` when the artifact is an implementation of the requirement, or `verifies` when the artifact is a verification of the requirement.
+  - `path` (string, required): a project-relative file path locating the artifact.
+  - `item` (required): the type of language object the link is attached to, as determined by the language-specific parser that produced the record (for example a function, module, or type).
+  - `linespace` (required): one or more 1-based line numbers in `path` that the link refers to. Line numbers are unique and strictly increasing. A single-line object has one line; a multi-line object includes every line in that object's extent.
+
+  Multiple records may share a `requirement_id`. Producers contribute records into a collected set. Consumers read that set. This requirement does not define any producer or consumer.
+attributes:
+  rationale: A single record shape lets independent sources of implementation and verification links feed the same consumers without coupling those sources to each other or to a particular report.
+  status: active
+links:
+  - satisfies: GRD-SYS-002

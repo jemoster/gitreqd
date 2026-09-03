@@ -1,5 +1,7 @@
 //! CLI tests for GRD-CLI-004 / GRD-CLI-005 / GRD-CLI-001 / GRD-CLI-002.
 
+extern crate gitreqd_macros as gitreqd;
+
 use gitreqd_cli::{
     run_bootstrap, run_html, run_schema, run_validate, BootstrapOptions, SchemaOutputFormat,
 };
@@ -165,4 +167,47 @@ fn validate_and_html_on_temp_project() {
     let html = fs::read_to_string(out.join("index.html")).unwrap();
     assert!(html.contains("DEMO-001"));
     assert!(html.contains("Requirements"));
+}
+
+#[gitreqd::verifies("GRD-HTML-007")]
+#[test]
+fn html_presents_source_links_from_rust_attributes() {
+    let tmp = temp_dir();
+    fs::write(
+        tmp.join(ROOT_MARKER),
+        "requirement_dirs:\n  - requirements\n",
+    )
+    .unwrap();
+    let reqs = tmp.join("requirements");
+    fs::create_dir_all(&reqs).unwrap();
+    fs::write(
+        reqs.join("DEMO-001.req.yml"),
+        "id: DEMO-001\ntitle: Demo\nrequire: The system shall demonstrate validation.\n",
+    )
+    .unwrap();
+    let src = tmp.join("src");
+    fs::create_dir_all(&src).unwrap();
+    fs::write(
+        src.join("lib.rs"),
+        r#"#[gitreqd::implements("DEMO-001")]
+fn demo() {}
+
+#[gitreqd::verifies("DEMO-001")]
+#[test]
+fn checks_demo() {}
+"#,
+    )
+    .unwrap();
+
+    let out = tmp.join("html-out");
+    assert!(run_html(&tmp, &out).unwrap());
+    let html = fs::read_to_string(out.join("index.html")).unwrap();
+    let start = html.find("id=\"DEMO-001\"").unwrap();
+    let end = html[start..].find("</section>").unwrap() + start;
+    let detail = &html[start..end];
+    assert!(detail.contains("Implemented by"));
+    assert!(detail.contains("<code>src/lib.rs</code>"));
+    assert!(detail.contains("function"));
+    assert!(detail.contains("Verified by"));
+    assert!(detail.contains("test"));
 }
