@@ -26,5 +26,13 @@ refinement: |
 attributes:
   rationale: Custom Rust attributes on implementation and test items are one source of requirement-to-source links, independent of other producers and of report formatting.
   status: active
+satisfied_by:
+  - artifact: crates/gitreqd-core/src/source_links.rs
+    description: Walks Rust sources and emits source-link records from tracing attributes.
+  - artifact: crates/gitreqd-macros/src/lib.rs
+    description: Proc-macro attributes so implements and verifies tags compile on Rust items.
+verified_by:
+  - artifact: crates/gitreqd-core/src/source_links.rs
+    description: Unit tests cover collection, unknown IDs, skipped directories, item types, and self-annotations.
 links:
   - satisfies: GRD-SYS-017

@@ -16,5 +16,11 @@ refinement: |
 attributes:
   rationale: A single record shape lets independent sources of implementation and verification links feed the same consumers without coupling those sources to each other or to a particular report.
   status: active
+satisfied_by:
+  - artifact: crates/gitreqd-core/src/types.rs
+    description: SourceLink and SourceLinkKind define the collected source-link record.
+verified_by:
+  - artifact: crates/gitreqd-core/src/source_links.rs
+    description: Unit tests cover record construction and linespace normalization.
 links:
   - satisfies: GRD-SYS-002
