@@ -1,11 +1,13 @@
 id: GRD-SYS-012
-title: Configure external LLM providers in project config
-require: The tool shall allow configuration of external LLM providers in the project root marker file `{{ GRD-SYS-007:root_marker_filename }}`.
+title: No external LLM provider configuration
+require: The tool shall not configure external LLM providers in the project root marker file `{{ GRD-SYS-007:root_marker_filename }}`.
 refinement: |
-  The configuration shall support selecting a provider and specifying provider-specific connection settings required for the tool to make LLM requests.
+  The project root marker shall not define an `llm` configuration block for selecting a provider or connection settings.
 
-  Features that use LLM capabilities shall read their provider configuration from `{{ GRD-SYS-007:root_marker_filename }}` and shall fail with a clear error if required LLM configuration is missing or invalid.
+  Features shall not read LLM provider configuration from `{{ GRD-SYS-007:root_marker_filename }}`.
+
+  This withdraws the previous requirement that LLM-backed features load provider settings from the root marker.
 attributes:
   rationale: |
-    Centralizing external LLM configuration in project settings ensures consistent behavior across LLM-powered features and avoids hardcoded provider assumptions.
+    LLM provider configuration existed to support merge-conflict resolution, which is being removed. Unused provider configuration should not remain in the product.
   status: active
