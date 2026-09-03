@@ -21,11 +21,3 @@ attributes:
   status: active
 links:
   - satisfies: GRD-VSC-001
-satisfied_by:
-  - artifact: crates/gitreqd-core/src/html.rs
-    description: Rust engine generates single-requirement HTML that shares detail markup and styling with the full report.
-  - artifact: crates/gitreqd-core/src/profile/types.rs
-    description: Profiles API exposes single-requirement HTML generation.
-verified_by:
-  - artifact: crates/gitreqd-core/src/html.rs
-    description: Unit tests cover single-requirement HTML structure, styling, escaping, parameter resolution, reverse links, and source links.
