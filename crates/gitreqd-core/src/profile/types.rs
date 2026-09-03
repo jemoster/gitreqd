@@ -32,4 +32,11 @@ pub trait RequirementProfile: Send + Sync {
         requirements: &[RequirementWithSource],
         source_links: &[SourceLink],
     ) -> String;
+    /// GRD-VSC-003 / GRD-SYS-010: Single-requirement HTML using the same detail rendering as the full report.
+    fn generate_single_requirement_html(
+        &self,
+        requirement: &RequirementWithSource,
+        all_requirements: Option<&[RequirementWithSource]>,
+        source_links: &[SourceLink],
+    ) -> String;
 }

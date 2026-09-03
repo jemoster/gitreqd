@@ -2,7 +2,9 @@
 
 use std::path::Path;
 
-use crate::html::generate_full_html_with_source_links;
+use crate::html::{
+    generate_full_html_with_source_links, generate_single_requirement_html_with_source_links,
+};
 use crate::parse::{parse_requirement_content, parse_requirement_file};
 use crate::rules::validate_requirements;
 use crate::schema::export_requirement_file_json_schema;
@@ -62,5 +64,18 @@ impl RequirementProfile for StandardProfile {
         source_links: &[SourceLink],
     ) -> String {
         generate_full_html_with_source_links(requirements, source_links)
+    }
+
+    fn generate_single_requirement_html(
+        &self,
+        requirement: &RequirementWithSource,
+        all_requirements: Option<&[RequirementWithSource]>,
+        source_links: &[SourceLink],
+    ) -> String {
+        generate_single_requirement_html_with_source_links(
+            requirement,
+            all_requirements,
+            source_links,
+        )
     }
 }

@@ -27,7 +27,10 @@ pub use format::{
     format_project_requirement_files, format_requirement_to_yaml,
     normalize_requirement_file_text_for_compare, FormatProjectResult,
 };
-pub use html::{generate_full_html, generate_full_html_with_source_links};
+pub use html::{
+    generate_full_html, generate_full_html_with_source_links, generate_single_requirement_html,
+    generate_single_requirement_html_with_source_links,
+};
 pub use load::{get_requirements_with_links, load_requirements};
 pub use parameters::{resolve_text, resolve_to_segments, ResolvedSegment, SegmentKind};
 pub use parse::{parse_requirement_content, parse_requirement_data, parse_requirement_file};
