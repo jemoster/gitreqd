@@ -1,0 +1,30 @@
+id: GRD-SYS-018
+title: Rust attribute source links
+require: The tool shall collect source-link records from gitreqd tracing attributes on Rust items.
+refinement: |
+  This producer creates source-link records as defined by GRD-SYS-017. It does not define how records are displayed.
+
+  Rust items are tagged with:
+
+  - `#[gitreqd::implements("REQ-ID")]` — emit a record with `kind` `implements` for each listed ID.
+  - `#[gitreqd::verifies("REQ-ID")]` — emit a record with `kind` `verifies` for each listed ID.
+
+  Each attribute takes one or more requirement IDs as string literals. The kind comes from the attribute name.
+
+  Example:
+
+  ```rust
+  #[gitreqd::implements("GRD-SYS-017")]
+  pub fn collect_source_links() {}
+
+  #[gitreqd::verifies("GRD-SYS-017")]
+  #[test]
+  fn collects_implements_attribute() {}
+  ```
+
+  Scan `*.rs` files under the project root, excluding generated and dependency directories such as `target/`. For each recognized attribute, a Rust parser identifies the tagged object and emits records with `path` set to that file, `item` set to the parser's type for that object (for example function, module, struct, trait, constant, or test), and `linespace` set to the 1-based lines of that object. Omit IDs that are not in the loaded requirement set.
+attributes:
+  rationale: Custom Rust attributes on implementation and test items are one source of requirement-to-source links, independent of other producers and of report formatting.
+  status: active
+links:
+  - satisfies: GRD-SYS-017
