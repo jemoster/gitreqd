@@ -754,6 +754,75 @@ fn source_links_for_requirement<'a>(
         .collect()
 }
 
+/// GRD-VSC-003: Single-requirement HTML shares base structure/styling with the full report.
+/// GRD-HTML-004: Refinement and rationale are rendered as Markdown (same as the full report).
+pub fn generate_single_requirement_html(
+    requirement: &RequirementWithSource,
+    all_requirements: Option<&[RequirementWithSource]>,
+) -> String {
+    generate_single_requirement_html_with_source_links(requirement, all_requirements, &[])
+}
+
+/// GRD-VSC-003: Single-requirement HTML; GRD-HTML-007: optional source-link records.
+#[gitreqd::implements("GRD-VSC-003")]
+pub fn generate_single_requirement_html_with_source_links(
+    requirement: &RequirementWithSource,
+    all_requirements: Option<&[RequirementWithSource]>,
+    source_links: &[SourceLink],
+) -> String {
+    let fallback;
+    let list: &[RequirementWithSource] = match all_requirements {
+        Some(reqs) if !reqs.is_empty() => reqs,
+        _ => {
+            fallback = [requirement.clone()];
+            &fallback
+        }
+    };
+    let by_id: HashMap<String, &RequirementWithSource> =
+        list.iter().map(|r| (r.id.clone(), r)).collect();
+    let linked_from = linked_from_map(list);
+    let req_links = source_links_for_requirement(source_links, &requirement.id);
+    let detail = requirement_detail_html(
+        requirement,
+        linked_from.get(&requirement.id).map(|v| v.as_slice()),
+        &by_id,
+        &req_links,
+    );
+
+    format!(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requirement {id}</title>
+  <style>
+    body {{ font-family: system-ui, sans-serif; max-width: 60rem; margin: 0 auto; padding: 1rem; }}
+    .requirement-detail {{ margin: 0; padding: 0; border: none; }}
+    .meta, .source {{ color: #666; font-size: 0.9rem; }}
+    .label {{ font-weight: 600; color: #444; }}
+    .labeled-block {{ margin-top: 0.75rem; }}
+    .labeled-block .label {{ display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }}
+    .require, .refinement p, .rationale p {{ margin: 0.4em 0; }}
+    .refinement p:first-child, .rationale p:first-child {{ margin-top: 0; }}
+    .refinement p:last-child, .rationale p:last-child {{ margin-bottom: 0; }}
+    .rationale {{ margin-top: 0; }}
+    .satisfies-list, .linked-from-list, .artifact-refs-list, .source-links-list {{ margin: 0.25rem 0 0 1.25rem; padding: 0; }}
+    .source-link-item, .source-link-lines {{ color: #666; }}
+    .param-value {{ background: #e8f4f8; padding: 0.1em 0.3em; border-radius: 3px; font-weight: 500; }}
+    .parameters-table {{ margin: 0.25rem 0 0 0; border-collapse: collapse; width: 100%; max-width: 30rem; }}
+    .parameters-table th, .parameters-table td {{ padding: 0.25rem 0.5rem; text-align: left; border: 1px solid #ddd; }}
+    .parameters-table th {{ font-weight: 600; color: #444; background: #f8f8f8; }}
+  </style>
+</head>
+<body>
+{detail}
+</body>
+</html>"#,
+        id = escape_html(&requirement.id),
+    )
+}
+
 /// GRD-HTML-001: HTML report represents the full set of information in the requirements file.
 /// GRD-SYS-010: Invoked via the active profile.
 pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
@@ -1103,6 +1172,117 @@ mod tests {
         assert!(html.contains("data-source-req=\"GRD-P-001\""));
         assert!(html.contains("data-param=\"limit\""));
         assert!(html.contains("42"));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003")]
+    #[test]
+    fn single_requirement_html_renders_one_requirement() {
+        let r = req("GRD-VSC-003", "Requirement editor preview");
+        let html = generate_single_requirement_html(&r, None);
+        assert!(html.contains("id=\"GRD-VSC-003\""));
+        assert!(html.contains("Requirement editor preview"));
+        assert!(html.contains("class=\"requirement-detail\""));
+        assert!(html.contains("class=\"meta\""));
+        assert!(html.contains("class=\"source\""));
+        assert!(html.contains("class=\"require\""));
+        assert!(html.contains("<title>Requirement GRD-VSC-003</title>"));
+        assert!(!html.contains("<h1>Requirements</h1>"));
+        assert!(!html.contains("<h2>Index</h2>"));
+        assert!(!html.contains("data-gitreqd-field"));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003")]
+    #[test]
+    fn single_requirement_html_shares_structure_and_styling_with_full_report() {
+        let mut r = req("GRD-X-001", "Title");
+        r.refinement = "Body".into();
+        r.attributes = Some(IndexMap::from([(
+            "status".into(),
+            serde_json::json!("active"),
+        )]));
+        r.links = Some(vec![Link {
+            satisfies: Some("GRD-X-000".into()),
+            extra: BTreeMap::new(),
+        }]);
+        let single = generate_single_requirement_html(&r, None);
+        let full = generate_full_html(&[r.clone()]);
+        assert!(single.contains("<html lang=\"en\">"));
+        assert!(single.contains("requirement-detail"));
+        assert!(single.contains("meta"));
+        assert!(single.contains("source"));
+        assert!(single.contains("refinement"));
+        assert!(single.contains("font-family: system-ui, sans-serif"));
+        assert!(single.contains("max-width: 60rem"));
+        assert!(full.contains("font-family: system-ui, sans-serif"));
+        assert!(full.contains("max-width: 60rem"));
+        assert!(single.contains("<title>Requirement GRD-X-001</title>"));
+        let start = single.find("id=\"GRD-X-001\"").unwrap();
+        let end = single[start..].find("</section>").unwrap() + start;
+        let detail = &single[start..end];
+        assert!(full.contains(detail));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003")]
+    #[test]
+    fn single_requirement_html_escapes_fields() {
+        let mut r = req("ID", "Title <script>");
+        r.refinement = "Desc & \"quoted\"".into();
+        r.source_path = PathBuf::from("/p/ID.req.yml");
+        let html = generate_single_requirement_html(&r, None);
+        assert!(!html.contains("<script>"));
+        assert!(html.contains("&lt;script&gt;"));
+        assert!(html.contains("&amp;"));
+        assert!(html.contains("&quot;"));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003")]
+    #[test]
+    fn single_requirement_html_resolves_params_from_all_requirements() {
+        let mut r_a = req("GRD-A", "A");
+        r_a.parameters = Some(IndexMap::from([(
+            "x".into(),
+            ParameterValue::String("10".into()),
+        )]));
+        let mut r_b = req("GRD-B", "B");
+        r_b.refinement = "Value: {{ GRD-A:x }}".into();
+        let html = generate_single_requirement_html(&r_b, Some(&[r_a.clone(), r_b.clone()]));
+        assert!(html.contains("10"));
+        assert!(html.contains("class=\"param-value\""));
+        assert!(html.contains("data-source-req=\"GRD-A\""));
+        assert!(html.contains("data-param=\"x\""));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003")]
+    #[test]
+    fn single_requirement_html_includes_reverse_links_from_all_requirements() {
+        let a = req("GRD-A", "Target");
+        let mut b = req("GRD-B", "Linker");
+        b.links = Some(vec![Link {
+            satisfies: Some("GRD-A".into()),
+            extra: BTreeMap::new(),
+        }]);
+        let html = generate_single_requirement_html(&a, Some(&[a.clone(), b]));
+        assert!(html.contains("Linked from"));
+        assert!(html.contains("GRD-B"));
+    }
+
+    #[gitreqd::verifies("GRD-VSC-003", "GRD-HTML-007")]
+    #[test]
+    fn single_requirement_html_presents_source_links() {
+        let r = req("GRD-HTML-007", "Source links");
+        let implements = SourceLink::new(
+            "GRD-HTML-007",
+            SourceLinkKind::Implements,
+            "src/html.rs",
+            "function",
+            vec![10, 11, 12],
+        )
+        .unwrap();
+        let html = generate_single_requirement_html_with_source_links(&r, None, &[implements]);
+        assert!(html.contains("Implemented by"));
+        assert!(html.contains("<code>src/html.rs</code>"));
+        assert!(html.contains("L10–L12"));
+        assert!(!html.contains("Verified by"));
     }
 
     #[gitreqd::verifies("GRD-HTML-007")]
