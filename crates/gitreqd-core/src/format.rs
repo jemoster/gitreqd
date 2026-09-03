@@ -167,18 +167,110 @@ fn prefer_clip_block_chomp_for_markdown_keys(yaml: &str) -> String {
     re.replace_all(yaml, "$1|$2").into_owned()
 }
 
-fn stringify_yaml_value(value: &Value) -> String {
-    let mut s = serde_yaml::to_string(value).unwrap_or_else(|_| String::new());
-    if let Some(rest) = s.strip_prefix("---\n") {
-        s = rest.to_string();
-    }
+fn dump_inline_scalar(value: &Value) -> String {
+    let dumped = serde_yaml::to_string(value).unwrap_or_else(|_| String::new());
+    let mut s = dumped.strip_prefix("---\n").unwrap_or(&dumped).to_string();
     if let Some(rest) = s.strip_suffix("...\n") {
         s = rest.to_string();
     }
-    if !s.ends_with('\n') {
-        s.push('\n');
+    while s.ends_with('\n') {
+        s.pop();
     }
-    prefer_clip_block_chomp_for_markdown_keys(&s)
+    s
+}
+
+fn write_block_string(out: &mut String, s: &str, key_indent: usize) {
+    out.push_str(" |\n");
+    let body_indent = " ".repeat(key_indent + 2);
+    let stripped = s.strip_suffix('\n').unwrap_or(s);
+    for line in stripped.split('\n') {
+        if line.is_empty() {
+            out.push('\n');
+        } else {
+            out.push_str(&body_indent);
+            out.push_str(line);
+            out.push('\n');
+        }
+    }
+}
+
+fn write_mapping_value(out: &mut String, value: &Value, indent: usize) {
+    match value {
+        Value::Mapping(map) if map.is_empty() => out.push_str(" {}"),
+        Value::Mapping(map) => {
+            out.push('\n');
+            write_mapping(out, map, indent + 2, false);
+        }
+        Value::Sequence(seq) if seq.is_empty() => out.push_str(" []"),
+        Value::Sequence(seq) => {
+            out.push('\n');
+            write_sequence(out, seq, indent + 2);
+        }
+        Value::String(s) if s.contains('\n') => write_block_string(out, s, indent),
+        other => {
+            out.push(' ');
+            out.push_str(&dump_inline_scalar(other));
+        }
+    }
+}
+
+fn write_mapping(out: &mut String, map: &Mapping, indent: usize, seq_first: bool) {
+    let pad = " ".repeat(indent);
+    for (i, (key, value)) in map.iter().enumerate() {
+        let key = match key {
+            Value::String(s) => s.as_str(),
+            _ => continue,
+        };
+        if i == 0 && seq_first {
+            // First key stays on the sequence-item dash line.
+        } else {
+            if !out.is_empty() && !out.ends_with('\n') {
+                out.push('\n');
+            }
+            out.push_str(&pad);
+        }
+        out.push_str(key);
+        out.push(':');
+        write_mapping_value(out, value, indent);
+    }
+}
+
+fn write_sequence(out: &mut String, seq: &[Value], indent: usize) {
+    let pad = " ".repeat(indent);
+    for item in seq {
+        out.push_str(&pad);
+        out.push_str("- ");
+        match item {
+            Value::Mapping(map) => {
+                write_mapping(out, map, indent + 2, true);
+                if !out.ends_with('\n') {
+                    out.push('\n');
+                }
+            }
+            Value::Sequence(inner) => {
+                out.push('\n');
+                write_sequence(out, inner, indent + 2);
+            }
+            Value::String(s) if s.contains('\n') => write_block_string(out, s, indent),
+            other => {
+                out.push_str(&dump_inline_scalar(other));
+                out.push('\n');
+            }
+        }
+    }
+}
+
+fn stringify_yaml_value(value: &Value) -> String {
+    let mut out = String::new();
+    match value {
+        Value::Mapping(map) => write_mapping(&mut out, map, 0, false),
+        Value::Sequence(seq) => write_sequence(&mut out, seq, 0),
+        other => out.push_str(&dump_inline_scalar(other)),
+    }
+    if !out.ends_with('\n') {
+        out.push('\n');
+    }
+    prefer_clip_block_chomp_for_markdown_keys(&out)
 }
 
 /// Normalize text so two requirement files that differ only by line endings or trailing
@@ -522,6 +614,89 @@ mod tests {
 
     #[gitreqd::verifies("GRD-SYS-011")]
     #[test]
+    fn indents_block_sequences_under_mapping_keys() {
+        let yaml = format_requirement_to_yaml(&Requirement {
+            id: "GRD-T-005".into(),
+            title: "T".into(),
+            require: "The system shall do x.".into(),
+            refinement: String::new(),
+            attributes: Some(IndexMap::from([("list".into(), serde_json::json!([2, 1]))])),
+            satisfied_by: Some(vec![ArtifactRef {
+                artifact: "src/a.ts".into(),
+                description: Some("impl".into()),
+            }]),
+            verified_by: None,
+            links: Some(vec![Link {
+                satisfies: Some("GRD-A".into()),
+                extra: BTreeMap::from([("extra".into(), serde_json::json!("keep"))]),
+            }]),
+            parameters: None,
+        });
+        assert!(
+            yaml.contains("satisfied_by:\n  - artifact: src/a.ts\n    description: impl\n"),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("links:\n  - satisfies: GRD-A\n    extra: keep\n"),
+            "{yaml}"
+        );
+        assert!(yaml.contains("  list:\n    - 2\n    - 1\n"), "{yaml}");
+        assert!(!yaml.contains("\n- artifact:"), "{yaml}");
+        assert!(!yaml.contains("\n- satisfies:"), "{yaml}");
+    }
+
+    #[gitreqd::verifies("GRD-SYS-011")]
+    #[test]
+    fn quotes_special_scalars_like_yaml_stringify() {
+        let yaml = format_requirement_to_yaml(&Requirement {
+            id: "GRD-T-006".into(),
+            title: "*star".into(),
+            require: "The system shall do x.".into(),
+            refinement: String::new(),
+            attributes: Some(IndexMap::from([
+                ("booly".into(), serde_json::json!("true")),
+                ("colon".into(), serde_json::json!("a: b")),
+                ("leading".into(), serde_json::json!("  x")),
+                ("note".into(), serde_json::json!("# hash")),
+            ])),
+            links: None,
+            satisfied_by: None,
+            verified_by: None,
+            parameters: Some(IndexMap::from([
+                ("empty".into(), ParameterValue::String(String::new())),
+                ("n".into(), ParameterValue::Float(1.5)),
+                ("s".into(), ParameterValue::String("yes: no".into())),
+            ])),
+        });
+        assert!(
+            yaml.contains("title: '*star'") || yaml.contains("title: \"*star\""),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("booly: 'true'") || yaml.contains("booly: \"true\""),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("colon: 'a: b'") || yaml.contains("colon: \"a: b\""),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("note: '# hash'") || yaml.contains("note: \"# hash\""),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("s: 'yes: no'") || yaml.contains("s: \"yes: no\""),
+            "{yaml}"
+        );
+        assert!(
+            yaml.contains("empty: ''") || yaml.contains("empty: \"\""),
+            "{yaml}"
+        );
+        assert!(yaml.contains("n: 1.5"), "{yaml}");
+    }
+
+    #[gitreqd::verifies("GRD-SYS-011")]
+    #[test]
     fn normalize_treats_crlf_and_trailing_whitespace_as_equal() {
         let canonical =
             format_requirement_to_yaml(&req("GRD-T-004", "T", "The system shall do x."));
@@ -549,6 +724,28 @@ mod tests {
 
         let after = fs::read_to_string(&file_path).unwrap();
         assert!(parse_requirement_content(&after, &file_path).is_ok());
+        let _ = fs::remove_dir_all(&project_root);
+    }
+
+    #[gitreqd::verifies("GRD-CLI-006")]
+    #[test]
+    fn project_format_skips_indented_canonical_sequences() {
+        let canonical = concat!(
+            "id: GRD-FMT-001\n",
+            "title: One\n",
+            "require: The system shall do x.\n",
+            "links:\n",
+            "  - satisfies: GRD-X\n",
+        );
+        let (project_root, file_path) = temp_project(canonical);
+        let result = format_project_requirement_files(&project_root);
+        assert!(result.success, "{:?}", result.errors);
+        assert!(
+            result.written_paths.is_empty(),
+            "rewrote: {}",
+            fs::read_to_string(&file_path).unwrap()
+        );
+        assert_eq!(result.skipped_paths, vec![file_path]);
         let _ = fs::remove_dir_all(&project_root);
     }
 
