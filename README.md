@@ -109,6 +109,13 @@ fn report_contains_index() {}
 
 `implements` marks implementation; `verifies` marks verification. Each attribute accepts one or more requirement ID strings. `#[gitreqd_macros::implements]` / `#[gitreqd_macros::verifies]` are equivalent without the alias.
 
+The HTML report (Rust `gitreqd html`) lists matching source links on each requirement:
+
+- **Implemented by** for `implements` tags
+- **Verified by** for `verifies` tags, in the same list as any YAML `verified_by` artifacts
+
+Each entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading is omitted when that requirement has no matching links.
+
 ## Optional Configuration
 
 ### `requirement_dirs` in `gitreqd.yaml`

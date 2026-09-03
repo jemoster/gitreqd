@@ -1,6 +1,8 @@
 //! GRD-SYS-010: Active profile drives requirement document shape, validation, and HTML output.
 
-use crate::types::{RequirementSchemaComposeOptions, RequirementWithSource, ValidationError};
+use crate::types::{
+    RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, ValidationError,
+};
 use std::path::Path;
 
 /// GRD-SYS-010: Active profile drives requirement document shape, validation, and HTML output.
@@ -25,5 +27,9 @@ pub trait RequirementProfile: Send + Sync {
         &self,
         project_root: &Path,
     ) -> Option<RequirementSchemaComposeOptions>;
-    fn generate_full_html(&self, requirements: &[RequirementWithSource]) -> String;
+    fn generate_full_html(
+        &self,
+        requirements: &[RequirementWithSource],
+        source_links: &[SourceLink],
+    ) -> String;
 }

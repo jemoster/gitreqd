@@ -2,12 +2,14 @@
 
 use std::path::Path;
 
-use crate::html::generate_full_html;
+use crate::html::generate_full_html_with_source_links;
 use crate::parse::{parse_requirement_content, parse_requirement_file};
 use crate::rules::validate_requirements;
 use crate::schema::export_requirement_file_json_schema;
 use crate::schema_compose::requirement_schema_compose_options_for_project as compose_options;
-use crate::types::{RequirementSchemaComposeOptions, RequirementWithSource, ValidationError};
+use crate::types::{
+    RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, ValidationError,
+};
 
 use super::types::RequirementProfile;
 
@@ -54,7 +56,11 @@ impl RequirementProfile for StandardProfile {
         compose_options(project_root)
     }
 
-    fn generate_full_html(&self, requirements: &[RequirementWithSource]) -> String {
-        generate_full_html(requirements)
+    fn generate_full_html(
+        &self,
+        requirements: &[RequirementWithSource],
+        source_links: &[SourceLink],
+    ) -> String {
+        generate_full_html_with_source_links(requirements, source_links)
     }
 }

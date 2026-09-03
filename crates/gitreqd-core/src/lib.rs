@@ -22,7 +22,7 @@ pub use discovery::{
     ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
 };
 pub use error::{DiscoverResult, Error};
-pub use html::generate_full_html;
+pub use html::{generate_full_html, generate_full_html_with_source_links};
 pub use load::{get_requirements_with_links, load_requirements};
 pub use parameters::{resolve_text, resolve_to_segments, ResolvedSegment, SegmentKind};
 pub use parse::{parse_requirement_content, parse_requirement_data, parse_requirement_file};

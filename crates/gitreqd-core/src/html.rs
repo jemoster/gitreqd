@@ -7,7 +7,7 @@ use pulldown_cmark::{html as md_html, Event, Options, Parser};
 use regex::Regex;
 
 use crate::parameters::{resolve_to_segments, SegmentKind};
-use crate::types::{ArtifactRef, RequirementWithSource};
+use crate::types::{ArtifactRef, RequirementWithSource, SourceLink, SourceLinkKind};
 
 /// GRD-SYS-005: Placeholder character range for param spans (U+E000–E0FF); replaced after markdown.
 const PARAM_PLACEHOLDER_BASE: u32 = 0xe000;
@@ -380,6 +380,7 @@ fn requirement_detail_html(
     r: &RequirementWithSource,
     linked_from_ids: Option<&[String]>,
     by_id: &HashMap<String, &RequirementWithSource>,
+    source_links: &[&SourceLink],
 ) -> String {
     let attrs = r.attributes.clone().unwrap_or_default();
     let attr_entries: Vec<(&String, &serde_json::Value)> =
@@ -538,11 +539,26 @@ fn requirement_detail_html(
 
     let satisfied_by_html =
         artifact_refs_section_html("Satisfied by", r.satisfied_by.as_deref(), by_id, &r.id);
-    let verified_by_html =
-        artifact_refs_section_html("Verified by", r.verified_by.as_deref(), by_id, &r.id);
+    let implements_html = source_links_section_html(
+        "Implemented by",
+        source_links
+            .iter()
+            .copied()
+            .filter(|l| l.kind == SourceLinkKind::Implements),
+    );
+    let verified_by_html = combined_verified_by_html(
+        r.verified_by.as_deref(),
+        source_links
+            .iter()
+            .copied()
+            .filter(|l| l.kind == SourceLinkKind::Verifies),
+        by_id,
+        &r.id,
+    );
 
     let links_at_bottom = [
         satisfied_by_html,
+        implements_html,
         verified_by_html,
         satisfies_html,
         linked_from_html,
@@ -648,16 +664,123 @@ fn artifact_refs_section_html(
     )
 }
 
+fn format_linespace(lines: &[u32]) -> String {
+    if lines.is_empty() {
+        return String::new();
+    }
+    let mut parts = Vec::new();
+    let mut start = lines[0];
+    let mut prev = lines[0];
+    for &n in &lines[1..] {
+        if n == prev + 1 {
+            prev = n;
+            continue;
+        }
+        parts.push(format_line_range(start, prev));
+        start = n;
+        prev = n;
+    }
+    parts.push(format_line_range(start, prev));
+    parts.join(", ")
+}
+
+fn format_line_range(start: u32, end: u32) -> String {
+    if start == end {
+        format!("L{start}")
+    } else {
+        format!("L{start}–L{end}")
+    }
+}
+
+fn source_link_item_html(link: &SourceLink) -> String {
+    format!(
+        "<li class=\"source-link\"><code>{}</code> <span class=\"source-link-item\">{}</span> <span class=\"source-link-lines\">{}</span></li>",
+        escape_html(&link.path),
+        escape_html(&link.item),
+        escape_html(&format_linespace(&link.linespace)),
+    )
+}
+
+fn source_links_list_html<'a, I>(links: I) -> String
+where
+    I: IntoIterator<Item = &'a SourceLink>,
+{
+    links.into_iter().map(source_link_item_html).collect()
+}
+
+fn source_links_section_html<'a, I>(label: &str, links: I) -> String
+where
+    I: IntoIterator<Item = &'a SourceLink>,
+{
+    let list = source_links_list_html(links);
+    if list.is_empty() {
+        return String::new();
+    }
+    format!(
+        "<div class=\"labeled-block source-links-block\"><span class=\"label\">{}</span><ul class=\"source-links-list\">{list}</ul></div>",
+        escape_html(label)
+    )
+}
+
+fn combined_verified_by_html<'a, I>(
+    yaml_refs: Option<&[ArtifactRef]>,
+    source_links: I,
+    by_id: &HashMap<String, &RequirementWithSource>,
+    requirement_id: &str,
+) -> String
+where
+    I: IntoIterator<Item = &'a SourceLink>,
+{
+    let yaml_list = yaml_refs
+        .filter(|refs| !refs.is_empty())
+        .map(|refs| artifact_refs_list_html(refs, by_id, requirement_id))
+        .unwrap_or_default();
+    let source_list = source_links_list_html(source_links);
+    if yaml_list.is_empty() && source_list.is_empty() {
+        return String::new();
+    }
+    format!(
+        "<div class=\"labeled-block artifact-refs-block source-links-block\"><span class=\"label\">Verified by</span><ul class=\"artifact-refs-list source-links-list\">{yaml_list}{source_list}</ul></div>"
+    )
+}
+
+fn source_links_for_requirement<'a>(
+    source_links: &'a [SourceLink],
+    requirement_id: &str,
+) -> Vec<&'a SourceLink> {
+    source_links
+        .iter()
+        .filter(|l| l.requirement_id == requirement_id)
+        .collect()
+}
+
 /// GRD-HTML-001: HTML report represents the full set of information in the requirements file.
 /// GRD-SYS-010: Invoked via the active profile.
 pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
+    generate_full_html_with_source_links(requirements, &[])
+}
+
+/// GRD-HTML-007: Present source-link records on each requirement (Implemented by / Verified by).
+#[gitreqd::implements("GRD-HTML-007")]
+pub fn generate_full_html_with_source_links(
+    requirements: &[RequirementWithSource],
+    source_links: &[SourceLink],
+) -> String {
     let by_id: HashMap<String, &RequirementWithSource> =
         requirements.iter().map(|r| (r.id.clone(), r)).collect();
     let index_html = render_hierarchical_index(requirements, &by_id);
     let linked_from = linked_from_map(requirements);
     let details: String = requirements
         .iter()
-        .map(|r| requirement_detail_html(r, linked_from.get(&r.id).map(|v| v.as_slice()), &by_id))
+        .map(|r| {
+            let req_links = source_links_for_requirement(source_links, &r.id);
+            requirement_detail_html(
+                r,
+                linked_from.get(&r.id).map(|v| v.as_slice()),
+                &by_id,
+                &req_links,
+            )
+        })
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -680,7 +803,8 @@ pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
     .refinement p:first-child, .rationale p:first-child {{ margin-top: 0; }}
     .refinement p:last-child, .rationale p:last-child {{ margin-bottom: 0; }}
     .rationale {{ margin-top: 0; }}
-    .satisfies-list, .linked-from-list {{ margin: 0.25rem 0 0 1.25rem; padding: 0; }}
+    .satisfies-list, .linked-from-list, .artifact-refs-list, .source-links-list {{ margin: 0.25rem 0 0 1.25rem; padding: 0; }}
+    .source-link-item, .source-link-lines {{ color: #666; }}
     .index-category {{ font-weight: 600; color: #333; }}
     .param-value {{ background: #e8f4f8; padding: 0.1em 0.3em; border-radius: 3px; font-weight: 500; }}
     .parameters-table {{ margin: 0.25rem 0 0 0; border-collapse: collapse; width: 100%; max-width: 30rem; }}
@@ -704,7 +828,10 @@ pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{ArtifactRef, Link, ParameterValue, Requirement, RequirementWithSource};
+    use crate::types::{
+        ArtifactRef, Link, ParameterValue, Requirement, RequirementWithSource, SourceLink,
+        SourceLinkKind,
+    };
     use indexmap::IndexMap;
     use std::collections::BTreeMap;
     use std::path::PathBuf;
@@ -976,5 +1103,93 @@ mod tests {
         assert!(html.contains("data-source-req=\"GRD-P-001\""));
         assert!(html.contains("data-param=\"limit\""));
         assert!(html.contains("42"));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-007")]
+    #[test]
+    fn presents_source_links_by_kind() {
+        let r = req("GRD-HTML-007", "Source links");
+        let implements = SourceLink::new(
+            "GRD-HTML-007",
+            SourceLinkKind::Implements,
+            "src/html.rs",
+            "function",
+            vec![10, 11, 12],
+        )
+        .unwrap();
+        let verifies = SourceLink::new(
+            "GRD-HTML-007",
+            SourceLinkKind::Verifies,
+            "src/html.rs",
+            "test",
+            vec![80],
+        )
+        .unwrap();
+        let other = SourceLink::new(
+            "OTHER",
+            SourceLinkKind::Implements,
+            "src/other.rs",
+            "function",
+            vec![1],
+        )
+        .unwrap();
+        let html = generate_full_html_with_source_links(&[r], &[implements, verifies, other]);
+        let start = html.find("id=\"GRD-HTML-007\"").unwrap();
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        assert!(detail.contains("Implemented by"));
+        assert!(detail.contains("<code>src/html.rs</code>"));
+        assert!(detail.contains("function"));
+        assert!(detail.contains("L10–L12"));
+        assert!(detail.contains("Verified by"));
+        assert!(detail.contains("test"));
+        assert!(detail.contains("L80"));
+        assert!(!detail.contains("src/other.rs"));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-007")]
+    #[test]
+    fn omits_source_link_sections_without_records() {
+        let html = generate_full_html(&[req("GRD-NONE-001", "No links")]);
+        let start = html.find("id=\"GRD-NONE-001\"").unwrap();
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        assert!(!detail.contains("Implemented by"));
+        assert!(!detail.contains("Verified by"));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-007")]
+    #[test]
+    fn verified_by_combines_yaml_and_source_links() {
+        let mut r = req("GRD-MIX-001", "Mixed");
+        r.verified_by = Some(vec![ArtifactRef {
+            artifact: "test/foo.test.ts".into(),
+            description: None,
+        }]);
+        let verifies = SourceLink::new(
+            "GRD-MIX-001",
+            SourceLinkKind::Verifies,
+            "src/lib.rs",
+            "test",
+            vec![4],
+        )
+        .unwrap();
+        let html = generate_full_html_with_source_links(&[r], &[verifies]);
+        let start = html.find("id=\"GRD-MIX-001\"").unwrap();
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        let verified_count = detail.matches("Verified by").count();
+        assert_eq!(verified_count, 1);
+        assert!(detail.contains("<code>test/foo.test.ts</code>"));
+        assert!(detail.contains("<code>src/lib.rs</code>"));
+        assert!(!detail.contains("Implemented by"));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-007")]
+    #[test]
+    fn format_linespace_compresses_ranges() {
+        assert_eq!(format_linespace(&[3]), "L3");
+        assert_eq!(format_linespace(&[3, 4, 5]), "L3–L5");
+        assert_eq!(format_linespace(&[1, 3, 4, 8]), "L1, L3–L4, L8");
     }
 }

@@ -125,6 +125,7 @@ version = "0.4.0"
 dependencies = [
  "clap",
  "gitreqd-core",
+ "gitreqd-macros",
  "serde_json",
  "serde_yaml",
 ]
