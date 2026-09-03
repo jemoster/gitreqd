@@ -5,7 +5,7 @@ import { requirementFileDataSchema } from "./requirement-schema.js";
 import type { Requirement, RequirementWithSource } from "./types.js";
 import type { ValidationError } from "./types.js";
 
-/** GRD-SYS-009: Format Zod issues for CLI and conflict resolution messages. */
+/** GRD-SYS-009: Format Zod issues for CLI messages. */
 function formatRequirementParseError(err: z.ZodError): string {
   const issue = err.issues[0];
   if (!issue) return "Invalid requirement data";
@@ -57,8 +57,7 @@ export function parseRequirementContentWithSchema(
 }
 
 /**
- * Parse requirement YAML from a content string (e.g. for validating merged content).
- * GRD-GIT-002: used to validate resolved conflict content against schema before writing.
+ * Parse requirement YAML from a content string.
  */
 export function parseRequirementContent(
   content: string,
