@@ -19,3 +19,9 @@ attributes:
 links:
   - satisfies: GRD-SYS-001
   - satisfies: GRD-SYS-009
+satisfied_by:
+  - artifact: crates/gitreqd-core/src/format.rs
+    description: Rust engine serializes requirements to canonical YAML with stable field order, sorted nested keys, and clip block scalars for markdown fields.
+verified_by:
+  - artifact: crates/gitreqd-core/src/format.rs
+    description: Unit tests cover idempotence, key order, alphabetical nested keys, clip chomping, and skip-write normalization.
