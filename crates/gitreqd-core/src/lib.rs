@@ -2,6 +2,7 @@
 
 extern crate gitreqd_macros as gitreqd;
 
+pub mod artifact_links;
 pub mod discovery;
 pub mod error;
 pub mod format;
@@ -17,6 +18,10 @@ pub mod schema_compose;
 pub mod source_links;
 pub mod types;
 
+pub use artifact_links::{
+    github_blob_url_for_artifact, posix_join_repo_path, ArtifactLinkRenderOptions,
+    GithubArtifactLinkContext,
+};
 pub use discovery::{
     discover_project, discover_project_root, discover_project_root_candidates,
     discover_requirement_paths, find_root_marker_path, get_requirement_dirs, normalize_path,

@@ -6,6 +6,7 @@ use std::sync::OnceLock;
 use pulldown_cmark::{html as md_html, Event, Options, Parser};
 use regex::Regex;
 
+use crate::artifact_links::{github_blob_url_for_artifact, ArtifactLinkRenderOptions};
 use crate::parameters::{resolve_to_segments, SegmentKind};
 use crate::types::{ArtifactRef, RequirementWithSource, SourceLink, SourceLinkKind};
 
@@ -381,6 +382,7 @@ fn requirement_detail_html(
     linked_from_ids: Option<&[String]>,
     by_id: &HashMap<String, &RequirementWithSource>,
     source_links: &[&SourceLink],
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
     let attrs = r.attributes.clone().unwrap_or_default();
     let attr_entries: Vec<(&String, &serde_json::Value)> =
@@ -537,8 +539,13 @@ fn requirement_detail_html(
         })
         .collect();
 
-    let satisfied_by_html =
-        artifact_refs_section_html("Satisfied by", r.satisfied_by.as_deref(), by_id, &r.id);
+    let satisfied_by_html = artifact_refs_section_html(
+        "Satisfied by",
+        r.satisfied_by.as_deref(),
+        by_id,
+        &r.id,
+        artifact_links,
+    );
     let implements_html = source_links_section_html(
         "Implemented by",
         source_links
@@ -554,6 +561,7 @@ fn requirement_detail_html(
             .filter(|l| l.kind == SourceLinkKind::Verifies),
         by_id,
         &r.id,
+        artifact_links,
     );
 
     let links_at_bottom = [
@@ -607,19 +615,32 @@ fn artifact_refs_list_html(
     refs: &[ArtifactRef],
     by_id: &HashMap<String, &RequirementWithSource>,
     requirement_id: &str,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
+    let external_attrs = if artifact_links.is_some() {
+        " target=\"_blank\" rel=\"noopener noreferrer\""
+    } else {
+        ""
+    };
     let mut items = Vec::new();
     for ref_item in refs {
         let artifact = ref_item.artifact.trim();
         if artifact.is_empty() {
             continue;
         }
-        let is_url = artifact.to_ascii_lowercase().starts_with("http://")
-            || artifact.to_ascii_lowercase().starts_with("https://");
+        let lower = artifact.to_ascii_lowercase();
+        let is_url = lower.starts_with("http://") || lower.starts_with("https://");
         let artifact_html = if is_url {
             format!(
-                "<a href=\"{}\">{}</a>",
+                "<a href=\"{}\"{external_attrs}>{}</a>",
                 escape_html(artifact),
+                escape_html(artifact)
+            )
+        } else if let Some(github) = artifact_links.and_then(|opts| opts.github.as_ref()) {
+            let href = github_blob_url_for_artifact(artifact, github);
+            format!(
+                "<a href=\"{}\"{external_attrs}>{}</a>",
+                escape_html(&href),
                 escape_html(artifact)
             )
         } else {
@@ -647,6 +668,7 @@ fn artifact_refs_section_html(
     refs: Option<&[ArtifactRef]>,
     by_id: &HashMap<String, &RequirementWithSource>,
     requirement_id: &str,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
     let Some(refs) = refs else {
         return String::new();
@@ -654,7 +676,7 @@ fn artifact_refs_section_html(
     if refs.is_empty() {
         return String::new();
     }
-    let list = artifact_refs_list_html(refs, by_id, requirement_id);
+    let list = artifact_refs_list_html(refs, by_id, requirement_id, artifact_links);
     if list.is_empty() {
         return String::new();
     }
@@ -727,13 +749,14 @@ fn combined_verified_by_html<'a, I>(
     source_links: I,
     by_id: &HashMap<String, &RequirementWithSource>,
     requirement_id: &str,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String
 where
     I: IntoIterator<Item = &'a SourceLink>,
 {
     let yaml_list = yaml_refs
         .filter(|refs| !refs.is_empty())
-        .map(|refs| artifact_refs_list_html(refs, by_id, requirement_id))
+        .map(|refs| artifact_refs_list_html(refs, by_id, requirement_id, artifact_links))
         .unwrap_or_default();
     let source_list = source_links_list_html(source_links);
     if yaml_list.is_empty() && source_list.is_empty() {
@@ -760,15 +783,17 @@ pub fn generate_single_requirement_html(
     requirement: &RequirementWithSource,
     all_requirements: Option<&[RequirementWithSource]>,
 ) -> String {
-    generate_single_requirement_html_with_source_links(requirement, all_requirements, &[])
+    generate_single_requirement_html_with_source_links(requirement, all_requirements, &[], None)
 }
 
 /// GRD-VSC-003: Single-requirement HTML; GRD-HTML-007: optional source-link records.
+/// GRD-UI-009: optional GitHub context turns project-relative artifact paths into blob links.
 #[gitreqd::implements("GRD-VSC-003")]
 pub fn generate_single_requirement_html_with_source_links(
     requirement: &RequirementWithSource,
     all_requirements: Option<&[RequirementWithSource]>,
     source_links: &[SourceLink],
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
     let fallback;
     let list: &[RequirementWithSource] = match all_requirements {
@@ -787,6 +812,7 @@ pub fn generate_single_requirement_html_with_source_links(
         linked_from.get(&requirement.id).map(|v| v.as_slice()),
         &by_id,
         &req_links,
+        artifact_links,
     );
 
     format!(
@@ -848,6 +874,7 @@ pub fn generate_full_html_with_source_links(
                 linked_from.get(&r.id).map(|v| v.as_slice()),
                 &by_id,
                 &req_links,
+                None,
             )
         })
         .collect::<Vec<_>>()
@@ -897,6 +924,7 @@ pub fn generate_full_html_with_source_links(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::artifact_links::{ArtifactLinkRenderOptions, GithubArtifactLinkContext};
     use crate::types::{
         ArtifactRef, Link, ParameterValue, Requirement, RequirementWithSource, SourceLink,
         SourceLinkKind,
@@ -997,6 +1025,65 @@ mod tests {
         assert!(html.contains("Implements the feature."));
         assert!(html.contains("href=\"https://example.com/evidence\""));
         assert!(html.contains("Verified by"));
+    }
+
+    #[gitreqd::verifies("GRD-UI-009")]
+    #[test]
+    fn github_blob_links_and_external_artifacts_open_in_new_window() {
+        let mut r = req("GRD-UI9-001", "Traceability");
+        r.satisfied_by = Some(vec![
+            ArtifactRef {
+                artifact: "packages/core/src/foo.ts".into(),
+                description: Some("Implementation.".into()),
+            },
+            ArtifactRef {
+                artifact: "https://example.com/evidence".into(),
+                description: None,
+            },
+        ]);
+        r.verified_by = Some(vec![ArtifactRef {
+            artifact: "packages/core/test/foo.test.ts".into(),
+            description: None,
+        }]);
+        let artifact_links = ArtifactLinkRenderOptions {
+            github: Some(GithubArtifactLinkContext {
+                owner: "acme".into(),
+                repo: "widgets".into(),
+                commit_sha: "abcdef1234567890".into(),
+                project_root_rel: "apps/reqs".into(),
+            }),
+        };
+        let html = generate_single_requirement_html_with_source_links(
+            &r,
+            Some(&[r.clone()]),
+            &[],
+            Some(&artifact_links),
+        );
+        assert!(html.contains("target=\"_blank\" rel=\"noopener noreferrer\""));
+        assert!(html.contains(
+            "href=\"https://github.com/acme/widgets/blob/abcdef1234567890/apps/reqs/packages/core/src/foo.ts\""
+        ));
+        assert!(html.contains("href=\"https://example.com/evidence\""));
+        assert!(!html.contains("<code>packages/core/src/foo.ts</code>"));
+    }
+
+    #[gitreqd::verifies("GRD-UI-009")]
+    #[test]
+    fn file_paths_remain_code_when_artifact_links_has_no_github_context() {
+        let mut r = req("GRD-UI9-002", "Local paths");
+        r.satisfied_by = Some(vec![ArtifactRef {
+            artifact: "src/local.ts".into(),
+            description: None,
+        }]);
+        let artifact_links = ArtifactLinkRenderOptions { github: None };
+        let html = generate_single_requirement_html_with_source_links(
+            &r,
+            Some(&[r.clone()]),
+            &[],
+            Some(&artifact_links),
+        );
+        assert!(html.contains("<code>src/local.ts</code>"));
+        assert!(!html.contains("target=\"_blank\""));
     }
 
     #[test]
@@ -1278,7 +1365,8 @@ mod tests {
             vec![10, 11, 12],
         )
         .unwrap();
-        let html = generate_single_requirement_html_with_source_links(&r, None, &[implements]);
+        let html =
+            generate_single_requirement_html_with_source_links(&r, None, &[implements], None);
         assert!(html.contains("Implemented by"));
         assert!(html.contains("<code>src/html.rs</code>"));
         assert!(html.contains("L10–L12"));

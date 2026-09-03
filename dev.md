@@ -24,7 +24,7 @@ Workspace TypeScript packages:
 
 Rust crates (independent essential CLI):
 
-- `crates/gitreqd-core` - core engine (discovery, parse, validate, format, full and single-requirement HTML, schema export, source-link collection).
+- `crates/gitreqd-core` - core engine (discovery, parse, validate, format, full and single-requirement HTML, schema export, source-link collection). Single-requirement HTML can optionally turn implementation and verification file paths into GitHub blob links when repository owner, name, commit, and project-root path are provided.
 - `crates/gitreqd-macros` - proc-macro attributes for tagging Rust items as source links.
 - `crates/gitreqd` - `gitreqd` binary with bootstrap, validate, format, html, and schema.
 
