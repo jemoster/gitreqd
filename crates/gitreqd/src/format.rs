@@ -7,6 +7,7 @@ use std::io::{self, Write};
 use std::path::Path;
 
 /// Format every discovered requirement file in place. Returns true on success.
+#[gitreqd::implements("GRD-CLI-006")]
 pub fn run_format(project_dir: &Path) -> io::Result<bool> {
     let candidates = match discover_project_root_candidates(project_dir) {
         Ok(c) => c,

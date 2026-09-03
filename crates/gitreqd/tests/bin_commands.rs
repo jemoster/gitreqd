@@ -1,5 +1,7 @@
 //! End-to-end binary tests for the essential CLI (GRD-CLI-008).
 
+extern crate gitreqd_macros as gitreqd;
+
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
@@ -23,6 +25,7 @@ fn help_lists_essential_commands() {
     assert!(text.contains("bootstrap"));
 }
 
+#[gitreqd::verifies("GRD-CLI-006")]
 #[test]
 fn help_lists_format_command() {
     let out = Command::new(bin()).arg("--help").output().unwrap();

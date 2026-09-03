@@ -1,5 +1,7 @@
 //! GRD-CLI-008: Essential command-line interface (bootstrap, validate, html, schema).
 
+extern crate gitreqd_macros as gitreqd;
+
 pub mod bootstrap;
 pub mod format;
 pub mod html;
