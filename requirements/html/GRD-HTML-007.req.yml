@@ -15,16 +15,6 @@ refinement: |
 attributes:
   rationale: The HTML report should show where a requirement is implemented and verified whenever source-link records exist, without depending on a particular producer.
   status: active
-satisfied_by:
-  - artifact: crates/gitreqd-core/src/html.rs
-    description: Renders source-link records under Implemented by and Verified by.
-  - artifact: crates/gitreqd/src/html.rs
-    description: Passes collected source-link records into HTML generation.
-verified_by:
-  - artifact: crates/gitreqd-core/src/html.rs
-    description: Unit tests cover kind headings, omitted empty sections, line ranges, and combined verified-by lists.
-  - artifact: crates/gitreqd/tests/cli.rs
-    description: CLI HTML generation includes Implemented by and Verified by for tagged Rust sources.
 links:
   - satisfies: GRD-HTML-001
   - satisfies: GRD-SYS-017
