@@ -5,9 +5,7 @@ import {
   discoverRequirementPaths,
   getRequirementDirs,
   ROOT_MARKER,
-  ROOT_MARKER_FILENAMES,
 } from "../src/discovery";
-import { parseLlmConfig } from "../src/llm-config";
 
 describe("GRD-SYS-007: gitreqd.yaml contents", () => {
   function makeTempProject(): string {
@@ -122,68 +120,6 @@ describe("GRD-SYS-007: gitreqd.yaml contents", () => {
     await expect(discoverRequirementPaths(projectRoot)).rejects.toThrow(
       /duplicate "requirement_dirs" entry after resolving paths/
     );
-  });
-
-  describe("GRD-SYS-012 / GRD-SYS-014: llm config in root marker", () => {
-    it("parses ollama base_url and model when present in gitreqd.yaml", () => {
-      const projectRoot = makeTempProject();
-      fs.writeFileSync(
-        path.join(projectRoot, ROOT_MARKER),
-        [
-          "requirement_dirs:",
-          "  - reqs",
-          "llm:",
-          "  provider: ollama",
-          "  base_url: \"http://ollama:11434\"",
-          "  model: llama4:scout",
-        ].join("\n"),
-        "utf-8"
-      );
-      const r = parseLlmConfig(projectRoot);
-      expect(r.ok).toBe(true);
-      if (r.ok) {
-        expect(r.config).toEqual({
-          provider: "ollama",
-          base_url: "http://ollama:11434",
-          model: "llama4:scout",
-        });
-      }
-    });
-
-    it("fails when llm key is missing", () => {
-      const projectRoot = makeTempProject();
-      fs.writeFileSync(path.join(projectRoot, ROOT_MARKER), "requirement_dirs:\n  - reqs\n", "utf-8");
-      const r = parseLlmConfig(projectRoot);
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.message).toMatch(/Missing "llm"/);
-    });
-
-    it("fails when ollama model is missing", () => {
-      const projectRoot = makeTempProject();
-      fs.writeFileSync(
-        path.join(projectRoot, ROOT_MARKER),
-        "requirement_dirs:\n  - reqs\nllm:\n  provider: ollama\n  base_url: http://localhost:11434\n",
-        "utf-8"
-      );
-      const r = parseLlmConfig(projectRoot);
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.message).toMatch(/llm\.model/);
-    });
-
-    it("reads config from gitreqd.yml when that is the project marker (GRD-SYS-007)", () => {
-      const projectRoot = makeTempProject();
-      const ymlMarker = ROOT_MARKER_FILENAMES[1]!;
-      fs.writeFileSync(
-        path.join(projectRoot, ymlMarker),
-        ["requirement_dirs:", "  - reqs", "llm:", "  provider: ollama", "  base_url: \"http://x:11434\"", "  model: m"].join("\n"),
-        "utf-8"
-      );
-      const r = parseLlmConfig(projectRoot);
-      expect(r.ok).toBe(true);
-      if (r.ok) {
-        expect(r.config).toEqual({ provider: "ollama", base_url: "http://x:11434", model: "m" });
-      }
-    });
   });
 });
 

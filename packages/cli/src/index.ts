@@ -5,7 +5,6 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { runValidate } from "./validate-cmd.js";
 import { runHtml } from "./html-cmd.js";
-import { runResolveConflicts } from "./resolve-conflicts-cmd.js";
 import { runBootstrap } from "./bootstrap-cmd.js";
 import { runSchema } from "./schema-cmd.js";
 import { runFormat } from "./format-cmd.js";
@@ -22,7 +21,6 @@ Commands:
   html              Generate an HTML report of all requirements
   schema            Print the requirement schema for the current project (JSON Schema or YAML)
   bootstrap         Initialize a directory with gitreqd.yaml and a requirements folder
-  resolve-conflicts Resolve merge conflicts in requirement files using LLM (GRD-GIT-002)
 
 Options (global):
   -h, --help           Show this help or command-specific help
@@ -98,29 +96,12 @@ Options:
   --cursor-rules       Add .cursor rules for requirements (without prompting)
 `;
 
-const RESOLVE_CONFLICTS_HELP = `gitreqd resolve-conflicts – resolve merge conflicts in requirement files (GRD-GIT-002)
-
-Usage: gitreqd resolve-conflicts [options]
-
-Resolves Git merge conflicts in requirement YAML files under the project using the LLM
-configured in gitreqd.yaml under the \`llm\` key (see project documentation). Only requirement files
-under requirement_dirs are processed. Resolved content is validated against the
-requirement schema; on validation failure no changes are written.
-
-Set GITREQD_LOG_LLM=1 to log LLM requests and responses to stderr.
-
-Options:
-  -h, --help           Show this help
-  --project-dir <dir>  Project directory (default: current directory)
-`;
-
 const CLI_COMMANDS = [
   "validate",
   "format",
   "html",
   "schema",
   "bootstrap",
-  "resolve-conflicts",
 ] as const;
 
 type CliCommand = (typeof CLI_COMMANDS)[number];
@@ -250,8 +231,6 @@ async function main(): Promise<number> {
       console.log(SCHEMA_HELP);
     } else if (helpCommand === "bootstrap") {
       console.log(BOOTSTRAP_HELP);
-    } else if (helpCommand === "resolve-conflicts") {
-      console.log(RESOLVE_CONFLICTS_HELP);
     } else {
       console.log(GENERAL_HELP);
     }
@@ -299,24 +278,13 @@ async function main(): Promise<number> {
       console.log(`Created: ${result.created.join(", ")}`);
       return 0;
     }
-    if (command === "resolve-conflicts") {
-      const { success, resolved, errors } = await runResolveConflicts(projectDir);
-      for (const err of errors) {
-        const location = err.line != null ? `${err.path}:${err.line}` : err.path;
-        console.error(`${location}: ${err.message}`);
-      }
-      if (resolved.length > 0) {
-        console.log(`Resolved ${resolved.length} file(s): ${resolved.join(", ")}`);
-      }
-      return success ? 0 : 1;
-    }
   } catch (err) {
     console.error(err);
     return 1;
   }
 
   console.error(
-    "Usage: gitreqd validate | format | html | schema | bootstrap | resolve-conflicts [--project-dir <dir>] [--output <path>]"
+    "Usage: gitreqd validate | format | html | schema | bootstrap [--project-dir <dir>] [--output <path>]"
   );
   return 1;
 }

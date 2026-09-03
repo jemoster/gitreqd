@@ -4,7 +4,7 @@ This page collects developer-focused documentation that was moved out of `README
 
 ## Current Components
 
-- **CLI** - Discover requirements, validate schema, format requirement YAML, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`. The TypeScript package provides the full command set including resolve-conflicts; the Rust crates provide bootstrap, validate, format, html, and schema.
+- **CLI** - Discover requirements, validate schema, format requirement YAML, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`. The TypeScript package and the Rust crates both provide bootstrap, validate, format, html, and schema.
 - **VS Code extension** - Navigate `satisfies` links, use Go to Definition on requirement IDs, preview requirements, and scaffold new requirements.
 - **Pre-commit hook** - Optional hook script under `scripts/` to run `gitreqd validate` on commit.
 
@@ -18,7 +18,7 @@ Future integrations are tracked here until formal requirements are added:
 
 Workspace TypeScript packages:
 
-- `packages/core` - `@gitreqd/core`: core engine (discovery, parse, validate, resolve).
+- `packages/core` - `@gitreqd/core`: core engine (discovery, parse, validate, format).
 - `packages/cli` - `gitreqd`: CLI package and `gitreqd` binary.
 - `packages/vscode` - `gitreqd-vscode`: extension source and packaging.
 
@@ -35,7 +35,7 @@ Shared product data:
 
 ## Build From Source
 
-TypeScript (full CLI including resolve-conflicts):
+TypeScript:
 
 ```bash
 npm install

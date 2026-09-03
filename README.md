@@ -50,7 +50,6 @@ A common flow is: define/refine requirements with `/require`, then switch to `/i
 - `gitreqd format` - rewrite requirement YAML into canonical format.
 - `gitreqd html` - generate a static HTML report.
 - `gitreqd schema` - print or export the effective requirement schema.
-- `gitreqd resolve-conflicts` - resolve requirement-file merge conflicts with optional LLM settings.
 
 Use `gitreqd --help` or `gitreqd <command> --help` for full options.
 
@@ -125,13 +124,6 @@ Bootstrap creates a `requirements/` folder and lists it under `requirement_dirs`
 ### `profile` in `gitreqd.yaml`
 
 Choose how requirement YAML is interpreted and rendered. If omitted, `standard` is used.
-
-### `llm` in `gitreqd.yaml`
-
-Used by LLM-enabled commands such as `resolve-conflicts`.
-
-- `provider: ollama` requires `model`; optional `base_url` (default `http://localhost:11434`).
-- `provider: claude` requires `api_key_env`; optional `model` and `base_url`.
 
 ## Developer Documentation
 

@@ -24,13 +24,6 @@ export {
 } from "./requirement-files.js";
 
 export {
-  resolveRequirementConflicts,
-  reconstructSides,
-  hasConflictMarkers,
-} from "./conflicts.js";
-export type { ResolveResult, MergeFieldFn, ResolveRequirementConflictsOptions } from "./conflicts.js";
-
-export {
   parseRequirementContent,
   parseRequirementContentWithSchema,
   parseRequirementData,
@@ -97,15 +90,6 @@ export type {
 
 export { resolveText, resolveToSegments } from "./parameters.js";
 export type { ResolvedSegment } from "./parameters.js";
-
-export {
-  parseLlmConfig,
-  validateLlmForUse,
-  ollamaModelMatchesTag,
-  DEFAULT_CLAUDE_MODEL,
-  DEFAULT_OLLAMA_BASE_URL,
-} from "./llm-config.js";
-export type { LlmRuntimeConfig, ParseLlmConfigResult } from "./llm-config.js";
 
 export {
   githubBlobUrlForArtifact,
