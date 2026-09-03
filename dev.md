@@ -4,7 +4,7 @@ This page collects developer-focused documentation that was moved out of `README
 
 ## Current Components
 
-- **CLI** - Discover requirements, validate schema, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`. The TypeScript package provides the full command set; the Rust crates provide the essential commands (`bootstrap`, `validate`, `html`, `schema`).
+- **CLI** - Discover requirements, validate schema, format requirement YAML, and generate static HTML reports. Run from a project root (`gitreqd.yaml` / `gitreqd.yml`) or pass `--project-dir`. The TypeScript package provides the full command set including resolve-conflicts; the Rust crates provide bootstrap, validate, format, html, and schema.
 - **VS Code extension** - Navigate `satisfies` links, use Go to Definition on requirement IDs, preview requirements, and scaffold new requirements.
 - **Pre-commit hook** - Optional hook script under `scripts/` to run `gitreqd validate` on commit.
 
@@ -24,9 +24,9 @@ Workspace TypeScript packages:
 
 Rust crates (independent essential CLI):
 
-- `crates/gitreqd-core` - core engine (discovery, parse, validate, HTML, schema export, source-link collection).
+- `crates/gitreqd-core` - core engine (discovery, parse, validate, format, HTML, schema export, source-link collection).
 - `crates/gitreqd-macros` - proc-macro attributes for tagging Rust items as source links.
-- `crates/gitreqd` - `gitreqd` binary with bootstrap, validate, html, and schema.
+- `crates/gitreqd` - `gitreqd` binary with bootstrap, validate, format, html, and schema.
 
 Shared product data:
 
@@ -35,7 +35,7 @@ Shared product data:
 
 ## Build From Source
 
-TypeScript (full CLI including format and resolve-conflicts):
+TypeScript (full CLI including resolve-conflicts):
 
 ```bash
 npm install
@@ -54,7 +54,7 @@ cd packages/cli
 npm link
 ```
 
-Rust (essential commands: bootstrap, validate, html, schema):
+Rust (bootstrap, validate, format, html, schema):
 
 ```bash
 cargo build --workspace

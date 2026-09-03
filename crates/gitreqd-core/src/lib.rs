@@ -4,6 +4,7 @@ extern crate gitreqd_macros as gitreqd;
 
 pub mod discovery;
 pub mod error;
+pub mod format;
 pub mod html;
 pub mod load;
 pub mod parameters;
@@ -22,6 +23,10 @@ pub use discovery::{
     ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
 };
 pub use error::{DiscoverResult, Error};
+pub use format::{
+    format_project_requirement_files, format_requirement_to_yaml,
+    normalize_requirement_file_text_for_compare, FormatProjectResult,
+};
 pub use html::{generate_full_html, generate_full_html_with_source_links};
 pub use load::{get_requirements_with_links, load_requirements};
 pub use parameters::{resolve_text, resolve_to_segments, ResolvedSegment, SegmentKind};

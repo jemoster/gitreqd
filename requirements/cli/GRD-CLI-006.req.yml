@@ -18,3 +18,17 @@ links:
   - satisfies: GRD-SYS-002
   - satisfies: GRD-SYS-003
   - satisfies: GRD-SYS-011
+satisfied_by:
+  - artifact: crates/gitreqd-core/src/format.rs
+    description: Project-wide format discovers requirement files, parses with the active profile, and rewrites only non-canonical files.
+  - artifact: crates/gitreqd/src/format.rs
+    description: gitreqd format command rewrites requirement YAML in place.
+  - artifact: crates/gitreqd/src/main.rs
+    description: Exposes the format subcommand on the gitreqd binary.
+verified_by:
+  - artifact: crates/gitreqd-core/src/format.rs
+    description: Tests rewrite then skip canonical files, and write nothing when any file fails to parse.
+  - artifact: crates/gitreqd/tests/cli.rs
+    description: Library tests for format success and missing project root.
+  - artifact: crates/gitreqd/tests/bin_commands.rs
+    description: Binary help lists the format command.

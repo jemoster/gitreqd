@@ -24,6 +24,14 @@ fn help_lists_essential_commands() {
 }
 
 #[test]
+fn help_lists_format_command() {
+    let out = Command::new(bin()).arg("--help").output().unwrap();
+    assert!(out.status.success());
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(text.contains("format"));
+}
+
+#[test]
 fn validate_sample_project_basic() {
     let root = repo_root();
     let out = Command::new(bin())

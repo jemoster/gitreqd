@@ -3,7 +3,8 @@
 extern crate gitreqd_macros as gitreqd;
 
 use gitreqd_cli::{
-    run_bootstrap, run_html, run_schema, run_validate, BootstrapOptions, SchemaOutputFormat,
+    run_bootstrap, run_format, run_html, run_schema, run_validate, BootstrapOptions,
+    SchemaOutputFormat,
 };
 use gitreqd_core::ROOT_MARKER;
 use std::fs;
@@ -210,4 +211,35 @@ fn checks_demo() {}
     assert!(detail.contains("function"));
     assert!(detail.contains("Verified by"));
     assert!(detail.contains("test"));
+}
+
+#[gitreqd::verifies("GRD-CLI-006")]
+#[test]
+fn format_rewrites_then_skips() {
+    let tmp = temp_dir();
+    fs::write(
+        tmp.join(ROOT_MARKER),
+        "requirement_dirs:\n  - requirements\n",
+    )
+    .unwrap();
+    let reqs = tmp.join("requirements");
+    fs::create_dir_all(&reqs).unwrap();
+    let file = reqs.join("GRD-CLI-FMT-001.req.yml");
+    fs::write(
+        &file,
+        "title: T\nid: GRD-CLI-FMT-001\nrequire: The system shall do x.\n",
+    )
+    .unwrap();
+    assert!(run_format(&tmp).unwrap());
+    let after = fs::read_to_string(&file).unwrap();
+    assert!(after.starts_with("id:"));
+    assert!(run_format(&tmp).unwrap());
+    assert_eq!(fs::read_to_string(&file).unwrap(), after);
+}
+
+#[gitreqd::verifies("GRD-CLI-006")]
+#[test]
+fn format_fails_without_root() {
+    let tmp = temp_dir();
+    assert!(!run_format(&tmp).unwrap());
 }
