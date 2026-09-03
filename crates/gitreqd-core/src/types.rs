@@ -173,6 +173,21 @@ impl RequirementWithSource {
             category_path: None,
         }
     }
+
+    /// Payload for canonical YAML serialization (GRD-SYS-011); omits source metadata.
+    pub fn to_requirement(&self) -> Requirement {
+        Requirement {
+            id: self.id.clone(),
+            title: self.title.clone(),
+            require: self.require.clone(),
+            refinement: self.refinement.clone(),
+            attributes: self.attributes.clone(),
+            links: self.links.clone(),
+            satisfied_by: self.satisfied_by.clone(),
+            verified_by: self.verified_by.clone(),
+            parameters: self.parameters.clone(),
+        }
+    }
 }
 
 pub struct ProjectInfo {

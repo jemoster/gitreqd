@@ -14,7 +14,7 @@ npm install -g \
   "https://github.com/jemoster/gitreqd/releases/download/v0.4.0/gitreqd-0.4.0.tgz"
 ```
 
-A Rust implementation of the essential commands (`bootstrap`, `validate`, `html`, `schema`) is also in this repository.
+A Rust implementation of the CLI (`bootstrap`, `validate`, `format`, `html`, `schema`) is also in this repository.
 
 On Linux x86_64, download `gitreqd-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact. To build from source instead:
 

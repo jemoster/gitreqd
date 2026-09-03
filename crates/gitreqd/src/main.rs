@@ -2,7 +2,8 @@
 
 use clap::{Parser, Subcommand, ValueEnum};
 use gitreqd_cli::{
-    run_bootstrap, run_html, run_schema, run_validate, BootstrapOptions, SchemaOutputFormat,
+    run_bootstrap, run_format, run_html, run_schema, run_validate, BootstrapOptions,
+    SchemaOutputFormat,
 };
 use std::io::{self, IsTerminal, Write};
 use std::path::PathBuf;
@@ -16,6 +17,7 @@ use std::process::ExitCode;
 Usage: gitreqd <command> [options]\n\n\
 Commands:\n  \
   validate   Check requirement files for schema, duplicate IDs, and broken links\n  \
+  format     Rewrite requirement YAML files to canonical formatting\n  \
   html       Generate an HTML report of all requirements\n  \
   schema     Print the requirement schema for the current project (JSON Schema or YAML)\n  \
   bootstrap  Initialize a directory with gitreqd.yaml and a requirements folder"
@@ -33,6 +35,8 @@ struct Cli {
 enum Command {
     /// Check requirement files for schema, duplicate IDs, and broken links
     Validate,
+    /// Rewrite requirement YAML files to canonical formatting
+    Format,
     /// Generate an HTML report of all requirements
     Html {
         /// Output directory for index.html (default: .)
@@ -94,6 +98,13 @@ fn main() -> ExitCode {
 
     let ok = match cli.command.unwrap_or(Command::Validate) {
         Command::Validate => match run_validate(&project_dir) {
+            Ok(ok) => ok,
+            Err(err) => {
+                eprintln!("{err}");
+                false
+            }
+        },
+        Command::Format => match run_format(&project_dir) {
             Ok(ok) => ok,
             Err(err) => {
                 eprintln!("{err}");
