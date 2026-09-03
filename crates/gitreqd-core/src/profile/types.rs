@@ -1,5 +1,6 @@
 //! GRD-SYS-010: Active profile drives requirement document shape, validation, and HTML output.
 
+use crate::artifact_links::ArtifactLinkRenderOptions;
 use crate::types::{
     RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, ValidationError,
 };
@@ -33,10 +34,12 @@ pub trait RequirementProfile: Send + Sync {
         source_links: &[SourceLink],
     ) -> String;
     /// GRD-VSC-003 / GRD-SYS-010: Single-requirement HTML using the same detail rendering as the full report.
+    /// GRD-UI-009: `artifact_links` optionally turns project-relative artifact paths into GitHub blob URLs.
     fn generate_single_requirement_html(
         &self,
         requirement: &RequirementWithSource,
         all_requirements: Option<&[RequirementWithSource]>,
         source_links: &[SourceLink],
+        artifact_links: Option<&ArtifactLinkRenderOptions>,
     ) -> String;
 }

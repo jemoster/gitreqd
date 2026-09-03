@@ -2,6 +2,7 @@
 
 use std::path::Path;
 
+use crate::artifact_links::ArtifactLinkRenderOptions;
 use crate::html::{
     generate_full_html_with_source_links, generate_single_requirement_html_with_source_links,
 };
@@ -71,11 +72,13 @@ impl RequirementProfile for StandardProfile {
         requirement: &RequirementWithSource,
         all_requirements: Option<&[RequirementWithSource]>,
         source_links: &[SourceLink],
+        artifact_links: Option<&ArtifactLinkRenderOptions>,
     ) -> String {
         generate_single_requirement_html_with_source_links(
             requirement,
             all_requirements,
             source_links,
+            artifact_links,
         )
     }
 }
