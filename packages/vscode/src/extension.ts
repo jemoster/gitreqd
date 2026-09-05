@@ -1,12 +1,12 @@
 /**
  * VSCode extension for gitreqd: link resolution, preview (GRD-VSC-003), WYSIWYG/Markdown fields in preview (GRD-VSC-006), navigation,
- * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core Zod (GRD-SYS-009),
+ * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core (GRD-SYS-009),
  * refreshed when project root markers change, new requirement from explorer (GRD-VSC-005),
  * and hover titles for requirement id references (GRD-VSC-007).
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { REQUIREMENT_FILE_EXTENSION } from "@gitreqd/core";
+import { REQUIREMENT_FILE_EXTENSION, loadWasmBindings } from "@gitreqd/core";
 import { isRequirementDocument } from "./requirement-document.js";
 import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
@@ -37,6 +37,7 @@ function* findLinkRanges(document: vscode.TextDocument): Generator<{ range: vsco
 const OUTPUT_CHANNEL_NAME = "Gitreqd";
 
 export function activate(context: vscode.ExtensionContext): void {
+  loadWasmBindings(path.join(context.extensionPath, "dist"));
   const outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   const log = (message: string) => outputChannel.appendLine(message);
   context.subscriptions.push(outputChannel);

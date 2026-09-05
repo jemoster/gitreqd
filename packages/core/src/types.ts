@@ -1,6 +1,3 @@
-/**
- * GRD-SYS-005: Parameter value type (string, number, or boolean).
- */
 export type ParameterValue = string | number | boolean;
 
 export interface Link {
@@ -8,48 +5,26 @@ export interface Link {
   [key: string]: unknown;
 }
 
-/** GRD-SYS-016: Reference to an implementation or verification artifact (path or URL). */
 export interface ArtifactRef {
   artifact: string;
   description?: string;
 }
 
-/**
- * Requirement shape for YAML files. Runtime validation is enforced by the Zod schema
- * in `requirement-schema.ts` (GRD-SYS-009); this interface is the TypeScript contract.
- */
 export interface Requirement {
   id: string;
   title: string;
-  /** Single normative Shall/Should/May statement for this requirement ID. */
   require: string;
-  /** Supporting prose (Markdown in HTML reports). */
   refinement: string;
   attributes?: Record<string, unknown>;
   links?: Link[];
-  /** GRD-SYS-016: Artifacts that implement or satisfy this requirement. */
   satisfied_by?: ArtifactRef[];
-  /** GRD-SYS-016: Artifacts that verify this requirement was met. */
   verified_by?: ArtifactRef[];
-  /** GRD-SYS-005: Named parameters for templating in text fields. */
   parameters?: Record<string, ParameterValue>;
 }
 
 export interface RequirementWithSource extends Requirement {
-  /** Path to the YAML file this requirement was loaded from */
   sourcePath: string;
-  /**
-   * GRD-SYS-004: Path segments from the requirement_dir that contains this file
-   * to the file's directory (relative). Empty = file is directly under a requirement_dir.
-   */
   categoryPath?: string[];
-}
-
-export interface ProjectInfo {
-  /** Absolute path to the project root (directory containing gitreqd.yaml or gitreqd.yml) */
-  rootDir: string;
-  /** Absolute paths to requirement YAML files under the project */
-  requirementPaths: string[];
 }
 
 export interface ValidationError {
@@ -62,3 +37,19 @@ export interface LoadResult {
   requirements: RequirementWithSource[];
   errors: ValidationError[];
 }
+
+export interface DiscoverResult {
+  rootDir: string;
+  requirementPaths: string[];
+}
+
+export type ArtifactLinkRenderOptions = {
+  github?: {
+    owner: string;
+    repo: string;
+    commitSha: string;
+    projectRootRel: string;
+  };
+};
+
+export type RequirementSchemaComposeOptions = Record<string, never>;

@@ -1,4 +1,4 @@
-# GRD-CLI-007: Publish CLI install artifacts to GitHub Releases for direct npm install from source URLs.
+# Publish @gitreqd/core tarball and native CLI binary to GitHub Releases.
 # workflow_dispatch runs the same packaging and uploads workflow artifacts (no GitHub Release).
 name: Release CLI artifacts
 on:
@@ -11,11 +11,19 @@ permissions:
 
 jobs:
   cli-artifacts:
-    name: Build and upload CLI tarballs
+    name: Build and upload core tarball
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@1.83.0
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        run: bash ./scripts/install-wasm-bindgen.sh
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -26,18 +34,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Package CLI artifacts
+      - name: Package core artifacts
         run: bash ./scripts/package.sh
 
       # GRD-DEVOPS-003: tag must be v${version} and tarball names must include that version.
-      - name: Assert tag and CLI artifact names
+      - name: Assert tag and core artifact names
         if: github.event_name == 'release'
         run: python3 ./scripts/assert-release-tag.py "${{ github.event.release.tag_name }}" cli
 
-      - name: Upload CLI tarballs to release
+      - name: Upload core tarballs to release
         if: github.event_name == 'release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,7 +56,7 @@ jobs:
           fi
           gh release upload "${{ github.event.release.tag_name }}" "${tgz_files[@]}" --clobber
 
-      - name: Upload CLI tarballs as workflow artifacts
+      - name: Upload core tarballs as workflow artifacts
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:

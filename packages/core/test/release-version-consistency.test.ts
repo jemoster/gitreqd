@@ -14,7 +14,6 @@ const VSCODE_RELEASE_WORKFLOW = path.join(REPO_ROOT, ".github", "workflows", "re
 const RELEASE_GUIDE = path.join(REPO_ROOT, "release.md");
 const README = path.join(REPO_ROOT, "README.md");
 const CORE_PKG = path.join(REPO_ROOT, "packages", "core", "package.json");
-const CLI_PKG = path.join(REPO_ROOT, "packages", "cli", "package.json");
 const VSCODE_PKG = path.join(REPO_ROOT, "packages", "vscode", "package.json");
 const CARGO_TOML = path.join(REPO_ROOT, "Cargo.toml");
 
@@ -59,7 +58,6 @@ function seedVersionTree(tmpDir: string, version: string): void {
   fs.chmodSync(path.join(tmpDir, "scripts", "assert-release-tag.py"), 0o755);
 
   writeJson(path.join(tmpDir, "packages", "core", "package.json"), fixturePackageJson("@gitreqd/core", version, false));
-  writeJson(path.join(tmpDir, "packages", "cli", "package.json"), fixturePackageJson("gitreqd", version, true));
   writeJson(
     path.join(tmpDir, "packages", "vscode", "package.json"),
     fixturePackageJson("gitreqd-vscode", version, true)
@@ -69,7 +67,6 @@ function seedVersionTree(tmpDir: string, version: string): void {
     lockfileVersion: 3,
     packages: {
       "packages/core": { name: "@gitreqd/core", version },
-      "packages/cli": { name: "gitreqd", version, dependencies: { "@gitreqd/core": version } },
       "packages/vscode": { name: "gitreqd-vscode", version, dependencies: { "@gitreqd/core": version } },
     },
   });
@@ -79,14 +76,13 @@ function seedVersionTree(tmpDir: string, version: string): void {
   );
   fs.writeFileSync(
     path.join(tmpDir, "Cargo.lock"),
-    `[[package]]\nname = "gitreqd"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-core"\nversion = "${version}"\n`
+    `[[package]]\nname = "gitreqd"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-core"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-wasm"\nversion = "${version}"\n`
   );
   fs.writeFileSync(
     path.join(tmpDir, "README.md"),
     [
-      "npm install -g \\",
-      `  "https://github.com/example/gitreqd/releases/download/v${version}/gitreqd-core-${version}.tgz" \\`,
-      `  "https://github.com/example/gitreqd/releases/download/v${version}/gitreqd-${version}.tgz"`,
+      `Download gitreqd-core-${version}.tgz from`,
+      `https://github.com/example/gitreqd/releases/download/v${version}/gitreqd-core-${version}.tgz`,
       "",
     ].join("\n")
   );
@@ -100,11 +96,8 @@ function seedVersionTree(tmpDir: string, version: string): void {
 describe("GRD-DEVOPS-003: shared release version", () => {
   it("workspace packages, @gitreqd/core pins, and Cargo workspace version match", () => {
     const version = sharedPackageVersion();
-    expect(readJson(CLI_PKG).version).toBe(version);
     expect(readJson(VSCODE_PKG).version).toBe(version);
-    const cliDeps = readJson(CLI_PKG).dependencies as Record<string, string>;
     const vscodeDeps = readJson(VSCODE_PKG).dependencies as Record<string, string>;
-    expect(cliDeps["@gitreqd/core"]).toBe(version);
     expect(vscodeDeps["@gitreqd/core"]).toBe(version);
 
     const cargo = fs.readFileSync(CARGO_TOML, "utf-8");
@@ -113,11 +106,11 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(match?.[1]).toBe(version);
   });
 
-  it("README install URLs use the shared version in both the tag and artifact names", () => {
-    const version = sharedPackageVersion();
+  it("README documents cargo install and the native Linux binary", () => {
     const readme = fs.readFileSync(README, "utf-8");
-    expect(readme).toContain(`/releases/download/v${version}/gitreqd-core-${version}.tgz`);
-    expect(readme).toContain(`/releases/download/v${version}/gitreqd-${version}.tgz`);
+    expect(readme).toContain("cargo install --path crates/gitreqd");
+    expect(readme).toContain("gitreqd-linux-x86_64");
+    expect(readme).not.toMatch(/gitreqd-\d+\.\d+\.\d+\.tgz/);
   });
 
   it("bump-version.py updates packages, lockfiles, and README install URLs", () => {
@@ -132,25 +125,21 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     const corePkgText = fs.readFileSync(path.join(tmpDir, "packages", "core", "package.json"), "utf-8");
     expect(corePkgText).toContain("gitreqd — fixture");
     expect(corePkgText).not.toContain("\\u2014");
-    expect(readJson(path.join(tmpDir, "packages", "cli", "package.json")).version).toBe("9.8.7");
     expect(readJson(path.join(tmpDir, "packages", "vscode", "package.json")).version).toBe("9.8.7");
-    const cliDeps = readJson(path.join(tmpDir, "packages", "cli", "package.json")).dependencies as Record<
-      string,
-      string
-    >;
-    expect(cliDeps["@gitreqd/core"]).toBe("9.8.7");
     const lock = readJson(path.join(tmpDir, "package-lock.json"));
     const packages = lock.packages as Record<string, { version?: string; dependencies?: Record<string, string> }>;
     expect(packages["packages/core"].version).toBe("9.8.7");
-    expect(packages["packages/cli"].dependencies?.["@gitreqd/core"]).toBe("9.8.7");
+    expect(packages["packages/vscode"].dependencies?.["@gitreqd/core"]).toBe("9.8.7");
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.toml"), "utf-8")).toContain('version = "9.8.7"');
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain('name = "gitreqd"\nversion = "9.8.7"');
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
       'name = "gitreqd-core"\nversion = "9.8.7"'
     );
+    expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
+      'name = "gitreqd-wasm"\nversion = "9.8.7"'
+    );
     const readme = fs.readFileSync(path.join(tmpDir, "README.md"), "utf-8");
     expect(readme).toContain("/releases/download/v9.8.7/gitreqd-core-9.8.7.tgz");
-    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-9.8.7.tgz");
     expect(readme).not.toContain("0.1.0");
     expect(fs.readFileSync(path.join(tmpDir, "packages", "vscode", "README.md"), "utf-8")).toContain(
       "gitreqd-vscode-9.8.7.vsix"
@@ -163,9 +152,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     fs.writeFileSync(
       path.join(tmpDir, "README.md"),
       [
-        "npm install -g \\",
-        '  "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz" \\',
-        '  "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-0.1.0.tgz"',
+        'Download "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz"',
         "",
       ].join("\n")
     );
@@ -175,7 +162,6 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     });
     const readme = fs.readFileSync(path.join(tmpDir, "README.md"), "utf-8");
     expect(readme).toContain("/releases/download/v9.8.7/gitreqd-core-9.8.7.tgz");
-    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-9.8.7.tgz");
     expect(readme).not.toContain("v0.2.0");
     expect(readme).not.toContain("0.1.0");
   });
@@ -184,7 +170,6 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "1.2.3");
     fs.mkdirSync(path.join(tmpDir, "release"), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, "release", "gitreqd-1.2.3.tgz"), "");
     fs.writeFileSync(path.join(tmpDir, "release", "gitreqd-core-1.2.3.tgz"), "");
     const out = execFileSync("python3", [path.join(tmpDir, "scripts", "assert-release-tag.py"), "v1.2.3", "cli"], {
       cwd: tmpDir,

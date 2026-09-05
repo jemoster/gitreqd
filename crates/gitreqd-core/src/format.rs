@@ -1,22 +1,31 @@
 //! GRD-SYS-011: Canonical YAML serialization for requirement files.
 //! GRD-CLI-006: Project-wide format uses the same serialization and skip-write rules.
 
-use std::fs;
-use std::path::{Path, PathBuf};
+#[cfg(feature = "std-fs")]
+use std::path::PathBuf;
 
 use indexmap::IndexMap;
 use regex::Regex;
 use serde_yaml::{Mapping, Value};
 
+use crate::types::{ArtifactRef, Link, ParameterValue, Requirement};
+
+#[cfg(feature = "std-fs")]
+use crate::types::{RequirementWithSource, ValidationError};
+
+#[cfg(feature = "std-fs")]
 use crate::discovery::{
     discover_project_root_candidates, discover_requirement_paths, ROOT_MARKER_HINT,
 };
+#[cfg(feature = "std-fs")]
 use crate::profile::load_active_profile;
-use crate::types::{
-    ArtifactRef, Link, ParameterValue, Requirement, RequirementWithSource, ValidationError,
-};
+#[cfg(feature = "std-fs")]
+use std::fs;
+#[cfg(feature = "std-fs")]
+use std::path::Path;
 
 /// Result of formatting every discovered requirement file in a project (GRD-CLI-006).
+#[cfg(feature = "std-fs")]
 #[derive(Debug, Clone, Default)]
 pub struct FormatProjectResult {
     pub success: bool,
@@ -245,6 +254,7 @@ pub fn format_requirement_to_yaml(requirement: &Requirement) -> String {
 
 /// GRD-CLI-006: Format every discovered requirement YAML file in a project using the active
 /// profile parser and GRD-SYS-011 canonical serialization.
+#[cfg(feature = "std-fs")]
 #[gitreqd::implements("GRD-CLI-006")]
 pub fn format_project_requirement_files(project_dir: &Path) -> FormatProjectResult {
     let candidates = match discover_project_root_candidates(project_dir) {
@@ -371,6 +381,8 @@ mod tests {
     use crate::requirement_files::REQUIREMENT_FILE_EXTENSION;
     use indexmap::IndexMap;
     use std::collections::BTreeMap;
+    use std::fs;
+    use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
 
     static COUNTER: AtomicU64 = AtomicU64::new(0);

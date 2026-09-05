@@ -1,7 +1,7 @@
 {
   "name": "@gitreqd/core",
   "version": "0.4.0",
-  "description": "Core engine for gitreqd — discovery, parse, validate, format",
+  "description": "JS facade over gitreqd-core WASM — parse, validate, format, and HTML",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,21 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
-    },
-    "./html": {
-      "types": "./dist/html.d.ts",
-      "import": "./dist/html.js",
-      "default": "./dist/html.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.js",
-      "default": "./dist/types.js"
     }
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist"
+    "build": "bash ../../scripts/build-wasm-core.sh && tsc && mkdir -p dist/wasm && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm dist/wasm/",
+    "clean": "rm -rf dist wasm"
   },
   "files": [
     "dist"
@@ -38,14 +28,9 @@
     "node": ">=24"
   },
   "dependencies": {
-    "glob": "^11.0.0",
-    "markdown-it": "^14.1.0",
-    "yaml": "^2.6.1",
-    "zod": "^4.3.6",
-    "zod-to-json-schema": "^3.25.1"
+    "glob": "^11.0.0"
   },
   "devDependencies": {
-    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2"
   }

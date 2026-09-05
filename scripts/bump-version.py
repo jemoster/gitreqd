@@ -16,14 +16,14 @@ VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PKG_RELS = (
     Path("packages/core/package.json"),
-    Path("packages/cli/package.json"),
     Path("packages/vscode/package.json"),
 )
-LOCK_PKG_KEYS = ("packages/core", "packages/cli", "packages/vscode")
+LOCK_PKG_KEYS = ("packages/core", "packages/vscode")
 CARGO_WORKSPACE_VERSION = re.compile(
     r'(\[workspace\.package\][^\[]*?version\s*=\s*")([^"]+)(")',
     re.S,
 )
+CARGO_PACKAGE_NAMES = ("gitreqd", "gitreqd-core", "gitreqd-wasm")
 
 
 def die(message: str) -> None:
@@ -45,7 +45,6 @@ def rewrite_install_docs(root: Path, old: str, new: str) -> None:
         text = re.sub(r"/releases/download/v\d+\.\d+\.\d+/", f"/releases/download/v{new}/", text)
         text = text.replace(f"gitreqd-core-{old}.tgz", f"gitreqd-core-{new}.tgz")
         text = text.replace(f"gitreqd-vscode-{old}.vsix", f"gitreqd-vscode-{new}.vsix")
-        text = text.replace(f"gitreqd-{old}.tgz", f"gitreqd-{new}.tgz")
         path.write_text(text, encoding="utf-8")
 
 
@@ -98,7 +97,7 @@ def bump(root: Path, new: str) -> None:
     cargo_lock = root / "Cargo.lock"
     if cargo_lock.is_file():
         text = cargo_lock.read_text(encoding="utf-8")
-        for name in ("gitreqd", "gitreqd-core"):
+        for name in CARGO_PACKAGE_NAMES:
             pattern = re.compile(
                 rf'(\[\[package\]\]\nname = "{re.escape(name)}"\nversion = "){re.escape(old)}(")'
             )
