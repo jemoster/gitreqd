@@ -1,15 +1,22 @@
 //! Load all requirements from a project directory.
 //! GRD-SYS-002 / GRD-SYS-004 / GRD-SYS-010.
 
-use std::path::{Path, PathBuf};
+use crate::types::RequirementWithSource;
 
+#[cfg(feature = "std-fs")]
 use crate::discovery::{discover_project, discover_requirement_paths, get_requirement_dirs};
+#[cfg(feature = "std-fs")]
 use crate::error::Error;
+#[cfg(feature = "std-fs")]
 use crate::profile::load_active_profile;
-use crate::types::{LoadResult, RequirementWithSource, ValidationError};
+#[cfg(feature = "std-fs")]
+use crate::types::{LoadResult, ValidationError};
+#[cfg(feature = "std-fs")]
+use std::path::{Path, PathBuf};
 
 /// GRD-SYS-004: Compute category path segments for a requirement from its
 /// source_path and the project's requirement_dirs.
+#[cfg(feature = "std-fs")]
 fn category_path_for(source_path: &Path, requirement_dirs: &[PathBuf]) -> Vec<String> {
     let file_dir = source_path.parent().unwrap_or(source_path);
     for dir in requirement_dirs {
@@ -35,6 +42,7 @@ fn category_path_for(source_path: &Path, requirement_dirs: &[PathBuf]) -> Vec<St
 /// Parses each requirement file and validates (schema + duplicate ids + broken links).
 /// GRD-SYS-004: Sets category_path on each requirement from directory structure.
 /// GRD-SYS-010: Parsing and validation use the active profile from project configuration.
+#[cfg(feature = "std-fs")]
 pub fn load_requirements(
     start_dir: &Path,
     project_root: Option<&Path>,

@@ -15,7 +15,7 @@ name = "gitreqd"
 path = "src/main.rs"
 
 [dependencies]
-gitreqd-core.workspace = true
+gitreqd-core = { workspace = true, features = ["std-fs", "source-links"] }
 clap.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true

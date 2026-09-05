@@ -15,6 +15,7 @@ pub mod requirement_files;
 pub mod rules;
 pub mod schema;
 pub mod schema_compose;
+#[cfg(feature = "source-links")]
 pub mod source_links;
 pub mod types;
 
@@ -22,26 +23,35 @@ pub use artifact_links::{
     github_blob_url_for_artifact, posix_join_repo_path, ArtifactLinkRenderOptions,
     GithubArtifactLinkContext,
 };
+#[cfg(feature = "std-fs")]
 pub use discovery::{
     discover_project, discover_project_root, discover_project_root_candidates,
-    discover_requirement_paths, find_root_marker_path, get_requirement_dirs, normalize_path,
-    ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT,
+    discover_requirement_paths, find_root_marker_path, get_requirement_dirs,
+    read_root_marker_mapping,
+};
+pub use discovery::{
+    normalize_path, parse_root_marker_yaml, RootMarkerConfig, ROOT_MARKER, ROOT_MARKER_FILENAMES,
+    ROOT_MARKER_HINT,
 };
 pub use error::{DiscoverResult, Error};
-pub use format::{
-    format_project_requirement_files, format_requirement_to_yaml,
-    normalize_requirement_file_text_for_compare, FormatProjectResult,
-};
+#[cfg(feature = "std-fs")]
+pub use format::{format_project_requirement_files, FormatProjectResult};
+pub use format::{format_requirement_to_yaml, normalize_requirement_file_text_for_compare};
 pub use html::{
     generate_full_html, generate_full_html_with_source_links, generate_single_requirement_html,
     generate_single_requirement_html_with_source_links,
 };
-pub use load::{get_requirements_with_links, load_requirements};
+pub use load::get_requirements_with_links;
+#[cfg(feature = "std-fs")]
+pub use load::load_requirements;
 pub use parameters::{resolve_text, resolve_to_segments, ResolvedSegment, SegmentKind};
-pub use parse::{parse_requirement_content, parse_requirement_data, parse_requirement_file};
+#[cfg(feature = "std-fs")]
+pub use parse::parse_requirement_file;
+pub use parse::{parse_requirement_content, parse_requirement_data};
+#[cfg(feature = "std-fs")]
+pub use profile::{get_active_profile_id, load_active_profile};
 pub use profile::{
-    get_active_profile_id, get_requirement_profile, list_registered_profile_ids,
-    load_active_profile, RequirementProfile, STANDARD_PROFILE_ID,
+    get_requirement_profile, list_registered_profile_ids, RequirementProfile, STANDARD_PROFILE_ID,
 };
 pub use requirement_files::{
     expected_requirement_basenames_for_id, is_requirement_filename,
@@ -54,7 +64,9 @@ pub use rules::{
     validate_requirements, NamedGlobalRule, NamedRule, ValidationRule,
 };
 pub use schema::{export_requirement_file_json_schema, parse_requirement_value};
+#[cfg(feature = "std-fs")]
 pub use schema_compose::requirement_schema_compose_options_for_project;
+#[cfg(feature = "source-links")]
 pub use source_links::collect_rust_source_links;
 pub use types::{
     ArtifactRef, Link, LoadResult, ParameterValue, ProjectInfo, Requirement,

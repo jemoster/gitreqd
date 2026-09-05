@@ -14,9 +14,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const { exportRequirementFileJsonSchema } = await import(
-  join(root, "packages/core/dist/requirement-schema.js")
+const { exportRequirementFileJsonSchema, loadWasmBindings } = await import(
+  join(root, "packages/core/dist/index.js")
 );
+loadWasmBindings();
 const json = exportRequirementFileJsonSchema();
 const text = `${JSON.stringify(json, null, 2)}\n`;
 const outPath = process.argv[2] ?? join(root, "out/requirement-schema.json");

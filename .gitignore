@@ -4,3 +4,4 @@ dist/
 out/
 release/
 /target/
+packages/core/wasm/

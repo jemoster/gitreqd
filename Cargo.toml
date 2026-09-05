@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/gitreqd-core", "crates/gitreqd", "crates/gitreqd-macros"]
+members = ["crates/gitreqd-core", "crates/gitreqd", "crates/gitreqd-macros", "crates/gitreqd-wasm"]
 
 [workspace.package]
 edition = "2021"
@@ -8,8 +8,9 @@ license = "MIT"
 version = "0.4.0"
 
 [workspace.dependencies]
-gitreqd-core = { path = "crates/gitreqd-core" }
+gitreqd-core = { path = "crates/gitreqd-core", default-features = false }
 gitreqd-macros = { path = "crates/gitreqd-macros" }
+wasm-bindgen = "=0.2.100"
 serde = { version = "1", features = ["derive"] }
 syn = { version = "2", features = ["full", "visit", "parsing"] }
 quote = "1"

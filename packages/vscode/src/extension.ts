@@ -1,6 +1,6 @@
 /**
  * VSCode extension for gitreqd: link resolution, preview (GRD-VSC-003), WYSIWYG/Markdown fields in preview (GRD-VSC-006), navigation,
- * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core Zod (GRD-SYS-009),
+ * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core (GRD-SYS-009),
  * refreshed when project root markers change, new requirement from explorer (GRD-VSC-005),
  * and hover titles for requirement id references (GRD-VSC-007).
  */
