@@ -17,6 +17,13 @@ describe("core tarball release artifacts", () => {
     expect(script).not.toContain("packages/cli");
   });
 
+  it("installs pinned wasm-bindgen from the GitHub release binary", () => {
+    const script = fs.readFileSync(path.join(REPO_ROOT, "scripts", "install-wasm-bindgen.sh"), "utf-8");
+    expect(script).toContain("github.com/rustwasm/wasm-bindgen/releases/download/");
+    expect(script).toContain("0.2.100");
+    expect(script).toContain("x86_64-unknown-linux-musl");
+  });
+
   it("release workflow packages core tarballs and uploads them to GitHub Releases", () => {
     const workflow = fs.readFileSync(CLI_RELEASE_WORKFLOW, "utf-8");
     expect(workflow).toContain("release:");
