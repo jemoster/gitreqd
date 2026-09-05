@@ -1,8 +1,11 @@
 /**
  * WASM facade smoke tests: init bindings, parse, validate, schema, and single-requirement HTML.
  */
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   exportRequirementFileJsonSchema,
   formatRequirementToYaml,
@@ -116,5 +119,25 @@ attributes:
     expect("error" in result).toBe(false);
     if ("error" in result) return;
     expect(result.requirement.id).toBe("SYS-001");
+  });
+
+  it("loads wasm from the package dist when process.cwd is not the repo root", () => {
+    const distIndex = path.join(REPO_ROOT, "packages", "core", "dist", "index.js");
+    expect(fs.existsSync(distIndex)).toBe(true);
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-wasm-cwd-"));
+    const spec = pathToFileURL(distIndex).href;
+    const script = `
+      import { parseRequirementContent } from ${JSON.stringify(spec)};
+      const r = parseRequirementContent(
+        "id: GRD-WASM-CWD\\ntitle: Cwd\\nrequire: The loader shall not use process.cwd().\\n",
+        "GRD-WASM-CWD.req.yml"
+      );
+      if ("error" in r) throw new Error(r.error.message);
+      if (r.requirement.id !== "GRD-WASM-CWD") throw new Error(r.requirement.id);
+    `;
+    execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+      cwd: tmp,
+      encoding: "utf-8",
+    });
   });
 });

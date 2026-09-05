@@ -1,7 +1,8 @@
-import { createRequire } from "node:module";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+/**
+ * Load gitreqd-core WASM via a static specifier so Node and bundlers resolve
+ * `dist/wasm/gitreqd_wasm.js` relative to this module, not `process.cwd()`.
+ */
+import * as wasm from "./wasm/gitreqd_wasm.js";
 
 export interface WasmBindings {
   requirementFileExtension(): string;
@@ -22,47 +23,16 @@ export interface WasmBindings {
   hasRequirementProfile(id: string): boolean;
 }
 
-let cached: WasmBindings | undefined;
-
-function moduleDir(): string {
-  try {
-    const url = new Function("return import.meta.url")() as unknown;
-    if (typeof url === "string") {
-      return path.dirname(fileURLToPath(url));
-    }
-  } catch {
-    // CJS hosts (Jest, VS Code bundle) have no import.meta.
-  }
-  const cjsDir = (globalThis as { __dirname?: string }).__dirname;
-  if (cjsDir) return cjsDir;
-  return process.cwd();
-}
-
-function existingFile(candidates: string[]): string | undefined {
-  return candidates.find((p) => fs.existsSync(p));
-}
+let cached: WasmBindings | undefined = wasm;
 
 /**
- * Load wasm-bindgen Node bindings. `explicitDir` is the directory that contains
- * `gitreqd_wasm.js` and `gitreqd_wasm_bg.wasm`.
+ * Return the wasm-bindgen Node bindings. `explicitDir` is ignored: the glue is
+ * imported from `./wasm/gitreqd_wasm.js` next to this module (see dist/wasm/).
  */
-export function loadWasmBindings(explicitDir?: string): WasmBindings {
-  if (cached) return cached;
-  const here = moduleDir();
-  const jsPath = existingFile(
-    [
-      explicitDir ? path.join(explicitDir, "gitreqd_wasm.js") : "",
-      process.env.GITREQD_WASM_DIR ? path.join(process.env.GITREQD_WASM_DIR, "gitreqd_wasm.js") : "",
-      path.join(here, "wasm", "gitreqd_wasm.js"),
-      path.join(here, "..", "wasm", "gitreqd_wasm.js"),
-      path.join(process.cwd(), "packages", "core", "wasm", "gitreqd_wasm.js"),
-    ].filter(Boolean)
-  );
-  if (!jsPath) {
-    throw new Error("gitreqd WASM bindings not found; run scripts/build-wasm-core.sh");
+export function loadWasmBindings(_explicitDir?: string): WasmBindings {
+  if (!cached) {
+    cached = wasm;
   }
-  const req = createRequire(jsPath);
-  cached = req(jsPath) as WasmBindings;
   return cached;
 }
 

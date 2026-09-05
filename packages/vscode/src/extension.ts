@@ -6,7 +6,7 @@
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { REQUIREMENT_FILE_EXTENSION, loadWasmBindings } from "@gitreqd/core";
+import { REQUIREMENT_FILE_EXTENSION } from "@gitreqd/core";
 import { isRequirementDocument } from "./requirement-document.js";
 import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
@@ -37,7 +37,6 @@ function* findLinkRanges(document: vscode.TextDocument): Generator<{ range: vsco
 const OUTPUT_CHANNEL_NAME = "Gitreqd";
 
 export function activate(context: vscode.ExtensionContext): void {
-  loadWasmBindings(path.join(context.extensionPath, "dist"));
   const outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   const log = (message: string) => outputChannel.appendLine(message);
   context.subscriptions.push(outputChannel);
