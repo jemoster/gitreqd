@@ -34,3 +34,6 @@ wasm-bindgen "${WASM_FILE}" \
   --out-name gitreqd_wasm \
   --target nodejs \
   --typescript
+
+# wasm-bindgen Node glue is CommonJS. Isolate it from packages/core "type": "module".
+printf '%s\n' '{ "type": "commonjs" }' > "${OUT_DIR}/package.json"

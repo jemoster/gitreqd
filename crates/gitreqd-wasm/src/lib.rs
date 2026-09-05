@@ -322,7 +322,7 @@ pub fn wasm_format_requirement_to_yaml(requirement_json: &str) -> String {
 pub fn wasm_export_requirement_file_json_schema(compose_json: Option<String>) -> String {
     let options = compose_json
         .as_deref()
-        .filter(|s| !s.is_empty() && s != "null")
+        .filter(|s| !s.is_empty() && *s != "null")
         .map(|_| gitreqd_core::RequirementSchemaComposeOptions::default());
     export_requirement_file_json_schema(options.as_ref()).to_string()
 }

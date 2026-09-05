@@ -26,12 +26,16 @@ let cached: WasmBindings | undefined;
 
 function moduleDir(): string {
   try {
-    return path.dirname(fileURLToPath(import.meta.url));
+    const url = new Function("return import.meta.url")() as unknown;
+    if (typeof url === "string") {
+      return path.dirname(fileURLToPath(url));
+    }
   } catch {
-    const cjsDir = (globalThis as { __dirname?: string }).__dirname;
-    if (cjsDir) return cjsDir;
-    return process.cwd();
+    // CJS hosts (Jest, VS Code bundle) have no import.meta.
   }
+  const cjsDir = (globalThis as { __dirname?: string }).__dirname;
+  if (cjsDir) return cjsDir;
+  return process.cwd();
 }
 
 function existingFile(candidates: string[]): string | undefined {

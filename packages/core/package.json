@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "bash ../../scripts/build-wasm-core.sh && tsc && mkdir -p dist/wasm && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm dist/wasm/",
+    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist && tsc && mkdir -p dist/wasm && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist/wasm/",
     "clean": "rm -rf dist wasm"
   },
   "files": [
