@@ -12,6 +12,7 @@ import {
   generateSingleRequirementHtml,
   loadRequirements,
   loadWasmBindings,
+  initGitreqdWasm,
   parseRequirementContent,
   validateRequirements,
 } from "@gitreqd/core";
@@ -21,7 +22,8 @@ const SAMPLE = path.join(REPO_ROOT, "sample_projects", "basic");
 const FIXTURE_PATH = path.join(SAMPLE, "system", "SYS-001.req.yml");
 
 describe("gitreqd WASM core facade", () => {
-  beforeAll(() => {
+  beforeAll(async () => {
+    await initGitreqdWasm();
     loadWasmBindings();
   });
 

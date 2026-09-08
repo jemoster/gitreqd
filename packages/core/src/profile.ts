@@ -1,11 +1,10 @@
 import type { ArtifactLinkRenderOptions, RequirementSchemaComposeOptions, RequirementWithSource, ValidationError } from "./types.js";
 import {
   exportRequirementFileJsonSchema,
-  generateSingleRequirementHtmlRaw,
   parseRequirementContent,
-  stampEditableFieldMarkers,
   validateRequirements,
 } from "./engine.js";
+import { generateSingleRequirementHtml as renderSingleRequirementHtml } from "./html.js";
 import { parseRequirementFile, getActiveProfileId } from "./fs-adapter.js";
 import { STANDARD_PROFILE_ID } from "./constants.js";
 
@@ -39,30 +38,9 @@ const standardProfile: RequirementProfile = {
     throw new Error("Full-report HTML is provided by the native gitreqd CLI");
   },
   generateSingleRequirementHtml(requirement, allRequirements, options) {
-    const artifactLinksJson = options?.artifactLinks
-      ? JSON.stringify({
-          github: options.artifactLinks.github
-            ? {
-                owner: options.artifactLinks.github.owner,
-                repo: options.artifactLinks.github.repo,
-                commitSha: options.artifactLinks.github.commitSha,
-                projectRootRel: options.artifactLinks.github.projectRootRel,
-              }
-            : undefined,
-        })
-      : null;
-    const html = generateSingleRequirementHtmlRaw(requirement, allRequirements, artifactLinksJson);
-    return options?.editableFieldMarkers ? stampEditableFieldMarkers(html) : html;
+    return renderSingleRequirementHtml(requirement, allRequirements, options);
   },
 };
-
-export function generateSingleRequirementHtml(
-  requirement: RequirementWithSource,
-  allRequirements?: RequirementWithSource[],
-  options?: { editableFieldMarkers?: boolean; artifactLinks?: ArtifactLinkRenderOptions }
-): string {
-  return standardProfile.generateSingleRequirementHtml(requirement, allRequirements, options);
-}
 
 export function getRequirementProfile(id: string): RequirementProfile {
   if (id !== STANDARD_PROFILE_ID) {

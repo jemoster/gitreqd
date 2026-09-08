@@ -2,7 +2,7 @@
  * JS facade over gitreqd-core WASM. Node filesystem helpers stay in this package
  * so desktop VS Code can load projects without a web-extension rewrite.
  */
-export { loadWasmBindings } from "./wasm.js";
+export { initGitreqdWasm, loadWasmBindings } from "./wasm.js";
 
 export {
   ROOT_MARKER,
@@ -37,10 +37,14 @@ export {
 } from "./engine.js";
 
 export {
+  generateSingleRequirementHtml,
+  type SingleRequirementHtmlOptions,
+} from "./html.js";
+
+export {
   getRequirementProfile,
   listRegisteredProfileIds,
   loadActiveProfile,
-  generateSingleRequirementHtml,
   type RequirementProfile,
 } from "./profile.js";
 

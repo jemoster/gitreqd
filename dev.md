@@ -62,7 +62,9 @@ npm install
 npm run build
 ```
 
-`npm run build` compiles `gitreqd-wasm` into `packages/core/wasm/` (gitignored) and copies the `.wasm` next to the VS Code extension bundle.
+`npm run build` compiles `gitreqd-wasm` into `packages/core/wasm/` (Node, gitignored) and `packages/core/wasm-web/` (browser, gitignored), then copies the Node `.wasm` next to the VS Code extension bundle.
+
+Browser and other bundler consumers should import `@gitreqd/core/html` (and `@gitreqd/core/types`) rather than the package root. The root entry includes a Node filesystem adapter (`glob`, `node:fs`). In the browser, await `initGitreqdWasm()` once before calling `generateSingleRequirementHtml`; the renderer stays synchronous after that.
 
 ## Distribution
 
