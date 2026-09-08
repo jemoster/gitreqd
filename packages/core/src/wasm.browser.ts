@@ -14,7 +14,7 @@ export async function initGitreqdWasm(moduleOrPath?: unknown): Promise<void> {
   if (cached) return;
   if (!pending) {
     pending = Promise.resolve(
-      moduleOrPath === undefined ? init() : init(moduleOrPath as Parameters<typeof init>[0])
+      moduleOrPath === undefined ? init() : init({ module_or_path: moduleOrPath })
     ).then(() => {
       cached = wasm as unknown as WasmBindings;
       return cached;
