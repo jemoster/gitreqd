@@ -4,7 +4,7 @@
  * for YAML files and the openPreview command.
  *
  * Preview uses core's generateSingleRequirementHtml (same as full report), so description
- * and rationale are rendered as Markdown per GRD-HTML-004; see packages/core/test/html.test.ts.
+ * and rationale are rendered as Markdown per GRD-HTML-004.
  */
 import * as path from "node:path";
 import * as fs from "node:fs";

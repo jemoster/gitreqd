@@ -2,7 +2,7 @@
 
 This guide describes the minimum steps to cut a new GitHub release that publishes installable artifacts for `gitreqd`.
 
-The core, CLI, and VS Code packages share one version. When a Rust workspace is present, that workspace version must match. The GitHub release tag must be `v` plus that version. Packed npm tarball and VSIX names include that version.
+The `@gitreqd/core` package, `gitreqd-vscode` extension, and Cargo workspace share one version. The GitHub release tag must be `v` plus that version. Packed npm tarball and VSIX names include that version.
 
 ## 1) Prepare the release
 
@@ -40,14 +40,8 @@ Publishing the release triggers automation that packs artifacts and uploads them
 ## 4) Verify artifacts and install path
 
 1. Confirm release automation completed successfully.
-2. Confirm required artifacts are attached to the release, including CLI `.tgz` assets named `gitreqd-X.Y.Z.tgz` and `gitreqd-core-X.Y.Z.tgz`, the VS Code extension `gitreqd-vscode-X.Y.Z.vsix`, and the Linux x86_64 native CLI binary (`gitreqd-linux-x86_64`) produced by workflow automation.
-3. Validate direct install from a GitHub-hosted source tarball URL, for example:
-
-```bash
-npm install -g "https://github.com/<org>/<repo>/releases/download/vX.Y.Z/<artifact>.tgz"
-```
-
-4. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `gitreqd`.
+2. Confirm required artifacts are attached to the release, including the `@gitreqd/core` tarball `gitreqd-core-X.Y.Z.tgz`, the VS Code extension `gitreqd-vscode-X.Y.Z.vsix`, and the Linux x86_64 native CLI binary (`gitreqd-linux-x86_64`) produced by workflow automation.
+3. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `gitreqd`.
 
 ## Testing release generation
 
@@ -60,7 +54,7 @@ Use these steps before (or instead of) publishing a GitHub Release.
 ./scripts/package-native-cli.sh
 ```
 
-Confirm `release/` contains CLI `.tgz` files named with the shared version and `gitreqd-linux-x86_64`. On Linux x86_64, run `./release/gitreqd-linux-x86_64 --help`.
+Confirm `release/` contains `gitreqd-core-X.Y.Z.tgz` named with the shared version and `gitreqd-linux-x86_64`. On Linux x86_64, run `./release/gitreqd-linux-x86_64 --help`.
 
 ### Download the native binary from a branch or pull request
 
@@ -83,4 +77,4 @@ Actions → **Release CLI artifacts** → **Run workflow**. Manual `workflow_dis
 
 ### Full GitHub Release path
 
-Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes the `.tgz` files, `gitreqd-vscode-X.Y.Z.vsix`, and `gitreqd-linux-x86_64`.
+Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes `gitreqd-core-X.Y.Z.tgz`, `gitreqd-vscode-X.Y.Z.vsix`, and `gitreqd-linux-x86_64`.

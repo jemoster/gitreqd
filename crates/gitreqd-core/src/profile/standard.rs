@@ -6,9 +6,10 @@ use crate::artifact_links::ArtifactLinkRenderOptions;
 use crate::html::{
     generate_full_html_with_source_links, generate_single_requirement_html_with_source_links,
 };
-use crate::parse::{parse_requirement_content, parse_requirement_file};
+use crate::parse::parse_requirement_content;
 use crate::rules::validate_requirements;
 use crate::schema::export_requirement_file_json_schema;
+#[cfg(feature = "std-fs")]
 use crate::schema_compose::requirement_schema_compose_options_for_project as compose_options;
 use crate::types::{
     RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, ValidationError,
@@ -27,7 +28,18 @@ impl RequirementProfile for StandardProfile {
         &self,
         file_path: &Path,
     ) -> Result<RequirementWithSource, ValidationError> {
-        parse_requirement_file(file_path)
+        #[cfg(feature = "std-fs")]
+        {
+            crate::parse::parse_requirement_file(file_path)
+        }
+        #[cfg(not(feature = "std-fs"))]
+        {
+            let _ = file_path;
+            Err(ValidationError::new(
+                file_path.display().to_string(),
+                "filesystem access is unavailable",
+            ))
+        }
     }
 
     fn parse_requirement_content(
@@ -56,7 +68,15 @@ impl RequirementProfile for StandardProfile {
         &self,
         project_root: &Path,
     ) -> Option<RequirementSchemaComposeOptions> {
-        compose_options(project_root)
+        #[cfg(feature = "std-fs")]
+        {
+            compose_options(project_root)
+        }
+        #[cfg(not(feature = "std-fs"))]
+        {
+            let _ = project_root;
+            None
+        }
     }
 
     fn generate_full_html(

@@ -10,6 +10,9 @@
     "baseUrl": ".",
     "paths": {
       "@gitreqd/core": ["packages/core/src/index.ts"],
+      "@gitreqd/core/html": ["packages/core/src/html.ts"],
+      "@gitreqd/core/engine": ["packages/core/src/engine.ts"],
+      "@gitreqd/core/types": ["packages/core/src/types.ts"],
       "@gitreqd/core/*": ["packages/core/src/*"]
     }
   },

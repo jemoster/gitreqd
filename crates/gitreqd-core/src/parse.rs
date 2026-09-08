@@ -1,6 +1,5 @@
 //! GRD-SYS-001 / GRD-SYS-009: Parse requirement YAML from content or disk.
 
-use std::fs;
 use std::path::Path;
 
 use serde_yaml::Value;
@@ -45,8 +44,9 @@ pub fn parse_requirement_content(
 }
 
 /// Parse a single requirement file.
+#[cfg(feature = "std-fs")]
 pub fn parse_requirement_file(file_path: &Path) -> Result<RequirementWithSource, ValidationError> {
-    let raw = match fs::read_to_string(file_path) {
+    let raw = match std::fs::read_to_string(file_path) {
         Ok(s) => s,
         Err(err) => {
             return Err(ValidationError::new(

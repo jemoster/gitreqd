@@ -1,18 +1,25 @@
 {
   "name": "@gitreqd/core",
   "version": "0.4.0",
-  "description": "Core engine for gitreqd — discovery, parse, validate, format",
+  "description": "JS facade over gitreqd-core WASM — parse, validate, format, and HTML",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "browser": {
+    "./dist/wasm.js": "./dist/wasm.browser.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/browser.js",
+      "node": "./dist/index.js",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./html": {
       "types": "./dist/html.d.ts",
+      "browser": "./dist/html.js",
+      "node": "./dist/html.js",
       "import": "./dist/html.js",
       "default": "./dist/html.js"
     },
@@ -20,11 +27,24 @@
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "default": "./dist/types.js"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "browser": "./dist/engine.js",
+      "node": "./dist/engine.js",
+      "import": "./dist/engine.js",
+      "default": "./dist/engine.js"
+    },
+    "./wasm": {
+      "types": "./dist/wasm.d.ts",
+      "browser": "./dist/wasm.browser.js",
+      "node": "./dist/wasm.js",
+      "default": "./dist/wasm.js"
     }
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist"
+    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist && tsc && mkdir -p dist/wasm dist/wasm-web && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist/wasm-web/",
+    "clean": "rm -rf dist wasm wasm-web"
   },
   "files": [
     "dist"
@@ -38,14 +58,9 @@
     "node": ">=24"
   },
   "dependencies": {
-    "glob": "^11.0.0",
-    "markdown-it": "^14.1.0",
-    "yaml": "^2.6.1",
-    "zod": "^4.3.6",
-    "zod-to-json-schema": "^3.25.1"
+    "glob": "^11.0.0"
   },
   "devDependencies": {
-    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.10.1",
     "typescript": "^5.7.2"
   }

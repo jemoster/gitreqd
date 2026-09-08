@@ -1,13 +1,21 @@
 //! GRD-SYS-003 / GRD-SYS-007 / GRD-CLI-003: Project root discovery and requirement file discovery.
 
-use std::collections::BTreeSet;
-use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 use serde_yaml::Value;
+
+use crate::error::Error;
+
+#[cfg(feature = "std-fs")]
+use std::collections::BTreeSet;
+#[cfg(feature = "std-fs")]
+use std::fs;
+#[cfg(feature = "std-fs")]
 use walkdir::WalkDir;
 
-use crate::error::{DiscoverResult, Error};
+#[cfg(feature = "std-fs")]
+use crate::error::DiscoverResult;
+#[cfg(feature = "std-fs")]
 use crate::requirement_files::REQUIREMENT_FILE_EXTENSIONS;
 
 /// GRD-SYS-007: primary project root marker filename (bootstrap writes this name).
@@ -19,8 +27,102 @@ pub const ROOT_MARKER_FILENAMES: [&str; 2] = ["gitreqd.yaml", "gitreqd.yml"];
 /// User-facing hint when no marker is found.
 pub const ROOT_MARKER_HINT: &str = "gitreqd.yaml or gitreqd.yml";
 
+/// Parsed project root marker (`gitreqd.yaml` / `gitreqd.yml`) without filesystem access.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RootMarkerConfig {
+    pub profile: String,
+    pub requirement_dirs: Vec<String>,
+}
+
+fn marker_location(marker_label: &str, marker_path: Option<&str>) -> String {
+    match marker_path {
+        Some(p) => format!("{marker_label} at {p}"),
+        None => marker_label.to_string(),
+    }
+}
+
+/// Parse a project root marker YAML document (GRD-SYS-007 / GRD-SYS-010).
+/// `requirement_dirs` entries are returned as written (not resolved to absolute paths).
+pub fn parse_root_marker_yaml(
+    raw: &str,
+    marker_label: &str,
+    marker_path: Option<&str>,
+) -> Result<RootMarkerConfig, Error> {
+    let where_ = marker_location(marker_label, marker_path);
+    let data: Value = serde_yaml::from_str(raw)
+        .map_err(|err| Error::msg(format!("Failed to parse {where_}: {err}")))?;
+
+    let obj = match &data {
+        Value::Mapping(m) => m,
+        _ => {
+            return Err(Error::msg(format!(
+                "Invalid {where_}: expected a mapping at top level"
+            )));
+        }
+    };
+
+    let dirs = obj
+        .get(Value::String("requirement_dirs".to_string()))
+        .ok_or_else(|| {
+            Error::msg(format!(
+                "Invalid {where_}: \"requirement_dirs\" must be a sequence"
+            ))
+        })?;
+
+    let seq = match dirs {
+        Value::Sequence(s) => s,
+        _ => {
+            return Err(Error::msg(format!(
+                "Invalid {where_}: \"requirement_dirs\" must be a sequence"
+            )));
+        }
+    };
+
+    let mut requirement_dirs: Vec<String> = Vec::new();
+    for raw_value in seq {
+        let trimmed = match raw_value {
+            Value::String(s) => s.trim().to_string(),
+            _ => {
+                return Err(Error::msg(format!(
+                    "Invalid {where_}: each \"requirement_dirs\" entry must be a non-empty string"
+                )));
+            }
+        };
+        if trimmed.is_empty() {
+            return Err(Error::msg(format!(
+                "Invalid {where_}: each \"requirement_dirs\" entry must be a non-empty string"
+            )));
+        }
+        requirement_dirs.push(trimmed);
+    }
+
+    let profile = match obj.get(Value::String("profile".to_string())) {
+        None | Some(Value::Null) => crate::profile::STANDARD_PROFILE_ID.to_string(),
+        Some(Value::String(s)) => {
+            let id = s.trim();
+            if id.is_empty() {
+                return Err(Error::msg(format!(
+                    "Invalid {where_}: \"profile\" must be a non-empty string when set"
+                )));
+            }
+            id.to_string()
+        }
+        Some(_) => {
+            return Err(Error::msg(format!(
+                "Invalid {where_}: \"profile\" must be a non-empty string when set"
+            )));
+        }
+    };
+
+    Ok(RootMarkerConfig {
+        profile,
+        requirement_dirs,
+    })
+}
+
 /// Absolute path to the project root marker file under `project_root`, or None if none exist.
 /// GRD-SYS-007: prefers `gitreqd.yaml` over `gitreqd.yml` when both exist.
+#[cfg(feature = "std-fs")]
 pub fn find_root_marker_path(project_root: &Path) -> Option<PathBuf> {
     for name in ROOT_MARKER_FILENAMES {
         let p = project_root.join(name);
@@ -50,6 +152,7 @@ pub fn normalize_path(path: &Path) -> PathBuf {
 /// Find the candidate project root by starting at `start_dir` and walking up the directory structure.
 ///
 /// Returns an array with zero or one absolute directory paths. Empty if none.
+#[cfg(feature = "std-fs")]
 pub fn discover_project_root_candidates(start_dir: &Path) -> Result<Vec<PathBuf>, Error> {
     let resolved = if start_dir.is_absolute() {
         start_dir.to_path_buf()
@@ -79,6 +182,7 @@ pub fn discover_project_root_candidates(start_dir: &Path) -> Result<Vec<PathBuf>
 
 /// Find the project root by searching from `start_dir` and walking up until the first
 /// directory containing a root marker is found. Returns that root, or None if none is found.
+#[cfg(feature = "std-fs")]
 pub fn discover_project_root(start_dir: &Path) -> Result<Option<PathBuf>, Error> {
     let candidates = discover_project_root_candidates(start_dir)?;
     Ok(if candidates.len() == 1 {
@@ -88,6 +192,7 @@ pub fn discover_project_root(start_dir: &Path) -> Result<Option<PathBuf>, Error>
     })
 }
 
+#[cfg(feature = "std-fs")]
 fn marker_label(root_path: &Path) -> String {
     root_path
         .file_name()
@@ -97,6 +202,7 @@ fn marker_label(root_path: &Path) -> String {
 
 /// Read the project root marker under `project_root` and return the configured
 /// requirement directories, as absolute paths. The file must follow GRD-SYS-007.
+#[cfg(feature = "std-fs")]
 pub fn get_requirement_dirs(project_root: &Path) -> Result<Vec<PathBuf>, Error> {
     let project_root = normalize_path(&if project_root.is_absolute() {
         project_root.to_path_buf()
@@ -119,61 +225,13 @@ pub fn get_requirement_dirs(project_root: &Path) -> Result<Vec<PathBuf>, Error> 
         ))
     })?;
 
-    let data: Value = serde_yaml::from_str(&raw).map_err(|err| {
-        Error::msg(format!(
-            "Failed to parse {marker_label} at {}: {err}",
-            root_path.display()
-        ))
-    })?;
-
-    let obj = match &data {
-        Value::Mapping(m) => m,
-        _ => {
-            return Err(Error::msg(format!(
-                "Invalid {marker_label} at {}: expected a mapping at top level",
-                root_path.display()
-            )));
-        }
-    };
-
-    let dirs = obj
-        .get(Value::String("requirement_dirs".to_string()))
-        .ok_or_else(|| {
-            Error::msg(format!(
-                "Invalid {marker_label} at {}: \"requirement_dirs\" must be a sequence",
-                root_path.display()
-            ))
-        })?;
-
-    let seq = match dirs {
-        Value::Sequence(s) => s,
-        _ => {
-            return Err(Error::msg(format!(
-                "Invalid {marker_label} at {}: \"requirement_dirs\" must be a sequence",
-                root_path.display()
-            )));
-        }
-    };
+    let parsed =
+        parse_root_marker_yaml(&raw, &marker_label, Some(&root_path.display().to_string()))?;
 
     let mut resolved_dirs: Vec<PathBuf> = Vec::new();
     let mut seen = BTreeSet::new();
 
-    for raw_value in seq {
-        let trimmed = match raw_value {
-            Value::String(s) => s.trim().to_string(),
-            _ => {
-                return Err(Error::msg(format!(
-                    "Invalid {marker_label} at {}: each \"requirement_dirs\" entry must be a non-empty string",
-                    root_path.display()
-                )));
-            }
-        };
-        if trimmed.is_empty() {
-            return Err(Error::msg(format!(
-                "Invalid {marker_label} at {}: each \"requirement_dirs\" entry must be a non-empty string",
-                root_path.display()
-            )));
-        }
+    for trimmed in parsed.requirement_dirs {
         let abs = normalize_path(&project_root.join(&trimmed));
         if !seen.insert(abs.clone()) {
             return Err(Error::msg(format!(
@@ -188,6 +246,7 @@ pub fn get_requirement_dirs(project_root: &Path) -> Result<Vec<PathBuf>, Error> 
     Ok(resolved_dirs)
 }
 
+#[cfg(feature = "std-fs")]
 fn path_contains_node_modules(path: &Path) -> bool {
     path.components().any(|c| c.as_os_str() == "node_modules")
 }
@@ -195,6 +254,7 @@ fn path_contains_node_modules(path: &Path) -> bool {
 /// Discover all requirement files under the directories configured in the project root marker.
 /// GRD-SYS-007: `*.req.yml` and `*.req.yaml`. Excludes node_modules.
 /// GRD-SYS-007: a `requirement_dirs` entry of exactly `.` resolves to the project root and is searched recursively.
+#[cfg(feature = "std-fs")]
 pub fn discover_requirement_paths(project_root: &Path) -> Result<Vec<PathBuf>, Error> {
     let cwd = normalize_path(&if project_root.is_absolute() {
         project_root.to_path_buf()
@@ -241,6 +301,7 @@ pub fn discover_requirement_paths(project_root: &Path) -> Result<Vec<PathBuf>, E
 
 /// Discover project root from `start_dir` (walking up) and all requirement
 /// file paths under it. Errors if no project root is found.
+#[cfg(feature = "std-fs")]
 pub fn discover_project(start_dir: &Path) -> Result<DiscoverResult, Error> {
     let candidates = discover_project_root_candidates(start_dir)?;
     if candidates.is_empty() {
@@ -263,6 +324,7 @@ pub fn discover_project(start_dir: &Path) -> Result<DiscoverResult, Error> {
 }
 
 /// Parse the project root marker as a YAML mapping, if present and valid.
+#[cfg(feature = "std-fs")]
 pub fn read_root_marker_mapping(project_root: &Path) -> Option<(PathBuf, serde_yaml::Mapping)> {
     let root_path = find_root_marker_path(project_root)?;
     let raw = fs::read_to_string(&root_path).ok()?;

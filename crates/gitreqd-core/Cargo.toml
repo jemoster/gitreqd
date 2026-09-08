@@ -6,15 +6,20 @@ license.workspace = true
 description = "Core engine for gitreqd — discovery, parse, validate, and HTML report"
 publish = false
 
+[features]
+default = ["std-fs", "source-links"]
+std-fs = ["dep:walkdir"]
+source-links = ["dep:syn", "dep:proc-macro2"]
+
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true
 thiserror.workspace = true
-walkdir.workspace = true
+walkdir = { workspace = true, optional = true }
 regex.workspace = true
 pulldown-cmark = { workspace = true, features = ["html"] }
 indexmap.workspace = true
-syn.workspace = true
-proc-macro2.workspace = true
+syn = { workspace = true, optional = true }
+proc-macro2 = { workspace = true, optional = true }
 gitreqd-macros.workspace = true

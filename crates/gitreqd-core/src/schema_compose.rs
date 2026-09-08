@@ -1,12 +1,17 @@
 //! GRD-CLI-005 / GRD-SYS-009: Build compose options for the requirement JSON Schema from the
 //! project root marker, when configuration affects the exported schema.
 
+#[cfg(feature = "std-fs")]
 use std::path::Path;
 
+#[cfg(feature = "std-fs")]
 use crate::discovery::find_root_marker_path;
+
+#[cfg(feature = "std-fs")]
 use crate::types::RequirementSchemaComposeOptions;
 
 /// Currently reserved: project marker is read so future fields can map into compose options.
+#[cfg(feature = "std-fs")]
 pub fn requirement_schema_compose_options_for_project(
     project_root: &Path,
 ) -> Option<RequirementSchemaComposeOptions> {
@@ -16,7 +21,7 @@ pub fn requirement_schema_compose_options_for_project(
     None
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std-fs"))]
 mod tests {
     use super::*;
     use std::fs;

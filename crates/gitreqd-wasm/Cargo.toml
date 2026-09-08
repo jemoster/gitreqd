@@ -1,0 +1,18 @@
+[package]
+name = "gitreqd-wasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "WASM bindings for gitreqd-core (wasm-bindgen JSON ABI, Node target for VS Code)"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[dependencies]
+gitreqd-core = { workspace = true }
+wasm-bindgen.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+indexmap.workspace = true

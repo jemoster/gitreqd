@@ -6,23 +6,15 @@ A requirements management CLI for repositories that store requirements as YAML f
 
 ## Installation
 
-Install the latest published release directly from GitHub assets:
+On Linux x86_64, download `gitreqd-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact.
 
-```bash
-npm install -g \
-  "https://github.com/jemoster/gitreqd/releases/download/v0.4.0/gitreqd-core-0.4.0.tgz" \
-  "https://github.com/jemoster/gitreqd/releases/download/v0.4.0/gitreqd-0.4.0.tgz"
-```
-
-A Rust implementation of the CLI (`bootstrap`, `validate`, `format`, `html`, `schema`) is also in this repository.
-
-On Linux x86_64, download `gitreqd-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact. To build from source instead:
+To build from source:
 
 ```bash
 cargo install --path crates/gitreqd
 ```
 
-See `dev.md` for building from source.
+See `dev.md` for developer builds.
 
 ## Quick Start
 

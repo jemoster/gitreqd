@@ -19,10 +19,10 @@ refinement: |
 
   ```yaml
   satisfied_by:
-    - artifact: packages/core/src/requirement-schema.ts
-      description: Zod schema defines the requirement file shape.
+    - artifact: crates/gitreqd-core/src/schema.rs
+      description: Requirement YAML schema defines the requirement file shape.
   verified_by:
-    - artifact: packages/core/test/requirement-schema.test.ts
+    - artifact: crates/gitreqd-core/src/schema.rs
       description: Unit tests cover schema parsing and rejection of unknown keys.
     - artifact: https://ci.example.com/runs/12345
       description: CI run for the release that introduced the fields.
@@ -33,12 +33,12 @@ attributes:
     traceability from normative text to code and evidence without overloading requirement-to-requirement links.
   status: active
 satisfied_by:
-  - artifact: packages/core/src/requirement-schema.ts
-    description: Zod schema defines satisfied_by and verified_by on each requirement file.
-  - artifact: packages/core/src/types.ts
-    description: TypeScript Requirement contract includes ArtifactRef and optional traceability fields.
+  - artifact: crates/gitreqd-core/src/schema.rs
+    description: Requirement YAML schema defines satisfied_by and verified_by on each requirement file.
+  - artifact: crates/gitreqd-core/src/types.rs
+    description: Requirement contract includes ArtifactRef and optional traceability fields.
 verified_by:
-  - artifact: packages/core/test/requirement-schema-artifacts.test.ts
+  - artifact: crates/gitreqd-core/src/schema.rs
     description: Schema parsing, rejection of invalid entries, and JSON Schema export coverage.
 links:
   - satisfies: GRD-SYS-001

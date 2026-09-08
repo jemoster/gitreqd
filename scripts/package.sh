@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# GRD-SYS-008: Build and package the tool for distribution.
-# Produces installable .tgz artifacts in the release/ directory.
+# GRD-SYS-008: Build and package @gitreqd/core for distribution.
+# Produces gitreqd-core-X.Y.Z.tgz in the release/ directory.
 # Usage: ./scripts/package.sh
 
 set -euo pipefail
@@ -18,10 +18,10 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Building gitreqd ..."
+echo "Building @gitreqd/core (WASM facade) ..."
 cd "${REPO_ROOT}"
 npm install
-npm run build
+npm run build -w @gitreqd/core
 
 echo "Creating release directory: ${RELEASE_DIR}"
 rm -rf "${RELEASE_DIR}"
@@ -31,12 +31,9 @@ echo "Packaging @gitreqd/core ..."
 cd "${REPO_ROOT}/packages/core"
 npm pack --pack-destination "${RELEASE_DIR}"
 
-echo "Packaging gitreqd CLI ..."
-cd "${REPO_ROOT}/packages/cli"
-npm pack --pack-destination "${RELEASE_DIR}"
-
 echo "Done. Distribution artifacts:"
 ls -la "${RELEASE_DIR}"/*.tgz
 echo ""
-echo "To install onto this host: ./scripts/install-gitreqd.sh ${RELEASE_DIR}"
-echo "Or: npm install -g ${RELEASE_DIR}"/*.tgz
+echo "The native gitreqd CLI is a Rust binary. Build it with:"
+echo "  ./scripts/package-native-cli.sh"
+echo "or: cargo install --path crates/gitreqd"

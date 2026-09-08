@@ -14,7 +14,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PKG_RELS = (
     "packages/core/package.json",
-    "packages/cli/package.json",
     "packages/vscode/package.json",
 )
 CARGO_WORKSPACE_VERSION = re.compile(
@@ -22,7 +21,7 @@ CARGO_WORKSPACE_VERSION = re.compile(
     re.S,
 )
 ARTIFACTS = {
-    "cli": ("release/gitreqd-{version}.tgz", "release/gitreqd-core-{version}.tgz"),
+    "cli": ("release/gitreqd-core-{version}.tgz",),
     "vscode": ("packages/vscode/gitreqd-vscode-{version}.vsix",),
     "native": ("release/gitreqd-linux-x86_64",),
 }

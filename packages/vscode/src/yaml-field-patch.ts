@@ -2,10 +2,15 @@
  * GRD-VSC-006: Apply field edits from the preview webview back into requirement YAML.
  * Block scalars for refinement/rationale use `|` (clip) like the project formatter, not `|-` (strip).
  */
-import { preferClipBlockChompForMarkdownKeys } from "@gitreqd/core";
 import { parseDocument, Scalar } from "yaml";
 
 export type EditableMarkdownField = "refinement" | "rationale";
+
+const CLIP_CHOMP_RE = /^([ \t]*(?:refinement|rationale):[ \t]*)\|-(\r?\n)/gm;
+
+function preferClipBlockChompForMarkdownKeys(yaml: string): string {
+  return yaml.replace(CLIP_CHOMP_RE, "$1|$2");
+}
 
 function scalarForMarkdownField(value: string): string | Scalar {
   if (!value.includes("\n")) {

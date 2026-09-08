@@ -1,18 +1,24 @@
 //! GRD-SYS-010: Profiles API for standard and user-defined profiles.
 
-mod active_profile;
 mod registry;
 mod standard;
 mod types;
 
+#[cfg(feature = "std-fs")]
+mod active_profile;
+
+#[cfg(feature = "std-fs")]
 pub use active_profile::get_active_profile_id;
 pub use registry::{get_requirement_profile, list_registered_profile_ids, STANDARD_PROFILE_ID};
 pub use types::RequirementProfile;
 
+#[cfg(feature = "std-fs")]
 use crate::error::Error;
+#[cfg(feature = "std-fs")]
 use std::path::Path;
 
 /// GRD-SYS-010: Resolve the active profile from project configuration and return its implementation.
+#[cfg(feature = "std-fs")]
 pub fn load_active_profile(project_root: &Path) -> Result<&'static dyn RequirementProfile, Error> {
     get_requirement_profile(&get_active_profile_id(project_root)?)
 }
@@ -42,6 +48,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "std-fs")]
     #[test]
     fn defaults_missing_profile_key() {
         let dir = temp_project();
@@ -54,6 +61,7 @@ mod tests {
         assert_eq!(load_active_profile(&dir).unwrap().id(), STANDARD_PROFILE_ID);
     }
 
+    #[cfg(feature = "std-fs")]
     #[test]
     fn reads_explicit_standard() {
         let dir = temp_project();
@@ -65,6 +73,7 @@ mod tests {
         assert_eq!(get_active_profile_id(&dir).unwrap(), STANDARD_PROFILE_ID);
     }
 
+    #[cfg(feature = "std-fs")]
     #[test]
     fn unknown_profile_errors() {
         let dir = temp_project();
