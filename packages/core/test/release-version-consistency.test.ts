@@ -76,7 +76,7 @@ function seedVersionTree(tmpDir: string, version: string): void {
   );
   fs.writeFileSync(
     path.join(tmpDir, "Cargo.lock"),
-    `[[package]]\nname = "gitreqd"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-core"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-wasm"\nversion = "${version}"\n`
+    `[[package]]\nname = "gitreqd"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-core"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-macros"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-wasm"\nversion = "${version}"\n`
   );
   fs.writeFileSync(
     path.join(tmpDir, "README.md"),
@@ -134,6 +134,9 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain('name = "gitreqd"\nversion = "9.8.7"');
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
       'name = "gitreqd-core"\nversion = "9.8.7"'
+    );
+    expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
+      'name = "gitreqd-macros"\nversion = "9.8.7"'
     );
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
       'name = "gitreqd-wasm"\nversion = "9.8.7"'

@@ -15,7 +15,7 @@ Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satis
 
    The build bundles `@gitreqd/core` and the wasm-bindgen glue into the extension and copies `gitreqd_wasm_bg.wasm` next to `dist/extension.js`, so the installed VSIX is self-contained. Requirement YAML validation uses the Red Hat **YAML** extension: on activation, gitreqd registers the JSON Schema from core (and refreshes it when `gitreqd.yaml` / `gitreqd.yml` or workspace folders change).
 
-   This produces a `.vsix` file in `packages/vscode/` (e.g. `gitreqd-vscode-0.4.0.vsix`).
+   This produces a `.vsix` file in `packages/vscode/` (e.g. `gitreqd-vscode-0.5.0.vsix`).
 
 2. **Install the VSIX in VSCode**:
 
