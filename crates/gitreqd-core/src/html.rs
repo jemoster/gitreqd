@@ -7,7 +7,7 @@ use pulldown_cmark::{html as md_html, Event, Options, Parser};
 use regex::Regex;
 
 use crate::artifact_links::{
-    github_blob_url_for_artifact, ide_file_url, resolve_ide_fs_path, ArtifactLinkRenderOptions,
+    github_blob_url_for_artifact, ide_file_url_for, resolve_ide_fs_path, ArtifactLinkRenderOptions,
 };
 use crate::parameters::{resolve_to_segments, SegmentKind};
 use crate::types::{ArtifactRef, RequirementWithSource, SourceLink, SourceLinkKind};
@@ -618,7 +618,7 @@ fn source_file_html(
 ) -> String {
     let escaped = escape_html(source_path);
     match ide_href_for_path(source_path, None, artifact_links) {
-        Some(href) => format!("<a href=\"{}\">{escaped}</a>", escape_html(&href)),
+        Some(href) => ide_anchor(&href, &escaped),
         None => escaped,
     }
 }
@@ -633,11 +633,19 @@ fn ide_href_for_path(
     if scheme.is_empty() {
         return None;
     }
-    Some(ide_file_url(
+    Some(ide_file_url_for(
         scheme,
+        ide.remote_authority.as_deref(),
         &resolve_ide_fs_path(&ide.project_root, path),
         line,
     ))
+}
+
+fn ide_anchor(href: &str, inner: &str) -> String {
+    format!(
+        "<a href=\"{}\" target=\"_blank\" rel=\"noreferrer\">{inner}</a>",
+        escape_html(href)
+    )
 }
 
 fn artifact_refs_list_html(
@@ -667,11 +675,7 @@ fn artifact_refs_list_html(
                 escape_html(artifact)
             )
         } else if let Some(href) = ide_href_for_path(artifact, None, artifact_links) {
-            format!(
-                "<a href=\"{}\"><code>{}</code></a>",
-                escape_html(&href),
-                escape_html(artifact)
-            )
+            ide_anchor(&href, &format!("<code>{}</code>", escape_html(artifact)))
         } else if let Some(github) = artifact_links.and_then(|opts| opts.github.as_ref()) {
             let href = github_blob_url_for_artifact(artifact, github);
             format!(
@@ -736,11 +740,7 @@ fn source_link_item_html(
         link.linespace.first().copied(),
         artifact_links,
     ) {
-        Some(href) => format!(
-            "<a href=\"{}\"><code>{}</code></a>",
-            escape_html(&href),
-            escape_html(&link.path)
-        ),
+        Some(href) => ide_anchor(&href, &format!("<code>{}</code>", escape_html(&link.path))),
         None => format!("<code>{}</code>", escape_html(&link.path)),
     };
     format!(
@@ -1572,6 +1572,7 @@ mod tests {
             ide: Some(IdeArtifactLinkContext {
                 uri_scheme: "cursor".into(),
                 project_root: "/workspace".into(),
+                remote_authority: None,
             }),
             ..Default::default()
         }
@@ -1605,8 +1606,10 @@ mod tests {
         let end = html[start..].find("</section>").unwrap() + start;
         let detail = &html[start..end];
         assert!(detail
-            .contains("href=\"cursor://file/workspace/requirements/html/GRD-HTML-008.req.yml\""));
-        assert!(detail.contains("href=\"cursor://file/workspace/crates/gitreqd-core/src/html.rs\""));
+            .contains("href=\"cursor://file/workspace/requirements/html/GRD-HTML-008.req.yml:1\""));
+        assert!(
+            detail.contains("href=\"cursor://file/workspace/crates/gitreqd-core/src/html.rs:1\"")
+        );
         assert!(
             detail.contains("href=\"cursor://file/workspace/crates/gitreqd-core/src/html.rs:10\"")
         );
@@ -1633,6 +1636,7 @@ mod tests {
             ide: Some(IdeArtifactLinkContext {
                 uri_scheme: "vscode".into(),
                 project_root: "/repo".into(),
+                remote_authority: None,
             }),
         };
         let html = generate_single_requirement_html_with_source_links(
@@ -1641,7 +1645,7 @@ mod tests {
             &[],
             Some(&artifact_links),
         );
-        assert!(html.contains("href=\"vscode://file/repo/src/foo.ts\""));
+        assert!(html.contains("href=\"vscode://file/repo/src/foo.ts:1\""));
         assert!(!html.contains("github.com"));
     }
 
@@ -1659,5 +1663,29 @@ mod tests {
         assert!(html.contains("<code>src/foo.ts</code>"));
         assert!(html.contains("/workspace/requirements/html/GRD-HTML-008.req.yml"));
         assert!(!html.contains("href=\"/workspace/requirements/html/GRD-HTML-008.req.yml\""));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-008")]
+    #[test]
+    fn ide_links_use_vscode_remote_urls_when_remote_authority_is_set() {
+        let mut r = req("GRD-HTML-008", "Remote");
+        r.source_path = PathBuf::from("/home/dev/src/req.yml");
+        let artifact_links = ArtifactLinkRenderOptions {
+            ide: Some(IdeArtifactLinkContext {
+                uri_scheme: "cursor".into(),
+                project_root: "/home/dev".into(),
+                remote_authority: Some("ssh-remote+devbox".into()),
+            }),
+            ..Default::default()
+        };
+        let html = generate_single_requirement_html_with_source_links(
+            &r,
+            Some(&[r.clone()]),
+            &[],
+            Some(&artifact_links),
+        );
+        assert!(html
+            .contains("href=\"cursor://vscode-remote/ssh-remote+devbox/home/dev/src/req.yml:1\""));
+        assert!(!html.contains("cursor://file/"));
     }
 }

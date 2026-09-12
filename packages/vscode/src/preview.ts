@@ -623,6 +623,7 @@ export class RequirementPreviewManager {
             ide: {
               uriScheme: vscode.env.uriScheme,
               projectRoot,
+              remoteAuthority: vscode.env.remoteAuthority || undefined,
             },
           },
         });

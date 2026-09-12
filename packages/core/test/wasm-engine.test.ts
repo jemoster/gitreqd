@@ -126,10 +126,12 @@ satisfied_by:
       },
     });
     expect(html).toContain("GRD-WASM-005");
-    expect(html).toContain('href="cursor://file/workspace/src/feature.ts"');
+    expect(html).toContain('href="cursor://file/workspace/src/feature.ts:1"');
     expect(html).toContain("<code>src/feature.ts</code>");
     expect(html).toContain('href="https://example.com/evidence"');
-    expect(html).toContain('href="cursor://file/workspace/requirements/GRD-WASM-005.req.yml"');
+    expect(html).toContain(
+      'href="cursor://file/workspace/requirements/GRD-WASM-005.req.yml:1"'
+    );
   });
 
   it("loads requirements from the basic sample project via the Node fs adapter", async () => {

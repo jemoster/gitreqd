@@ -20,9 +20,9 @@ pub mod source_links;
 pub mod types;
 
 pub use artifact_links::{
-    github_blob_url_for_artifact, ide_file_url, posix_join_repo_path, resolve_ide_fs_path,
-    vscode_derived_uri_scheme, ArtifactLinkRenderOptions, GithubArtifactLinkContext,
-    IdeArtifactLinkContext,
+    github_blob_url_for_artifact, ide_file_url, ide_file_url_for, posix_join_repo_path,
+    resolve_ide_fs_path, vscode_derived_remote_authority, vscode_derived_uri_scheme,
+    ArtifactLinkRenderOptions, GithubArtifactLinkContext, IdeArtifactLinkContext,
 };
 #[cfg(feature = "std-fs")]
 pub use discovery::{

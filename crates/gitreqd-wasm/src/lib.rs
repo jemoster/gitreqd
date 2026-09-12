@@ -357,6 +357,12 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string(),
+            remote_authority: ide
+                .get("remoteAuthority")
+                .and_then(Value::as_str)
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(str::to_string),
         })
     });
     Some(ArtifactLinkRenderOptions { github, ide })

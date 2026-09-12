@@ -53,6 +53,7 @@ export type ArtifactLinkRenderOptions = {
   ide?: {
     uriScheme: string;
     projectRoot: string;
+    remoteAuthority?: string;
   };
 };
 

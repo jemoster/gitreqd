@@ -12,13 +12,15 @@ pub struct GithubArtifactLinkContext {
     pub project_root_rel: String,
 }
 
-/// Host IDE used to build `scheme://file/...` URLs for presented file paths.
+/// Host IDE used to build `scheme://file/...` or `scheme://vscode-remote/...` URLs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IdeArtifactLinkContext {
     /// URI scheme of the host IDE (`vscode`, `cursor`, `vscode-insiders`, …).
     pub uri_scheme: String,
     /// Absolute filesystem path of the gitreqd project root.
     pub project_root: String,
+    /// Remote window authority (`ssh-remote+host`, `dev-container+…`, …) when the IDE is attached over SSH, a container, or similar.
+    pub remote_authority: Option<String>,
 }
 
 /// Optional context for rendering artifact hyperlinks in requirement HTML.
@@ -151,9 +153,37 @@ pub fn resolve_ide_fs_path(project_root: &str, file_path: &str) -> String {
     }
 }
 
-/// Build a host-IDE URL that opens `absolute_path` (and optional 1-based line).
+fn encode_remote_authority(s: &str) -> String {
+    let mut out = String::new();
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'+' | b'@' | b':' => {
+                out.push(char::from(b))
+            }
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
+}
+
+/// Build a host-IDE URL that opens `absolute_path` at a 1-based line.
+///
+/// A line is always included so the host treats the target as a file rather than a folder.
+/// When `remote_authority` is set (SSH, container, WSL, …), the URL uses `vscode-remote`
+/// so the existing remote window opens the file instead of a local path.
 #[gitreqd::implements("GRD-HTML-008")]
 pub fn ide_file_url(scheme: &str, absolute_path: &str, line: Option<u32>) -> String {
+    ide_file_url_for(scheme, None, absolute_path, line)
+}
+
+/// GRD-HTML-008: Same as [`ide_file_url`], with an optional remote window authority.
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn ide_file_url_for(
+    scheme: &str,
+    remote_authority: Option<&str>,
+    absolute_path: &str,
+    line: Option<u32>,
+) -> String {
     let posix = if is_absolute_fs_path(absolute_path)
         && absolute_path.as_bytes()[0].is_ascii_alphabetic()
         && absolute_path.as_bytes().get(1) == Some(&b':')
@@ -178,11 +208,18 @@ pub fn ide_file_url(scheme: &str, absolute_path: &str, line: Option<u32>) -> Str
         })
         .collect::<Vec<_>>()
         .join("/");
-    let mut url = format!("{scheme}://file{encoded}");
-    if let Some(n) = line {
-        url.push(':');
-        url.push_str(&n.to_string());
-    }
+    let line = line.unwrap_or(1);
+    let authority = remote_authority.map(str::trim).filter(|s| !s.is_empty());
+    let mut url = if let Some(auth) = authority {
+        format!(
+            "{scheme}://vscode-remote/{}{encoded}",
+            encode_remote_authority(auth)
+        )
+    } else {
+        format!("{scheme}://file{encoded}")
+    };
+    url.push(':');
+    url.push_str(&line.to_string());
     url
 }
 
@@ -233,6 +270,23 @@ where
         return Some("windsurf".into());
     }
     Some("vscode".into())
+}
+
+/// Remote window authority from a VS Code-derived process environment, if present.
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn vscode_derived_remote_authority<F>(mut get: F) -> Option<String>
+where
+    F: FnMut(&str) -> Option<String>,
+{
+    for key in ["VSCODE_REMOTE_AUTHORITY", "CURSOR_REMOTE_AUTHORITY"] {
+        if let Some(value) = get(key) {
+            let trimmed = value.trim();
+            if !trimmed.is_empty() {
+                return Some(trimmed.to_string());
+            }
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -288,7 +342,7 @@ mod tests {
         );
         assert_eq!(
             ide_file_url("vscode", "C:/proj/app.rs", None),
-            "vscode://file/C:/proj/app.rs"
+            "vscode://file/C:/proj/app.rs:1"
         );
         assert_eq!(
             ide_file_url("vscode", "/tmp/my file.rs", Some(1)),
@@ -355,6 +409,37 @@ mod tests {
                 ("VSCODE_IPC_HOOK", "/tmp/vscodium-ipc"),
             ])),
             Some("vscodium".into())
+        );
+        assert_eq!(
+            vscode_derived_remote_authority(env(&[
+                ("TERM_PROGRAM", "vscode"),
+                ("VSCODE_REMOTE_AUTHORITY", "ssh-remote+devbox"),
+            ])),
+            Some("ssh-remote+devbox".into())
+        );
+        assert_eq!(vscode_derived_remote_authority(env(&[])), None);
+    }
+
+    #[gitreqd::verifies("GRD-HTML-008")]
+    #[test]
+    fn builds_vscode_remote_urls_for_ssh_and_container_windows() {
+        assert_eq!(
+            ide_file_url_for(
+                "cursor",
+                Some("ssh-remote+devbox"),
+                "/home/dev/src/lib.rs",
+                Some(10)
+            ),
+            "cursor://vscode-remote/ssh-remote+devbox/home/dev/src/lib.rs:10"
+        );
+        assert_eq!(
+            ide_file_url_for(
+                "cursor",
+                Some("attached-container+abc"),
+                "/home/dev/req.yml",
+                None
+            ),
+            "cursor://vscode-remote/attached-container+abc/home/dev/req.yml:1"
         );
     }
 }

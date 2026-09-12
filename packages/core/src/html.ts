@@ -42,6 +42,7 @@ export function generateSingleRequirementHtml(
           ? {
               uriScheme: options.artifactLinks.ide.uriScheme,
               projectRoot: options.artifactLinks.ide.projectRoot,
+              remoteAuthority: options.artifactLinks.ide.remoteAuthority,
             }
           : undefined,
       })

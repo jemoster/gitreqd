@@ -3,8 +3,8 @@
 
 use gitreqd_core::{
     collect_rust_source_links, discover_project_root_candidates, load_active_profile,
-    load_requirements, normalize_path, vscode_derived_uri_scheme, ArtifactLinkRenderOptions,
-    IdeArtifactLinkContext, ROOT_MARKER_HINT,
+    load_requirements, normalize_path, vscode_derived_remote_authority, vscode_derived_uri_scheme,
+    ArtifactLinkRenderOptions, IdeArtifactLinkContext, ROOT_MARKER_HINT,
 };
 use std::collections::HashSet;
 use std::fs;
@@ -13,15 +13,31 @@ use std::path::Path;
 
 pub fn run_html(project_dir: &Path, output_dir: &Path) -> io::Result<bool> {
     let scheme = vscode_derived_uri_scheme(|k| std::env::var(k).ok());
-    run_html_with_ide_scheme(project_dir, output_dir, scheme.as_deref())
+    let remote_authority = vscode_derived_remote_authority(|k| std::env::var(k).ok());
+    run_html_with_ide_links(
+        project_dir,
+        output_dir,
+        scheme.as_deref(),
+        remote_authority.as_deref(),
+    )
 }
 
 /// GRD-HTML-008: `ide_scheme` is the host IDE URI scheme when generating in a VS Code-derived environment.
-#[gitreqd::implements("GRD-HTML-008")]
 pub fn run_html_with_ide_scheme(
     project_dir: &Path,
     output_dir: &Path,
     ide_scheme: Option<&str>,
+) -> io::Result<bool> {
+    run_html_with_ide_links(project_dir, output_dir, ide_scheme, None)
+}
+
+/// GRD-HTML-008: `remote_authority` selects `vscode-remote` URLs for SSH/container windows.
+#[gitreqd::implements("GRD-HTML-008")]
+fn run_html_with_ide_links(
+    project_dir: &Path,
+    output_dir: &Path,
+    ide_scheme: Option<&str>,
+    remote_authority: Option<&str>,
 ) -> io::Result<bool> {
     let candidates = match discover_project_root_candidates(project_dir) {
         Ok(c) => c,
@@ -103,6 +119,10 @@ pub fn run_html_with_ide_scheme(
             ide: Some(IdeArtifactLinkContext {
                 uri_scheme: scheme.to_string(),
                 project_root,
+                remote_authority: remote_authority
+                    .map(str::trim)
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_string),
             }),
             github: None,
         })
@@ -116,5 +136,14 @@ pub fn run_html_with_ide_scheme(
         html_path.display(),
         result.requirements.len()
     )?;
+    if let Some(scheme) = ide_scheme.map(str::trim).filter(|s| !s.is_empty()) {
+        match remote_authority.map(str::trim).filter(|s| !s.is_empty()) {
+            Some(auth) => writeln!(
+                io::stdout(),
+                "IDE file links: {scheme}://vscode-remote/{auth}/…"
+            )?,
+            None => writeln!(io::stdout(), "IDE file links: {scheme}://file/…")?,
+        }
+    }
     Ok(true)
 }
