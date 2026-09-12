@@ -50,6 +50,10 @@ export type ArtifactLinkRenderOptions = {
     commitSha: string;
     projectRootRel: string;
   };
+  ide?: {
+    uriScheme: string;
+    projectRoot: string;
+  };
 };
 
 export type RequirementSchemaComposeOptions = Record<string, never>;

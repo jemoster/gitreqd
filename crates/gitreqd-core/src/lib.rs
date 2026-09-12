@@ -20,8 +20,9 @@ pub mod source_links;
 pub mod types;
 
 pub use artifact_links::{
-    github_blob_url_for_artifact, posix_join_repo_path, ArtifactLinkRenderOptions,
-    GithubArtifactLinkContext,
+    github_blob_url_for_artifact, ide_file_url, posix_join_repo_path, resolve_ide_fs_path,
+    vscode_derived_uri_scheme, ArtifactLinkRenderOptions, GithubArtifactLinkContext,
+    IdeArtifactLinkContext,
 };
 #[cfg(feature = "std-fs")]
 pub use discovery::{
@@ -38,7 +39,8 @@ pub use error::{DiscoverResult, Error};
 pub use format::{format_project_requirement_files, FormatProjectResult};
 pub use format::{format_requirement_to_yaml, normalize_requirement_file_text_for_compare};
 pub use html::{
-    generate_full_html, generate_full_html_with_source_links, generate_single_requirement_html,
+    generate_full_html, generate_full_html_with_artifact_links,
+    generate_full_html_with_source_links, generate_single_requirement_html,
     generate_single_requirement_html_with_source_links,
 };
 pub use load::get_requirements_with_links;

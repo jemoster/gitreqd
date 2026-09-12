@@ -107,6 +107,31 @@ attributes:
     expect(html).toContain('data-gitreqd-field="rationale"');
   });
 
+  it("turns file paths into host IDE links when artifactLinks.ide is set", () => {
+    const parsed = parseRequirementContent(
+      `id: GRD-WASM-005
+title: IDE links
+require: The HTML renderer shall emit host IDE file links.
+satisfied_by:
+  - artifact: src/feature.ts
+  - artifact: https://example.com/evidence
+`,
+      "/workspace/requirements/GRD-WASM-005.req.yml"
+    );
+    expect("error" in parsed).toBe(false);
+    if ("error" in parsed) return;
+    const html = generateSingleRequirementHtml(parsed.requirement, [parsed.requirement], {
+      artifactLinks: {
+        ide: { uriScheme: "cursor", projectRoot: "/workspace" },
+      },
+    });
+    expect(html).toContain("GRD-WASM-005");
+    expect(html).toContain('href="cursor://file/workspace/src/feature.ts"');
+    expect(html).toContain("<code>src/feature.ts</code>");
+    expect(html).toContain('href="https://example.com/evidence"');
+    expect(html).toContain('href="cursor://file/workspace/requirements/GRD-WASM-005.req.yml"');
+  });
+
   it("loads requirements from the basic sample project via the Node fs adapter", async () => {
     const result = await loadRequirements(SAMPLE);
     expect(result.errors).toEqual([]);
