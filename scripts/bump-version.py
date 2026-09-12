@@ -23,7 +23,7 @@ CARGO_WORKSPACE_VERSION = re.compile(
     r'(\[workspace\.package\][^\[]*?version\s*=\s*")([^"]+)(")',
     re.S,
 )
-CARGO_PACKAGE_NAMES = ("gitreqd", "gitreqd-core", "gitreqd-wasm")
+CARGO_PACKAGE_NAMES = ("gitreqd", "gitreqd-core", "gitreqd-macros", "gitreqd-wasm")
 
 
 def die(message: str) -> None:
