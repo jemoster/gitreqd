@@ -1,0 +1,23 @@
+id: GRD-HTML-008
+title: IDE file links in HTML reports generated in VS Code-derived environments
+require: When generating the HTML report in a VS Code-derived environment, the report shall render presented file paths as hyperlinks that open in that environment's IDE.
+refinement: |
+  A VS Code-derived environment is Visual Studio Code or an IDE that reuses the VS Code extension host and URI scheme, including Cursor and other VS Code derivatives.
+
+  This requirement applies to HTML report generation performed in that environment. That includes the CLI HTML report when the generator can determine it is running in such an environment, and HTML produced by the gitreqd VS Code extension. When the generator is not in a VS Code-derived environment, this requirement does not apply; file paths may remain plain text or use other link kinds.
+
+  File paths already presented in the report shall become those hyperlinks. That includes:
+
+  - The requirement source YAML path shown as the source file.
+  - Project-relative `satisfied_by` and `verified_by` artifact paths as defined by GRD-SYS-016. HTTP(S) artifact URLs remain ordinary web links.
+  - Source-link records presented by GRD-HTML-007, using `path` and `linespace` so the IDE opens at the linked location.
+
+  Each hyperlink shall use the URI scheme of the host IDE so the same report can open files in VS Code, Cursor, or another derivative (for example `vscode://file/...` or `cursor://file/...`). How a particular HTML consumer handles the click (browser protocol handler, extension host, or webview message) is out of scope, provided the generated `href` targets that IDE.
+attributes:
+  rationale: Opening a generated report from an IDE terminal or extension should jump to the referenced file in that same editor instead of requiring the user to copy a path.
+  status: active
+links:
+  - satisfies: GRD-HTML-001
+  - satisfies: GRD-HTML-007
+  - satisfies: GRD-SYS-016
+  - satisfies: GRD-SYS-017
