@@ -105,7 +105,7 @@ The HTML report (Rust `gitreqd html`) lists matching source links on each requir
 - **Satisfied by** — YAML `satisfied_by` under **By comment**, `implements` tags under **Rust**
 - **Verified by** — YAML `verified_by` under **By comment**, `verifies` tags under **Rust**
 
-Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items. In VS Code, Cursor, or another VS Code-based editor, those file paths (and the requirement source file) are links that open at the matching location. If the editor is attached over SSH or to a container, regenerate the report from that editor’s terminal so the links target the remote window.
+Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items. When the git `origin` remote is GitHub (github.com or a `github.*` Enterprise host), those file paths and the requirement source file are links to the file at `HEAD` on that host. Otherwise the paths stay plain text.
 
 A complete crate is in `sample_projects/rust`: a tiny temperature converter with `implements` on the library functions, `verifies` on the tests, YAML `satisfied_by` / `verified_by` artifacts, and instructions for generating the HTML report with the latest `gitreqd` release.
 

@@ -1,33 +1,44 @@
 //! Optional context for rendering file-path hyperlinks in requirement HTML.
 //! GRD-UI-009: GitHub blob URLs for satisfied_by / verified_by artifacts.
-//! GRD-HTML-008: Host-IDE URLs when generating HTML in a VS Code-derived environment.
+//! GRD-HTML-008: GitHub blob URLs at HEAD when `origin` is GitHub or GitHub Enterprise.
 
 /// GitHub repository location used to build blob URLs for project-relative artifact paths.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct GithubArtifactLinkContext {
+    /// GitHub host (`github.com` or a `github.*` Enterprise host). Empty means `github.com`.
+    pub host: String,
     pub owner: String,
     pub repo: String,
     pub commit_sha: String,
     /// Repository-relative posix path to the gitreqd project root (may be empty).
     pub project_root_rel: String,
+    /// Absolute gitreqd project root used to strip absolute presented paths. Empty when paths are already project-relative.
+    pub project_root: String,
 }
 
-/// Host IDE used to build `scheme://file/...` or `scheme://vscode-remote/...` URLs.
+impl GithubArtifactLinkContext {
+    pub fn github_host(&self) -> &str {
+        let trimmed = self.host.trim();
+        if trimmed.is_empty() {
+            "github.com"
+        } else {
+            trimmed
+        }
+    }
+}
+
+/// Owner, repo, and host parsed from a git `origin` URL.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct IdeArtifactLinkContext {
-    /// URI scheme of the host IDE (`vscode`, `cursor`, `vscode-insiders`, …).
-    pub uri_scheme: String,
-    /// Absolute filesystem path of the gitreqd project root.
-    pub project_root: String,
-    /// Remote window authority (`ssh-remote+host`, `dev-container+…`, …) when the IDE is attached over SSH, a container, or similar.
-    pub remote_authority: Option<String>,
+pub struct GithubOrigin {
+    pub host: String,
+    pub owner: String,
+    pub repo: String,
 }
 
 /// Optional context for rendering artifact hyperlinks in requirement HTML.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ArtifactLinkRenderOptions {
     pub github: Option<GithubArtifactLinkContext>,
-    pub ide: Option<IdeArtifactLinkContext>,
 }
 
 fn encode_uri_component(s: &str) -> String {
@@ -46,29 +57,6 @@ fn encode_uri_component(s: &str) -> String {
             | b'\''
             | b'('
             | b')' => out.push(char::from(b)),
-            _ => out.push_str(&format!("%{b:02X}")),
-        }
-    }
-    out
-}
-
-fn encode_ide_path_segment(s: &str) -> String {
-    let mut out = String::new();
-    for b in s.bytes() {
-        match b {
-            b'A'..=b'Z'
-            | b'a'..=b'z'
-            | b'0'..=b'9'
-            | b'-'
-            | b'_'
-            | b'.'
-            | b'!'
-            | b'~'
-            | b'*'
-            | b'\''
-            | b'('
-            | b')'
-            | b':' => out.push(char::from(b)),
             _ => out.push_str(&format!("%{b:02X}")),
         }
     }
@@ -94,13 +82,54 @@ pub fn posix_join_repo_path(project_root_rel: &str, artifact_path: &str) -> Stri
     }
 }
 
+/// Strip an absolute presented path down to a project-relative posix path.
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn project_relative_file_path(project_root: &str, file_path: &str) -> String {
+    let file = file_path.replace('\\', "/");
+    let file = file.strip_prefix("./").unwrap_or(file.as_str());
+    let root = project_root.replace('\\', "/");
+    let root = root.trim_end_matches('/');
+    if !root.is_empty() {
+        if file == root {
+            return String::new();
+        }
+        let prefix = format!("{root}/");
+        if let Some(rest) = file.strip_prefix(&prefix) {
+            return rest.to_string();
+        }
+    }
+    file.strip_prefix("./").unwrap_or(file).to_string()
+}
+
+fn github_line_fragment(line_start: Option<u32>, line_end: Option<u32>) -> String {
+    let Some(start) = line_start.filter(|&n| n > 0) else {
+        return String::new();
+    };
+    match line_end.filter(|&n| n > start) {
+        Some(end) => format!("#L{start}-L{end}"),
+        None => format!("#L{start}"),
+    }
+}
+
 /// Build a GitHub blob URL for an artifact at the loaded commit.
-#[gitreqd::implements("GRD-UI-009")]
+#[gitreqd::implements("GRD-UI-009", "GRD-HTML-008")]
 pub fn github_blob_url_for_artifact(
     artifact_path: &str,
     github: &GithubArtifactLinkContext,
 ) -> String {
-    let repo_path = posix_join_repo_path(&github.project_root_rel, artifact_path);
+    github_blob_url_for_path(artifact_path, github, None, None)
+}
+
+/// GRD-HTML-008: Blob URL with an optional GitHub line fragment (`#L10` or `#L10-L12`).
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn github_blob_url_for_path(
+    file_path: &str,
+    github: &GithubArtifactLinkContext,
+    line_start: Option<u32>,
+    line_end: Option<u32>,
+) -> String {
+    let project_rel = project_relative_file_path(&github.project_root, file_path);
+    let repo_path = posix_join_repo_path(&github.project_root_rel, &project_rel);
     let encoded_path: String = repo_path
         .split('/')
         .filter(|segment| !segment.is_empty())
@@ -108,198 +137,98 @@ pub fn github_blob_url_for_artifact(
         .collect::<Vec<_>>()
         .join("/");
     format!(
-        "https://github.com/{}/{}/blob/{}/{}",
+        "https://{}/{}/{}/blob/{}/{}{}",
+        github.github_host(),
         github.owner,
         github.repo,
         encode_uri_component(&github.commit_sha),
-        encoded_path
+        encoded_path,
+        github_line_fragment(line_start, line_end)
     )
 }
 
-fn is_absolute_fs_path(path: &str) -> bool {
-    let posix = path.replace('\\', "/");
-    posix.starts_with('/')
-        || (posix.len() >= 3
-            && posix.as_bytes()[0].is_ascii_alphabetic()
-            && posix.as_bytes()[1] == b':'
-            && posix.as_bytes()[2] == b'/')
-}
-
-/// Resolve a presented file path against the IDE project root to an absolute posix path.
+/// True when `host` is github.com or a GitHub Enterprise host (`github.*`).
 #[gitreqd::implements("GRD-HTML-008")]
-pub fn resolve_ide_fs_path(project_root: &str, file_path: &str) -> String {
-    let file = file_path.replace('\\', "/");
-    let file = file.strip_prefix("./").unwrap_or(file.as_str());
-    if is_absolute_fs_path(file) {
-        if file.as_bytes()[0].is_ascii_alphabetic() && file.as_bytes().get(1) == Some(&b':') {
-            format!("/{file}")
-        } else {
-            file.to_string()
-        }
-    } else {
-        let root = project_root.replace('\\', "/");
-        let root = root.trim_end_matches('/');
-        if root.is_empty() {
-            if file.starts_with('/') {
-                file.to_string()
-            } else {
-                format!("/{file}")
-            }
-        } else if is_absolute_fs_path(root) {
-            format!("{root}/{file}")
-        } else {
-            format!("/{root}/{file}")
-        }
-    }
+pub fn is_github_host(host: &str) -> bool {
+    let host = host.trim().to_ascii_lowercase();
+    host == "github.com" || host.starts_with("github.")
 }
 
-fn encode_remote_authority(s: &str) -> String {
-    let mut out = String::new();
-    for b in s.bytes() {
-        match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'+' | b'@' | b':' => {
-                out.push(char::from(b))
-            }
-            _ => out.push_str(&format!("%{b:02X}")),
-        }
-    }
-    out
-}
-
-/// Build a host-IDE URL that opens `absolute_path` at a 1-based line.
-///
-/// A line is always included so the host treats the target as a file rather than a folder.
-/// When `remote_authority` is set (SSH, container, WSL, …), the URL uses `vscode-remote`
-/// so the existing remote window opens the file instead of a local path.
+/// Parse owner/repo from a git `origin` URL when the host is GitHub or GitHub Enterprise.
 #[gitreqd::implements("GRD-HTML-008")]
-pub fn ide_file_url(scheme: &str, absolute_path: &str, line: Option<u32>) -> String {
-    ide_file_url_for(scheme, None, absolute_path, line)
-}
-
-/// GRD-HTML-008: Same as [`ide_file_url`], with an optional remote window authority.
-#[gitreqd::implements("GRD-HTML-008")]
-pub fn ide_file_url_for(
-    scheme: &str,
-    remote_authority: Option<&str>,
-    absolute_path: &str,
-    line: Option<u32>,
-) -> String {
-    let posix = if is_absolute_fs_path(absolute_path)
-        && absolute_path.as_bytes()[0].is_ascii_alphabetic()
-        && absolute_path.as_bytes().get(1) == Some(&b':')
-    {
-        format!("/{}", absolute_path.replace('\\', "/"))
-    } else {
-        let p = absolute_path.replace('\\', "/");
-        if p.starts_with('/') {
-            p
-        } else {
-            format!("/{p}")
-        }
-    };
-    let encoded: String = posix
-        .split('/')
-        .map(|segment| {
-            if segment.is_empty() {
-                String::new()
-            } else {
-                encode_ide_path_segment(segment)
-            }
-        })
-        .collect::<Vec<_>>()
-        .join("/");
-    let line = line.unwrap_or(1);
-    let authority = remote_authority.map(str::trim).filter(|s| !s.is_empty());
-    let mut url = if let Some(auth) = authority {
-        format!(
-            "{scheme}://vscode-remote/{}{encoded}",
-            encode_remote_authority(auth)
-        )
-    } else {
-        format!("{scheme}://file{encoded}")
-    };
-    url.push(':');
-    url.push_str(&line.to_string());
-    url
-}
-
-/// URI scheme for a VS Code-derived environment, or `None` when not in one.
-#[gitreqd::implements("GRD-HTML-008")]
-pub fn vscode_derived_uri_scheme<F>(mut get: F) -> Option<String>
-where
-    F: FnMut(&str) -> Option<String>,
-{
-    let term_program = get("TERM_PROGRAM");
-    let cursor_trace = get("CURSOR_TRACE_ID");
-    let in_family = term_program.as_deref() == Some("vscode")
-        || get("VSCODE_IPC_HOOK").is_some()
-        || get("VSCODE_IPC_HOOK_CLI").is_some()
-        || get("VSCODE_PID").is_some()
-        || get("VSCODE_INJECTION").is_some()
-        || cursor_trace.is_some();
-    if !in_family {
+pub fn parse_github_origin_url(url: &str) -> Option<GithubOrigin> {
+    let url = url.trim();
+    if url.is_empty() {
         return None;
     }
-
-    let haystack = [
-        get("VSCODE_GIT_ASKPASS_NODE"),
-        get("VSCODE_GIT_ASKPASS_MAIN"),
-        get("VSCODE_IPC_HOOK"),
-        get("VSCODE_IPC_HOOK_CLI"),
-        get("GIT_ASKPASS"),
-    ]
-    .into_iter()
-    .flatten()
-    .collect::<Vec<_>>()
-    .join(" ")
-    .to_ascii_lowercase();
-
-    if cursor_trace.is_some() || haystack.contains("cursor") {
-        return Some("cursor".into());
+    if let Some(rest) = url.strip_prefix("git@") {
+        let (host, path) = rest.split_once(':')?;
+        return owner_repo_from_host_path(host, path);
     }
-    if haystack.contains("insiders") {
-        return Some("vscode-insiders".into());
-    }
-    if haystack.contains("vscodium")
-        || haystack.contains("/codium")
-        || haystack.contains("\\codium")
-    {
-        return Some("vscodium".into());
-    }
-    if haystack.contains("windsurf") {
-        return Some("windsurf".into());
-    }
-    Some("vscode".into())
+    let rest = url
+        .strip_prefix("ssh://")
+        .or_else(|| url.strip_prefix("https://"))
+        .or_else(|| url.strip_prefix("http://"))
+        .or_else(|| url.strip_prefix("git://"))?;
+    let rest = rest
+        .split_once('@')
+        .map(|(_, hostpath)| hostpath)
+        .unwrap_or(rest);
+    let rest = rest.trim_start_matches('/');
+    let (host_and_port, path) = rest.split_once('/')?;
+    let host = host_and_port.split(':').next().unwrap_or(host_and_port);
+    owner_repo_from_host_path(host, path)
 }
 
-/// Remote window authority from a VS Code-derived process environment, if present.
-#[gitreqd::implements("GRD-HTML-008")]
-pub fn vscode_derived_remote_authority<F>(mut get: F) -> Option<String>
-where
-    F: FnMut(&str) -> Option<String>,
-{
-    for key in ["VSCODE_REMOTE_AUTHORITY", "CURSOR_REMOTE_AUTHORITY"] {
-        if let Some(value) = get(key) {
-            let trimmed = value.trim();
-            if !trimmed.is_empty() {
-                return Some(trimmed.to_string());
-            }
-        }
+fn owner_repo_from_host_path(host: &str, path: &str) -> Option<GithubOrigin> {
+    if !is_github_host(host) {
+        return None;
     }
-    None
+    let path = path.trim_matches('/').trim_end_matches(".git");
+    let mut parts = path.split('/');
+    let owner = parts.next()?.trim();
+    let repo = parts.next()?.trim();
+    if owner.is_empty() || repo.is_empty() {
+        return None;
+    }
+    Some(GithubOrigin {
+        host: host.to_string(),
+        owner: owner.to_string(),
+        repo: repo.to_string(),
+    })
+}
+
+/// Posix path of `project_root` relative to the git toplevel (empty when they are the same).
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn github_project_root_rel(toplevel: &str, project_root: &str) -> String {
+    let top = toplevel.replace('\\', "/");
+    let top = top.trim_end_matches('/');
+    let project = project_root.replace('\\', "/");
+    let project = project.trim_end_matches('/');
+    if top.is_empty() || project == top {
+        return String::new();
+    }
+    let prefix = format!("{top}/");
+    project.strip_prefix(&prefix).unwrap_or("").to_string()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
 
-    fn env(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<String> {
-        let map: HashMap<String, String> = pairs
-            .iter()
-            .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
-            .collect();
-        move |k: &str| map.get(k).cloned()
+    fn github(
+        owner: &str,
+        repo: &str,
+        sha: &str,
+        project_root_rel: &str,
+    ) -> GithubArtifactLinkContext {
+        GithubArtifactLinkContext {
+            owner: owner.into(),
+            repo: repo.into(),
+            commit_sha: sha.into(),
+            project_root_rel: project_root_rel.into(),
+            ..Default::default()
+        }
     }
 
     #[gitreqd::verifies("GRD-UI-009")]
@@ -320,12 +249,7 @@ mod tests {
     fn builds_github_blob_urls_at_the_loaded_commit() {
         let url = github_blob_url_for_artifact(
             "packages/core/src/a.ts",
-            &GithubArtifactLinkContext {
-                owner: "acme".into(),
-                repo: "widgets".into(),
-                commit_sha: "deadbeef".into(),
-                project_root_rel: "apps/reqs".into(),
-            },
+            &github("acme", "widgets", "deadbeef", "apps/reqs"),
         );
         assert_eq!(
             url,
@@ -335,111 +259,72 @@ mod tests {
 
     #[gitreqd::verifies("GRD-HTML-008")]
     #[test]
-    fn builds_ide_file_urls_for_unix_and_windows_paths() {
+    fn parses_github_com_and_enterprise_origin_urls() {
         assert_eq!(
-            ide_file_url("cursor", "/workspace/src/lib.rs", Some(12)),
-            "cursor://file/workspace/src/lib.rs:12"
+            parse_github_origin_url("https://github.com/acme/widgets.git"),
+            Some(GithubOrigin {
+                host: "github.com".into(),
+                owner: "acme".into(),
+                repo: "widgets".into(),
+            })
         );
         assert_eq!(
-            ide_file_url("vscode", "C:/proj/app.rs", None),
-            "vscode://file/C:/proj/app.rs:1"
+            parse_github_origin_url("git@github.com:acme/widgets.git"),
+            Some(GithubOrigin {
+                host: "github.com".into(),
+                owner: "acme".into(),
+                repo: "widgets".into(),
+            })
         );
         assert_eq!(
-            ide_file_url("vscode", "/tmp/my file.rs", Some(1)),
-            "vscode://file/tmp/my%20file.rs:1"
-        );
-    }
-
-    #[gitreqd::verifies("GRD-HTML-008")]
-    #[test]
-    fn resolves_relative_paths_against_the_project_root() {
-        assert_eq!(
-            resolve_ide_fs_path("/workspace", "src/lib.rs"),
-            "/workspace/src/lib.rs"
+            parse_github_origin_url("ssh://git@github.example.com/acme/widgets.git"),
+            Some(GithubOrigin {
+                host: "github.example.com".into(),
+                owner: "acme".into(),
+                repo: "widgets".into(),
+            })
         );
         assert_eq!(
-            resolve_ide_fs_path("/workspace", "/abs/req.yml"),
-            "/abs/req.yml"
-        );
-        assert_eq!(
-            resolve_ide_fs_path("C:/proj", "src\\lib.rs"),
-            "C:/proj/src/lib.rs"
-        );
-    }
-
-    #[gitreqd::verifies("GRD-HTML-008")]
-    #[test]
-    fn detects_vscode_derived_uri_schemes_from_environment() {
-        assert_eq!(vscode_derived_uri_scheme(env(&[])), None);
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[("TERM_PROGRAM", "xterm")])),
+            parse_github_origin_url("https://gitlab.com/acme/widgets.git"),
             None
         );
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[("TERM_PROGRAM", "vscode")])),
-            Some("vscode".into())
-        );
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[("CURSOR_TRACE_ID", "abc")])),
-            Some("cursor".into())
-        );
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[
-                ("TERM_PROGRAM", "vscode"),
-                (
-                    "VSCODE_GIT_ASKPASS_NODE",
-                    "/Applications/Cursor.app/Contents/Resources/app/helper"
-                ),
-            ])),
-            Some("cursor".into())
-        );
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[
-                ("TERM_PROGRAM", "vscode"),
-                (
-                    "VSCODE_GIT_ASKPASS_NODE",
-                    "/usr/share/code-insiders/resources/app/helper"
-                ),
-            ])),
-            Some("vscode-insiders".into())
-        );
-        assert_eq!(
-            vscode_derived_uri_scheme(env(&[
-                ("VSCODE_PID", "1"),
-                ("VSCODE_IPC_HOOK", "/tmp/vscodium-ipc"),
-            ])),
-            Some("vscodium".into())
-        );
-        assert_eq!(
-            vscode_derived_remote_authority(env(&[
-                ("TERM_PROGRAM", "vscode"),
-                ("VSCODE_REMOTE_AUTHORITY", "ssh-remote+devbox"),
-            ])),
-            Some("ssh-remote+devbox".into())
-        );
-        assert_eq!(vscode_derived_remote_authority(env(&[])), None);
+        assert_eq!(parse_github_origin_url(""), None);
     }
 
     #[gitreqd::verifies("GRD-HTML-008")]
     #[test]
-    fn builds_vscode_remote_urls_for_ssh_and_container_windows() {
+    fn builds_enterprise_blob_urls_with_line_fragments() {
+        let mut ctx = github("acme", "widgets", "deadbeef", "");
+        ctx.host = "github.example.com".into();
         assert_eq!(
-            ide_file_url_for(
-                "cursor",
-                Some("ssh-remote+devbox"),
-                "/home/dev/src/lib.rs",
-                Some(10)
-            ),
-            "cursor://vscode-remote/ssh-remote+devbox/home/dev/src/lib.rs:10"
+            github_blob_url_for_path("src/lib.rs", &ctx, Some(10), Some(12)),
+            "https://github.example.com/acme/widgets/blob/deadbeef/src/lib.rs#L10-L12"
         );
         assert_eq!(
-            ide_file_url_for(
-                "cursor",
-                Some("attached-container+abc"),
-                "/home/dev/req.yml",
-                None
+            github_blob_url_for_path("src/lib.rs", &ctx, Some(10), None),
+            "https://github.example.com/acme/widgets/blob/deadbeef/src/lib.rs#L10"
+        );
+    }
+
+    #[gitreqd::verifies("GRD-HTML-008")]
+    #[test]
+    fn strips_absolute_paths_before_joining_project_root_rel() {
+        let mut ctx = github("acme", "widgets", "abc", "gitreqd");
+        ctx.project_root = "/home/dev/src/gitreqd".into();
+        assert_eq!(
+            github_blob_url_for_artifact(
+                "/home/dev/src/gitreqd/requirements/cli/GRD-CLI-001.req.yml",
+                &ctx
             ),
-            "cursor://vscode-remote/attached-container+abc/home/dev/req.yml:1"
+            "https://github.com/acme/widgets/blob/abc/gitreqd/requirements/cli/GRD-CLI-001.req.yml"
+        );
+        assert_eq!(
+            github_project_root_rel("/home/dev/src/cloud", "/home/dev/src/cloud/gitreqd"),
+            "gitreqd"
+        );
+        assert_eq!(
+            github_project_root_rel("/home/dev/src/cloud", "/home/dev/src/cloud"),
+            ""
         );
     }
 }

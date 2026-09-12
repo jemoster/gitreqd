@@ -28,7 +28,7 @@ pub trait RequirementProfile: Send + Sync {
         &self,
         project_root: &Path,
     ) -> Option<RequirementSchemaComposeOptions>;
-    /// GRD-SYS-010: Full HTML report. GRD-HTML-008: `artifact_links` may include host-IDE file URLs.
+    /// GRD-SYS-010: Full HTML report. GRD-HTML-008: `artifact_links` may include GitHub blob URLs.
     fn generate_full_html(
         &self,
         requirements: &[RequirementWithSource],

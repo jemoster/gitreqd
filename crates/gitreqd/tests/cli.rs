@@ -3,9 +3,10 @@
 extern crate gitreqd_macros as gitreqd;
 
 use gitreqd_cli::{
-    run_bootstrap, run_format, run_html, run_html_with_ide_scheme, run_schema, run_validate,
+    run_bootstrap, run_format, run_html, run_html_with_github, run_schema, run_validate,
     BootstrapOptions, SchemaOutputFormat,
 };
+use gitreqd_core::GithubArtifactLinkContext;
 use gitreqd_core::ROOT_MARKER;
 use std::fs;
 use std::path::PathBuf;
@@ -217,7 +218,7 @@ fn checks_demo() {}
 
 #[gitreqd::verifies("GRD-HTML-008")]
 #[test]
-fn html_uses_host_ide_file_links_when_scheme_is_provided() {
+fn html_uses_github_blob_links_when_context_is_provided() {
     let tmp = temp_dir();
     fs::write(
         tmp.join(ROOT_MARKER),
@@ -241,22 +242,60 @@ fn demo() {}
     )
     .unwrap();
 
-    let out_ide = tmp.join("html-ide");
-    assert!(run_html_with_ide_scheme(&tmp, &out_ide, Some("cursor")).unwrap());
-    let html = fs::read_to_string(out_ide.join("index.html")).unwrap();
+    let project_root = tmp
+        .canonicalize()
+        .unwrap()
+        .to_string_lossy()
+        .replace('\\', "/");
+    let github = GithubArtifactLinkContext {
+        owner: "acme".into(),
+        repo: "widgets".into(),
+        commit_sha: "deadbeef".into(),
+        project_root: project_root.clone(),
+        ..Default::default()
+    };
+    let out_gh = tmp.join("html-gh");
+    assert!(run_html_with_github(&tmp, &out_gh, |_| Some(github.clone())).unwrap());
+    let html = fs::read_to_string(out_gh.join("index.html")).unwrap();
     let start = html.find("id=\"DEMO-001\"").unwrap();
     let end = html[start..].find("</section>").unwrap() + start;
     let detail = &html[start..end];
-    assert!(detail.contains("href=\"cursor://file"));
-    assert!(detail.contains("/src/lib.rs"));
-    assert!(detail.contains("/src/lib.rs:"));
+    assert!(detail.contains("href=\"https://github.com/acme/widgets/blob/deadbeef/"));
+    assert!(detail.contains("src/lib.rs"));
     assert!(detail.contains("DEMO-001.req.yml"));
-    assert!(detail.contains("<code>src/lib.rs</code>"));
+    assert!(!detail.contains("cursor://"));
+    assert!(!detail.contains("vscode://"));
 
     let out_plain = tmp.join("html-plain");
-    assert!(run_html_with_ide_scheme(&tmp, &out_plain, None).unwrap());
+    assert!(run_html_with_github(&tmp, &out_plain, |_| None).unwrap());
     let plain = fs::read_to_string(out_plain.join("index.html")).unwrap();
-    assert!(!plain.contains("://file/"));
+    assert!(!plain.contains("github.com/acme/widgets"));
+    assert!(plain.contains("<code>src/lib.rs</code>"));
+}
+
+#[gitreqd::verifies("GRD-HTML-008")]
+#[test]
+fn html_leaves_paths_unlinked_without_github_origin() {
+    let tmp = temp_dir();
+    fs::write(
+        tmp.join(ROOT_MARKER),
+        "requirement_dirs:\n  - requirements\n",
+    )
+    .unwrap();
+    let reqs = tmp.join("requirements");
+    fs::create_dir_all(&reqs).unwrap();
+    fs::write(
+        reqs.join("DEMO-001.req.yml"),
+        "id: DEMO-001\ntitle: Demo\nrequire: The system shall demonstrate validation.\n",
+    )
+    .unwrap();
+
+    let out = tmp.join("html-plain");
+    assert!(run_html(&tmp, &out).unwrap());
+    let html = fs::read_to_string(out.join("index.html")).unwrap();
+    assert!(!html.contains("href=\"https://github.com"));
+    assert!(!html.contains("cursor://"));
+    assert!(!html.contains("vscode://"));
 }
 
 #[gitreqd::verifies("GRD-CLI-006")]
