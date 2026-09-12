@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 use pulldown_cmark::{html as md_html, Event, Options, Parser};
 use regex::Regex;
 
-use crate::artifact_links::{github_blob_url_for_artifact, ArtifactLinkRenderOptions};
+use crate::artifact_links::{github_blob_url_for_path, ArtifactLinkRenderOptions};
 use crate::parameters::{resolve_to_segments, SegmentKind};
 use crate::types::{ArtifactRef, RequirementWithSource, SourceLink, SourceLinkKind};
 
@@ -604,8 +604,40 @@ fn requirement_detail_html(
     </section>"#,
         id = escape_html(&r.id),
         id_esc = escape_html(&r.id),
-        source = escape_html(&r.source_path.display().to_string()),
+        source = source_file_html(&r.source_path.display().to_string(), artifact_links),
     )
+}
+
+const GITHUB_LINK_ATTRS: &str = " target=\"_blank\" rel=\"noopener noreferrer\"";
+
+fn github_file_href(
+    path: &str,
+    line_start: Option<u32>,
+    line_end: Option<u32>,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
+) -> Option<String> {
+    let github = artifact_links?.github.as_ref()?;
+    Some(github_blob_url_for_path(path, github, line_start, line_end))
+}
+
+fn github_file_anchor(href: &str, inner: &str) -> String {
+    format!(
+        "<a href=\"{}\"{GITHUB_LINK_ATTRS}>{inner}</a>",
+        escape_html(href)
+    )
+}
+
+/// GRD-HTML-008: Source YAML path is a GitHub blob link when origin is GitHub.
+#[gitreqd::implements("GRD-HTML-008")]
+fn source_file_html(
+    source_path: &str,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
+) -> String {
+    let escaped = escape_html(source_path);
+    match github_file_href(source_path, None, None, artifact_links) {
+        Some(href) => github_file_anchor(&href, &escaped),
+        None => escaped,
+    }
 }
 
 fn artifact_refs_list_html(
@@ -614,8 +646,8 @@ fn artifact_refs_list_html(
     requirement_id: &str,
     artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
-    let external_attrs = if artifact_links.is_some() {
-        " target=\"_blank\" rel=\"noopener noreferrer\""
+    let http_attrs = if artifact_links.is_some() {
+        GITHUB_LINK_ATTRS
     } else {
         ""
     };
@@ -629,17 +661,12 @@ fn artifact_refs_list_html(
         let is_url = lower.starts_with("http://") || lower.starts_with("https://");
         let artifact_html = if is_url {
             format!(
-                "<a href=\"{}\"{external_attrs}>{}</a>",
+                "<a href=\"{}\"{http_attrs}>{}</a>",
                 escape_html(artifact),
                 escape_html(artifact)
             )
-        } else if let Some(github) = artifact_links.and_then(|opts| opts.github.as_ref()) {
-            let href = github_blob_url_for_artifact(artifact, github);
-            format!(
-                "<a href=\"{}\"{external_attrs}>{}</a>",
-                escape_html(&href),
-                escape_html(artifact)
-            )
+        } else if let Some(href) = github_file_href(artifact, None, None, artifact_links) {
+            github_file_anchor(&href, &escape_html(artifact))
         } else {
             format!("<code>{}</code>", escape_html(artifact))
         };
@@ -688,20 +715,37 @@ fn format_line_range(start: u32, end: u32) -> String {
     }
 }
 
-fn source_link_item_html(link: &SourceLink) -> String {
+fn source_link_item_html(
+    link: &SourceLink,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
+) -> String {
+    let line_start = link.linespace.first().copied();
+    let line_end = link.linespace.last().copied();
+    let path_html = match github_file_href(link.path.as_str(), line_start, line_end, artifact_links)
+    {
+        Some(href) => {
+            github_file_anchor(&href, &format!("<code>{}</code>", escape_html(&link.path)))
+        }
+        None => format!("<code>{}</code>", escape_html(&link.path)),
+    };
     format!(
-        "<li class=\"source-link\"><code>{}</code> <span class=\"source-link-item\">{}</span> <span class=\"source-link-lines\">{}</span></li>",
-        escape_html(&link.path),
+        "<li class=\"source-link\">{path_html} <span class=\"source-link-item\">{}</span> <span class=\"source-link-lines\">{}</span></li>",
         escape_html(&link.item),
         escape_html(&format_linespace(&link.linespace)),
     )
 }
 
-fn source_links_list_html<'a, I>(links: I) -> String
+fn source_links_list_html<'a, I>(
+    links: I,
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
+) -> String
 where
     I: IntoIterator<Item = &'a SourceLink>,
 {
-    links.into_iter().map(source_link_item_html).collect()
+    links
+        .into_iter()
+        .map(|link| source_link_item_html(link, artifact_links))
+        .collect()
 }
 
 fn origin_group_html(origin: &str, list_class: &str, items: &str) -> String {
@@ -731,7 +775,7 @@ where
         .filter(|refs| !refs.is_empty())
         .map(|refs| artifact_refs_list_html(refs, by_id, requirement_id, artifact_links))
         .unwrap_or_default();
-    let source_list = source_links_list_html(source_links);
+    let source_list = source_links_list_html(source_links, artifact_links);
     let groups = [
         origin_group_html("By comment", "artifact-refs-list", &yaml_list),
         origin_group_html("Rust", "source-links-list", &source_list),
@@ -840,10 +884,19 @@ pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
 }
 
 /// GRD-HTML-007: Present source-link records on each requirement (Satisfied by / Verified by).
-#[gitreqd::implements("GRD-HTML-007")]
 pub fn generate_full_html_with_source_links(
     requirements: &[RequirementWithSource],
     source_links: &[SourceLink],
+) -> String {
+    generate_full_html_with_artifact_links(requirements, source_links, None)
+}
+
+/// GRD-HTML-007 / GRD-HTML-008: Full report with optional source-link records and artifact/IDE link context.
+#[gitreqd::implements("GRD-HTML-007", "GRD-HTML-008")]
+pub fn generate_full_html_with_artifact_links(
+    requirements: &[RequirementWithSource],
+    source_links: &[SourceLink],
+    artifact_links: Option<&ArtifactLinkRenderOptions>,
 ) -> String {
     let by_id: HashMap<String, &RequirementWithSource> =
         requirements.iter().map(|r| (r.id.clone(), r)).collect();
@@ -858,7 +911,7 @@ pub fn generate_full_html_with_source_links(
                 linked_from.get(&r.id).map(|v| v.as_slice()),
                 &by_id,
                 &req_links,
-                None,
+                artifact_links,
             )
         })
         .collect::<Vec<_>>()
@@ -1040,6 +1093,7 @@ mod tests {
                 repo: "widgets".into(),
                 commit_sha: "abcdef1234567890".into(),
                 project_root_rel: "apps/reqs".into(),
+                ..Default::default()
             }),
         };
         let html = generate_single_requirement_html_with_source_links(
@@ -1064,7 +1118,7 @@ mod tests {
             artifact: "src/local.ts".into(),
             description: None,
         }]);
-        let artifact_links = ArtifactLinkRenderOptions { github: None };
+        let artifact_links = ArtifactLinkRenderOptions::default();
         let html = generate_single_requirement_html_with_source_links(
             &r,
             Some(&[r.clone()]),
@@ -1494,5 +1548,76 @@ mod tests {
         assert_eq!(format_linespace(&[3]), "L3");
         assert_eq!(format_linespace(&[3, 4, 5]), "L3–L5");
         assert_eq!(format_linespace(&[1, 3, 4, 8]), "L1, L3–L4, L8");
+    }
+
+    fn github_links() -> ArtifactLinkRenderOptions {
+        ArtifactLinkRenderOptions {
+            github: Some(GithubArtifactLinkContext {
+                owner: "acme".into(),
+                repo: "widgets".into(),
+                commit_sha: "deadbeef".into(),
+                project_root: "/workspace".into(),
+                ..Default::default()
+            }),
+        }
+    }
+
+    #[gitreqd::verifies("GRD-HTML-008")]
+    #[test]
+    fn github_links_wrap_source_file_yaml_artifacts_and_source_links() {
+        let mut r = req("GRD-HTML-008", "GitHub links");
+        r.source_path = PathBuf::from("/workspace/requirements/html/GRD-HTML-008.req.yml");
+        r.satisfied_by = Some(vec![
+            ArtifactRef {
+                artifact: "crates/gitreqd-core/src/html.rs".into(),
+                description: Some("Renders the report.".into()),
+            },
+            ArtifactRef {
+                artifact: "https://example.com/evidence".into(),
+                description: None,
+            },
+        ]);
+        let implements = SourceLink::new(
+            "GRD-HTML-008",
+            SourceLinkKind::Implements,
+            "crates/gitreqd-core/src/html.rs",
+            "function",
+            vec![10, 11, 12],
+        )
+        .unwrap();
+        let html =
+            generate_full_html_with_artifact_links(&[r], &[implements], Some(&github_links()));
+        let start = html.find("id=\"GRD-HTML-008\"").unwrap();
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        assert!(detail.contains(
+            "href=\"https://github.com/acme/widgets/blob/deadbeef/requirements/html/GRD-HTML-008.req.yml\""
+        ));
+        assert!(detail.contains(
+            "href=\"https://github.com/acme/widgets/blob/deadbeef/crates/gitreqd-core/src/html.rs\""
+        ));
+        assert!(detail.contains(
+            "href=\"https://github.com/acme/widgets/blob/deadbeef/crates/gitreqd-core/src/html.rs#L10-L12\""
+        ));
+        assert!(detail.contains("<code>crates/gitreqd-core/src/html.rs</code>"));
+        assert!(detail.contains("href=\"https://example.com/evidence\""));
+        assert!(!detail.contains("cursor://"));
+        assert!(!detail.contains("vscode://"));
+    }
+
+    #[gitreqd::verifies("GRD-HTML-008")]
+    #[test]
+    fn file_paths_stay_plain_without_github_context() {
+        let mut r = req("GRD-HTML-008", "No GitHub");
+        r.source_path = PathBuf::from("/workspace/requirements/html/GRD-HTML-008.req.yml");
+        r.satisfied_by = Some(vec![ArtifactRef {
+            artifact: "src/foo.ts".into(),
+            description: None,
+        }]);
+        let html = generate_full_html(&[r]);
+        assert!(!html.contains("github.com"));
+        assert!(html.contains("<code>src/foo.ts</code>"));
+        assert!(html.contains("/workspace/requirements/html/GRD-HTML-008.req.yml"));
+        assert!(!html.contains("href=\"/workspace/requirements/html/GRD-HTML-008.req.yml\""));
     }
 }

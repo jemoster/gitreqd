@@ -107,6 +107,40 @@ attributes:
     expect(html).toContain('data-gitreqd-field="rationale"');
   });
 
+  it("turns file paths into GitHub blob links when artifactLinks.github is set", () => {
+    const parsed = parseRequirementContent(
+      `id: GRD-WASM-005
+title: GitHub links
+require: The HTML renderer shall emit GitHub blob file links.
+satisfied_by:
+  - artifact: src/feature.ts
+  - artifact: https://example.com/evidence
+`,
+      "/workspace/requirements/GRD-WASM-005.req.yml"
+    );
+    expect("error" in parsed).toBe(false);
+    if ("error" in parsed) return;
+    const html = generateSingleRequirementHtml(parsed.requirement, [parsed.requirement], {
+      artifactLinks: {
+        github: {
+          owner: "acme",
+          repo: "widgets",
+          commitSha: "deadbeef",
+          projectRootRel: "",
+          projectRoot: "/workspace",
+        },
+      },
+    });
+    expect(html).toContain("GRD-WASM-005");
+    expect(html).toContain(
+      'href="https://github.com/acme/widgets/blob/deadbeef/src/feature.ts"'
+    );
+    expect(html).toContain('href="https://example.com/evidence"');
+    expect(html).toContain(
+      'href="https://github.com/acme/widgets/blob/deadbeef/requirements/GRD-WASM-005.req.yml"'
+    );
+  });
+
   it("loads requirements from the basic sample project via the Node fs adapter", async () => {
     const result = await loadRequirements(SAMPLE);
     expect(result.errors).toEqual([]);

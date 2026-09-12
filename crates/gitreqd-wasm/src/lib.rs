@@ -333,9 +333,13 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
         return None;
     }
     let v: Value = serde_json::from_str(raw).ok()?;
-    let github = v.get("github")?;
-    Some(ArtifactLinkRenderOptions {
-        github: Some(GithubArtifactLinkContext {
+    let github = v.get("github").and_then(|github| {
+        Some(GithubArtifactLinkContext {
+            host: github
+                .get("host")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
             owner: github.get("owner")?.as_str()?.to_string(),
             repo: github.get("repo")?.as_str()?.to_string(),
             commit_sha: github.get("commitSha")?.as_str()?.to_string(),
@@ -344,8 +348,14 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string(),
-        }),
-    })
+            project_root: github
+                .get("projectRoot")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
+        })
+    });
+    Some(ArtifactLinkRenderOptions { github })
 }
 
 #[wasm_bindgen(js_name = generateSingleRequirementHtml)]

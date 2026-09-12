@@ -40,7 +40,7 @@ A common flow is: define/refine requirements with `/require`, then switch to `/i
 - `gitreqd bootstrap` - initialize `gitreqd.yaml` and `requirements/`.
 - `gitreqd validate` - check requirement YAML against the active schema.
 - `gitreqd format` - rewrite requirement YAML into canonical format.
-- `gitreqd html` - generate a static HTML report.
+- `gitreqd html` - generate a static HTML report. When this command runs inside VS Code, Cursor, or another VS Code-based editor, file paths in the report become links that open in that editor. Over SSH or in a container, links target the remote window when the generator can see the remote authority. Built-in HTML preview servers (including Live Preview) often intercept those links; open the report in an external browser, or use the gitreqd requirement preview.
 - `gitreqd schema` - print or export the effective requirement schema.
 
 Use `gitreqd --help` or `gitreqd <command> --help` for full options.
@@ -105,7 +105,7 @@ The HTML report (Rust `gitreqd html`) lists matching source links on each requir
 - **Satisfied by** — YAML `satisfied_by` under **By comment**, `implements` tags under **Rust**
 - **Verified by** — YAML `verified_by` under **By comment**, `verifies` tags under **Rust**
 
-Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items.
+Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items. When the git `origin` remote is GitHub (github.com or a `github.*` Enterprise host), those file paths and the requirement source file are links to the file at `HEAD` on that host. Otherwise the paths stay plain text.
 
 A complete crate is in `sample_projects/rust`: a tiny temperature converter with `implements` on the library functions, `verifies` on the tests, YAML `satisfied_by` / `verified_by` artifacts, and instructions for generating the HTML report with the latest `gitreqd` release.
 

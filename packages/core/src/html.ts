@@ -4,6 +4,9 @@
  *
  * In the browser, await `initGitreqdWasm()` once before calling
  * `generateSingleRequirementHtml`. After init the renderer is synchronous.
+ *
+ * Pass `artifactLinks.github` to turn presented file paths into GitHub blob
+ * links at a commit (`https://github.com/.../blob/<sha>/...`).
  */
 import type { ArtifactLinkRenderOptions, RequirementWithSource } from "./types.js";
 import {
@@ -29,10 +32,12 @@ export function generateSingleRequirementHtml(
     ? JSON.stringify({
         github: options.artifactLinks.github
           ? {
+              host: options.artifactLinks.github.host,
               owner: options.artifactLinks.github.owner,
               repo: options.artifactLinks.github.repo,
               commitSha: options.artifactLinks.github.commitSha,
               projectRootRel: options.artifactLinks.github.projectRootRel,
+              projectRoot: options.artifactLinks.github.projectRoot,
             }
           : undefined,
       })

@@ -45,10 +45,12 @@ export interface DiscoverResult {
 
 export type ArtifactLinkRenderOptions = {
   github?: {
+    host?: string;
     owner: string;
     repo: string;
     commitSha: string;
     projectRootRel: string;
+    projectRoot?: string;
   };
 };
 
