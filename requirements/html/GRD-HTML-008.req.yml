@@ -17,7 +17,7 @@ attributes:
   rationale: Opening a generated report from an IDE terminal or extension should jump to the referenced file in that same editor instead of requiring the user to copy a path.
   status: active
 links:
-  - satisfies: GRD-HTML-001
-  - satisfies: GRD-HTML-007
-  - satisfies: GRD-SYS-016
-  - satisfies: GRD-SYS-017
+- satisfies: GRD-HTML-001
+- satisfies: GRD-HTML-007
+- satisfies: GRD-SYS-016
+- satisfies: GRD-SYS-017
