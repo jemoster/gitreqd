@@ -2,19 +2,25 @@ id: GRD-HTML-007
 title: Source links in the HTML report
 require: The HTML report shall present the source-link records associated with each requirement.
 refinement: |
-  This consumer reads source-link records as defined by GRD-SYS-017. It does not define how records are produced.
+  This consumer reads source-link records as defined by GRD-SYS-017 and YAML `satisfied_by` / `verified_by` artifacts as defined by GRD-SYS-016. It does not define how records are produced.
 
-  For each requirement, include the records whose `requirement_id` matches that requirement:
+  For each requirement, present matching items under two headings. Omit a heading when that requirement has no items for it:
 
-  - Records with kind `implements` appear under **Implemented by**.
-  - Records with kind `verifies` appear under **Verified by**.
+  - **Satisfied by** — YAML `satisfied_by` artifacts and source-link records with kind `implements`.
+  - **Verified by** — YAML `verified_by` artifacts and source-link records with kind `verifies`.
 
-  Each presented record identifies the source using `path`, `item`, and `linespace`. Omit a section when that requirement has no records of the corresponding kind.
+  Under each heading, group items by origin and omit an empty group:
 
-  How records are collected, and which producers exist, is out of scope for this requirement.
+  - **By comment** — YAML artifacts from the requirement file.
+  - **Rust** — source-link records collected from Rust tracing attributes.
+
+  Each presented source-link record identifies the source using `path`, `item`, and `linespace`.
+
+  How records are collected, and which producers exist beyond the origin groups above, is out of scope for this requirement.
 attributes:
-  rationale: The HTML report should show where a requirement is implemented and verified whenever source-link records exist, without depending on a particular producer.
+  rationale: One Satisfied by heading and one Verified by heading keep implementation and verification together while origin sub-headings show whether an item came from the requirement file or from Rust source.
   status: active
 links:
-  - satisfies: GRD-HTML-001
-  - satisfies: GRD-SYS-017
+- satisfies: GRD-HTML-001
+- satisfies: GRD-SYS-016
+- satisfies: GRD-SYS-017

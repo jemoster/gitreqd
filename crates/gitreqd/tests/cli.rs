@@ -206,11 +206,13 @@ fn checks_demo() {}
     let start = html.find("id=\"DEMO-001\"").unwrap();
     let end = html[start..].find("</section>").unwrap() + start;
     let detail = &html[start..end];
-    assert!(detail.contains("Implemented by"));
+    assert!(detail.contains("Satisfied by"));
+    assert!(detail.contains("Rust"));
     assert!(detail.contains("<code>src/lib.rs</code>"));
     assert!(detail.contains("function"));
     assert!(detail.contains("Verified by"));
     assert!(detail.contains("test"));
+    assert!(!detail.contains("Implemented by"));
 }
 
 #[gitreqd::verifies("GRD-CLI-006")]

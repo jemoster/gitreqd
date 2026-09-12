@@ -1,0 +1,13 @@
+id: TEMP-002
+title: Fahrenheit to Celsius
+require: The library shall convert a Fahrenheit temperature to Celsius using C = (F - 32) * 5 / 9.
+refinement: Freezing (32 °F) maps to 0 °C. Boiling (212 °F) maps to 100 °C.
+attributes:
+  rationale: The inverse conversion has its own implementation and tests so both link kinds appear on a second requirement.
+  status: active
+satisfied_by:
+- artifact: src/lib.rs
+  description: fahrenheit_to_celsius implements the conversion.
+verified_by:
+- artifact: src/lib.rs
+  description: Unit tests check freezing and boiling points.
