@@ -1,8 +1,10 @@
 //! GRD-CLI-002: CLI HTML report.
+//! GRD-HTML-008: When running in a VS Code-derived environment, file paths become host-IDE links.
 
 use gitreqd_core::{
     collect_rust_source_links, discover_project_root_candidates, load_active_profile,
-    load_requirements, normalize_path, ROOT_MARKER_HINT,
+    load_requirements, normalize_path, vscode_derived_uri_scheme, ArtifactLinkRenderOptions,
+    IdeArtifactLinkContext, ROOT_MARKER_HINT,
 };
 use std::collections::HashSet;
 use std::fs;
@@ -10,6 +12,17 @@ use std::io::{self, Write};
 use std::path::Path;
 
 pub fn run_html(project_dir: &Path, output_dir: &Path) -> io::Result<bool> {
+    let scheme = vscode_derived_uri_scheme(|k| std::env::var(k).ok());
+    run_html_with_ide_scheme(project_dir, output_dir, scheme.as_deref())
+}
+
+/// GRD-HTML-008: `ide_scheme` is the host IDE URI scheme when generating in a VS Code-derived environment.
+#[gitreqd::implements("GRD-HTML-008")]
+pub fn run_html_with_ide_scheme(
+    project_dir: &Path,
+    output_dir: &Path,
+    ide_scheme: Option<&str>,
+) -> io::Result<bool> {
     let candidates = match discover_project_root_candidates(project_dir) {
         Ok(c) => c,
         Err(err) => {
@@ -70,7 +83,32 @@ pub fn run_html(project_dir: &Path, output_dir: &Path) -> io::Result<bool> {
             Vec::new()
         }
     };
-    let html = profile.generate_full_html(&result.requirements, &source_links);
+    let artifact_links = ide_scheme.and_then(|scheme| {
+        let scheme = scheme.trim();
+        if scheme.is_empty() {
+            return None;
+        }
+        let project_root = root
+            .canonicalize()
+            .unwrap_or_else(|_| {
+                if root.is_absolute() {
+                    root.clone()
+                } else {
+                    cwd.join(root)
+                }
+            })
+            .to_string_lossy()
+            .into_owned();
+        Some(ArtifactLinkRenderOptions {
+            ide: Some(IdeArtifactLinkContext {
+                uri_scheme: scheme.to_string(),
+                project_root,
+            }),
+            github: None,
+        })
+    });
+    let html =
+        profile.generate_full_html(&result.requirements, &source_links, artifact_links.as_ref());
     fs::write(&html_path, html)?;
     writeln!(
         io::stdout(),

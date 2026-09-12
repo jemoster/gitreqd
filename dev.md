@@ -23,7 +23,7 @@ Workspace TypeScript packages:
 
 Rust crates:
 
-- `crates/gitreqd-core` - core engine (discovery, parse, validate, format, full and single-requirement HTML, schema export, source-link collection). Single-requirement HTML can optionally turn implementation and verification file paths into GitHub blob links when repository owner, name, commit, and project-root path are provided.
+- `crates/gitreqd-core` - core engine (discovery, parse, validate, format, full and single-requirement HTML, schema export, source-link collection). Single-requirement HTML can optionally turn implementation and verification file paths into GitHub blob links when repository owner, name, commit, and project-root path are provided, or into host-IDE file links when a VS Code-derived URI scheme and project root are provided.
 - `crates/gitreqd-wasm` - wasm-bindgen JSON ABI over `gitreqd-core` for JavaScript hosts.
 - `crates/gitreqd-macros` - proc-macro attributes for tagging Rust items as source links.
 - `crates/gitreqd` - `gitreqd` binary with bootstrap, validate, format, html, and schema.

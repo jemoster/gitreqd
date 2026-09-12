@@ -7,8 +7,8 @@ use gitreqd_core::{
     generate_single_requirement_html_with_source_links, get_requirement_profile,
     is_requirement_filename, list_registered_profile_ids, parse_requirement_content,
     parse_root_marker_yaml, requirement_id_from_filename, validate_requirements,
-    ArtifactLinkRenderOptions, ArtifactRef, GithubArtifactLinkContext, Link, ParameterValue,
-    RequirementWithSource, REQUIREMENT_FILE_EXTENSION, STANDARD_PROFILE_ID,
+    ArtifactLinkRenderOptions, ArtifactRef, GithubArtifactLinkContext, IdeArtifactLinkContext,
+    Link, ParameterValue, RequirementWithSource, REQUIREMENT_FILE_EXTENSION, STANDARD_PROFILE_ID,
 };
 use indexmap::IndexMap;
 use serde_json::{json, Map, Value};
@@ -333,9 +333,8 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
         return None;
     }
     let v: Value = serde_json::from_str(raw).ok()?;
-    let github = v.get("github")?;
-    Some(ArtifactLinkRenderOptions {
-        github: Some(GithubArtifactLinkContext {
+    let github = v.get("github").and_then(|github| {
+        Some(GithubArtifactLinkContext {
             owner: github.get("owner")?.as_str()?.to_string(),
             repo: github.get("repo")?.as_str()?.to_string(),
             commit_sha: github.get("commitSha")?.as_str()?.to_string(),
@@ -344,8 +343,23 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_string(),
-        }),
-    })
+        })
+    });
+    let ide = v.get("ide").and_then(|ide| {
+        let uri_scheme = ide.get("uriScheme")?.as_str()?.trim().to_string();
+        if uri_scheme.is_empty() {
+            return None;
+        }
+        Some(IdeArtifactLinkContext {
+            uri_scheme,
+            project_root: ide
+                .get("projectRoot")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
+        })
+    });
+    Some(ArtifactLinkRenderOptions { github, ide })
 }
 
 #[wasm_bindgen(js_name = generateSingleRequirementHtml)]

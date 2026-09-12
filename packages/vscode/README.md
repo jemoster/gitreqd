@@ -29,7 +29,7 @@ The extension will then be installed like any marketplace extension and activate
 
 ### Requirement preview and rich-text editing
 
-With a requirement file active, use the editor title **Open Requirement Preview** action (preview icon) to open the HTML preview beside the editor. The preview matches the structure and styling of the exported requirements report.
+With a requirement file active, use the editor title **Open Requirement Preview** action (preview icon) to open the HTML preview beside the editor. The preview matches the structure and styling of the exported requirements report. File paths in the preview (the requirement source file and local implementation or verification artifacts) open in the current editor.
 
 For **Description** and **Rationale** (when present), the preview includes a rich (WYSIWYG) editor with a formatting toolbar (headings, emphasis, lists, links, images, tables, code blocks, quotes). Edit the raw Markdown in the YAML file when you need the plain source. Changes in the preview are written back to the YAML file; you can also edit the same fields in the text editor—updates stay in sync when the document changes.
 

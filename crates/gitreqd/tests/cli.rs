@@ -3,8 +3,8 @@
 extern crate gitreqd_macros as gitreqd;
 
 use gitreqd_cli::{
-    run_bootstrap, run_format, run_html, run_schema, run_validate, BootstrapOptions,
-    SchemaOutputFormat,
+    run_bootstrap, run_format, run_html, run_html_with_ide_scheme, run_schema, run_validate,
+    BootstrapOptions, SchemaOutputFormat,
 };
 use gitreqd_core::ROOT_MARKER;
 use std::fs;
@@ -213,6 +213,50 @@ fn checks_demo() {}
     assert!(detail.contains("Verified by"));
     assert!(detail.contains("test"));
     assert!(!detail.contains("Implemented by"));
+}
+
+#[gitreqd::verifies("GRD-HTML-008")]
+#[test]
+fn html_uses_host_ide_file_links_when_scheme_is_provided() {
+    let tmp = temp_dir();
+    fs::write(
+        tmp.join(ROOT_MARKER),
+        "requirement_dirs:\n  - requirements\n",
+    )
+    .unwrap();
+    let reqs = tmp.join("requirements");
+    fs::create_dir_all(&reqs).unwrap();
+    fs::write(
+        reqs.join("DEMO-001.req.yml"),
+        "id: DEMO-001\ntitle: Demo\nrequire: The system shall demonstrate validation.\nsatisfied_by:\n  - artifact: src/lib.rs\n",
+    )
+    .unwrap();
+    let src = tmp.join("src");
+    fs::create_dir_all(&src).unwrap();
+    fs::write(
+        src.join("lib.rs"),
+        r#"#[gitreqd::implements("DEMO-001")]
+fn demo() {}
+"#,
+    )
+    .unwrap();
+
+    let out_ide = tmp.join("html-ide");
+    assert!(run_html_with_ide_scheme(&tmp, &out_ide, Some("cursor")).unwrap());
+    let html = fs::read_to_string(out_ide.join("index.html")).unwrap();
+    let start = html.find("id=\"DEMO-001\"").unwrap();
+    let end = html[start..].find("</section>").unwrap() + start;
+    let detail = &html[start..end];
+    assert!(detail.contains("href=\"cursor://file"));
+    assert!(detail.contains("/src/lib.rs"));
+    assert!(detail.contains("/src/lib.rs:"));
+    assert!(detail.contains("DEMO-001.req.yml"));
+    assert!(detail.contains("<code>src/lib.rs</code>"));
+
+    let out_plain = tmp.join("html-plain");
+    assert!(run_html_with_ide_scheme(&tmp, &out_plain, None).unwrap());
+    let plain = fs::read_to_string(out_plain.join("index.html")).unwrap();
+    assert!(!plain.contains("://file/"));
 }
 
 #[gitreqd::verifies("GRD-CLI-006")]
