@@ -51,6 +51,9 @@ gitreqd html --output ./out
 
 Open `out/index.html`. Each requirement includes:
 
-- **Satisfied by** — YAML `satisfied_by` artifact paths
-- **Implemented by** — `#[gitreqd::implements]` on `celsius_to_fahrenheit` / `fahrenheit_to_celsius`
-- **Verified by** — YAML `verified_by` plus `#[gitreqd::verifies]` on the unit tests (including the round-trip test that lists both IDs)
+- **Satisfied by**
+  - **By comment** — YAML `satisfied_by` artifact paths
+  - **Rust** — `#[gitreqd::implements]` on `celsius_to_fahrenheit` / `fahrenheit_to_celsius`
+- **Verified by**
+  - **By comment** — YAML `verified_by` artifact paths
+  - **Rust** — `#[gitreqd::verifies]` on the unit tests (including the round-trip test that lists both IDs)

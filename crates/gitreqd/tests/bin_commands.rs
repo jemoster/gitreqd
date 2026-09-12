@@ -176,10 +176,8 @@ fn html_sample_project_rust_includes_source_links() {
         let end = html[start..].find("</section>").unwrap() + start;
         let detail = &html[start..end];
         assert!(detail.contains("Satisfied by"), "{id} missing Satisfied by");
-        assert!(
-            detail.contains("Implemented by"),
-            "{id} missing Implemented by"
-        );
+        assert!(detail.contains("By comment"), "{id} missing By comment");
+        assert!(detail.contains("Rust"), "{id} missing Rust origin");
         assert!(detail.contains("Verified by"), "{id} missing Verified by");
         assert!(
             detail.contains("<code>src/lib.rs</code>"),
@@ -192,6 +190,10 @@ fn html_sample_project_rust_includes_source_links() {
         assert!(
             detail.contains("source-link-item\">test"),
             "{id} missing test source link"
+        );
+        assert!(
+            !detail.contains("Implemented by"),
+            "{id} still has Implemented by"
         );
     }
 }

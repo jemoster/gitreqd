@@ -100,12 +100,12 @@ fn report_contains_index() {}
 
 `implements` marks implementation; `verifies` marks verification. Each attribute accepts one or more requirement ID strings. `#[gitreqd_macros::implements]` / `#[gitreqd_macros::verifies]` are equivalent without the alias.
 
-The HTML report (Rust `gitreqd html`) lists matching source links on each requirement:
+The HTML report (Rust `gitreqd html`) lists matching source links on each requirement under the same headings as YAML artifacts:
 
-- **Implemented by** for `implements` tags
-- **Verified by** for `verifies` tags, in the same list as any YAML `verified_by` artifacts
+- **Satisfied by** — YAML `satisfied_by` under **By comment**, `implements` tags under **Rust**
+- **Verified by** — YAML `verified_by` under **By comment**, `verifies` tags under **Rust**
 
-Each entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading is omitted when that requirement has no matching links.
+Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items.
 
 A complete crate is in `sample_projects/rust`: a tiny temperature converter with `implements` on the library functions, `verifies` on the tests, YAML `satisfied_by` / `verified_by` artifacts, and instructions for generating the HTML report with the latest `gitreqd` release.
 

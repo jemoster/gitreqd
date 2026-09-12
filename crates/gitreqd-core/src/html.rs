@@ -539,21 +539,19 @@ fn requirement_detail_html(
         })
         .collect();
 
-    let satisfied_by_html = artifact_refs_section_html(
+    let satisfied_by_html = combined_trace_section_html(
         "Satisfied by",
         r.satisfied_by.as_deref(),
-        by_id,
-        &r.id,
-        artifact_links,
-    );
-    let implements_html = source_links_section_html(
-        "Implemented by",
         source_links
             .iter()
             .copied()
             .filter(|l| l.kind == SourceLinkKind::Implements),
+        by_id,
+        &r.id,
+        artifact_links,
     );
-    let verified_by_html = combined_verified_by_html(
+    let verified_by_html = combined_trace_section_html(
+        "Verified by",
         r.verified_by.as_deref(),
         source_links
             .iter()
@@ -566,7 +564,6 @@ fn requirement_detail_html(
 
     let links_at_bottom = [
         satisfied_by_html,
-        implements_html,
         verified_by_html,
         satisfies_html,
         linked_from_html,
@@ -663,29 +660,6 @@ fn artifact_refs_list_html(
     items.join("")
 }
 
-fn artifact_refs_section_html(
-    label: &str,
-    refs: Option<&[ArtifactRef]>,
-    by_id: &HashMap<String, &RequirementWithSource>,
-    requirement_id: &str,
-    artifact_links: Option<&ArtifactLinkRenderOptions>,
-) -> String {
-    let Some(refs) = refs else {
-        return String::new();
-    };
-    if refs.is_empty() {
-        return String::new();
-    }
-    let list = artifact_refs_list_html(refs, by_id, requirement_id, artifact_links);
-    if list.is_empty() {
-        return String::new();
-    }
-    format!(
-        "<div class=\"labeled-block artifact-refs-block\"><span class=\"label\">{}</span><ul class=\"artifact-refs-list\">{list}</ul></div>",
-        escape_html(label)
-    )
-}
-
 fn format_linespace(lines: &[u32]) -> String {
     if lines.is_empty() {
         return String::new();
@@ -730,21 +704,20 @@ where
     links.into_iter().map(source_link_item_html).collect()
 }
 
-fn source_links_section_html<'a, I>(label: &str, links: I) -> String
-where
-    I: IntoIterator<Item = &'a SourceLink>,
-{
-    let list = source_links_list_html(links);
-    if list.is_empty() {
+fn origin_group_html(origin: &str, list_class: &str, items: &str) -> String {
+    if items.is_empty() {
         return String::new();
     }
     format!(
-        "<div class=\"labeled-block source-links-block\"><span class=\"label\">{}</span><ul class=\"source-links-list\">{list}</ul></div>",
-        escape_html(label)
+        "<div class=\"link-origin\"><span class=\"label\">{}</span><ul class=\"{list_class}\">{items}</ul></div>",
+        escape_html(origin)
     )
 }
 
-fn combined_verified_by_html<'a, I>(
+/// GRD-HTML-007: One Satisfied by / Verified by heading with origin groups (By comment, Rust).
+#[gitreqd::implements("GRD-HTML-007")]
+fn combined_trace_section_html<'a, I>(
+    heading: &str,
     yaml_refs: Option<&[ArtifactRef]>,
     source_links: I,
     by_id: &HashMap<String, &RequirementWithSource>,
@@ -759,11 +732,20 @@ where
         .map(|refs| artifact_refs_list_html(refs, by_id, requirement_id, artifact_links))
         .unwrap_or_default();
     let source_list = source_links_list_html(source_links);
-    if yaml_list.is_empty() && source_list.is_empty() {
+    let groups = [
+        origin_group_html("By comment", "artifact-refs-list", &yaml_list),
+        origin_group_html("Rust", "source-links-list", &source_list),
+    ]
+    .into_iter()
+    .filter(|s| !s.is_empty())
+    .collect::<Vec<_>>()
+    .join("");
+    if groups.is_empty() {
         return String::new();
     }
     format!(
-        "<div class=\"labeled-block artifact-refs-block source-links-block\"><span class=\"label\">Verified by</span><ul class=\"artifact-refs-list source-links-list\">{yaml_list}{source_list}</ul></div>"
+        "<div class=\"labeled-block artifact-refs-block source-links-block\"><span class=\"label\">{}</span>{groups}</div>",
+        escape_html(heading)
     )
 }
 
@@ -835,6 +817,8 @@ pub fn generate_single_requirement_html_with_source_links(
     .rationale {{ margin-top: 0; }}
     .satisfies-list, .linked-from-list, .artifact-refs-list, .source-links-list {{ margin: 0.25rem 0 0 1.25rem; padding: 0; }}
     .source-link-item, .source-link-lines {{ color: #666; }}
+    .link-origin {{ margin-top: 0.35rem; margin-left: 0.25rem; }}
+    .link-origin > .label {{ font-size: 0.8rem; color: #555; }}
     .param-value {{ background: #e8f4f8; padding: 0.1em 0.3em; border-radius: 3px; font-weight: 500; }}
     .parameters-table {{ margin: 0.25rem 0 0 0; border-collapse: collapse; width: 100%; max-width: 30rem; }}
     .parameters-table th, .parameters-table td {{ padding: 0.25rem 0.5rem; text-align: left; border: 1px solid #ddd; }}
@@ -855,7 +839,7 @@ pub fn generate_full_html(requirements: &[RequirementWithSource]) -> String {
     generate_full_html_with_source_links(requirements, &[])
 }
 
-/// GRD-HTML-007: Present source-link records on each requirement (Implemented by / Verified by).
+/// GRD-HTML-007: Present source-link records on each requirement (Satisfied by / Verified by).
 #[gitreqd::implements("GRD-HTML-007")]
 pub fn generate_full_html_with_source_links(
     requirements: &[RequirementWithSource],
@@ -901,6 +885,8 @@ pub fn generate_full_html_with_source_links(
     .rationale {{ margin-top: 0; }}
     .satisfies-list, .linked-from-list, .artifact-refs-list, .source-links-list {{ margin: 0.25rem 0 0 1.25rem; padding: 0; }}
     .source-link-item, .source-link-lines {{ color: #666; }}
+    .link-origin {{ margin-top: 0.35rem; margin-left: 0.25rem; }}
+    .link-origin > .label {{ font-size: 0.8rem; color: #555; }}
     .index-category {{ font-weight: 600; color: #333; }}
     .param-value {{ background: #e8f4f8; padding: 0.1em 0.3em; border-radius: 3px; font-weight: 500; }}
     .parameters-table {{ margin: 0.25rem 0 0 0; border-collapse: collapse; width: 100%; max-width: 30rem; }}
@@ -1021,10 +1007,13 @@ mod tests {
         }]);
         let html = generate_full_html(&[r]);
         assert!(html.contains("Satisfied by"));
+        assert!(html.contains("By comment"));
         assert!(html.contains("<code>packages/core/src/foo.ts</code>"));
         assert!(html.contains("Implements the feature."));
         assert!(html.contains("href=\"https://example.com/evidence\""));
         assert!(html.contains("Verified by"));
+        assert!(!html.contains("Rust"));
+        assert!(!html.contains("Implemented by"));
     }
 
     #[gitreqd::verifies("GRD-UI-009")]
@@ -1367,10 +1356,13 @@ mod tests {
         .unwrap();
         let html =
             generate_single_requirement_html_with_source_links(&r, None, &[implements], None);
-        assert!(html.contains("Implemented by"));
+        assert!(html.contains("Satisfied by"));
+        assert!(html.contains("Rust"));
+        assert!(!html.contains("By comment"));
         assert!(html.contains("<code>src/html.rs</code>"));
         assert!(html.contains("L10–L12"));
         assert!(!html.contains("Verified by"));
+        assert!(!html.contains("Implemented by"));
     }
 
     #[gitreqd::verifies("GRD-HTML-007")]
@@ -1405,7 +1397,8 @@ mod tests {
         let start = html.find("id=\"GRD-HTML-007\"").unwrap();
         let end = html[start..].find("</section>").unwrap() + start;
         let detail = &html[start..end];
-        assert!(detail.contains("Implemented by"));
+        assert!(detail.contains("Satisfied by"));
+        assert!(detail.contains("Rust"));
         assert!(detail.contains("<code>src/html.rs</code>"));
         assert!(detail.contains("function"));
         assert!(detail.contains("L10–L12"));
@@ -1413,6 +1406,8 @@ mod tests {
         assert!(detail.contains("test"));
         assert!(detail.contains("L80"));
         assert!(!detail.contains("src/other.rs"));
+        assert!(!detail.contains("Implemented by"));
+        assert!(!detail.contains("By comment"));
     }
 
     #[gitreqd::verifies("GRD-HTML-007")]
@@ -1422,8 +1417,11 @@ mod tests {
         let start = html.find("id=\"GRD-NONE-001\"").unwrap();
         let end = html[start..].find("</section>").unwrap() + start;
         let detail = &html[start..end];
+        assert!(!detail.contains("Satisfied by"));
         assert!(!detail.contains("Implemented by"));
         assert!(!detail.contains("Verified by"));
+        assert!(!detail.contains("By comment"));
+        assert!(!detail.contains("Rust"));
     }
 
     #[gitreqd::verifies("GRD-HTML-007")]
@@ -1448,9 +1446,46 @@ mod tests {
         let detail = &html[start..end];
         let verified_count = detail.matches("Verified by").count();
         assert_eq!(verified_count, 1);
+        assert!(detail.contains("By comment"));
+        assert!(detail.contains("Rust"));
         assert!(detail.contains("<code>test/foo.test.ts</code>"));
         assert!(detail.contains("<code>src/lib.rs</code>"));
         assert!(!detail.contains("Implemented by"));
+        assert!(!detail.contains("Satisfied by"));
+        let comment_pos = detail.find("By comment").unwrap();
+        let rust_pos = detail.find("Rust").unwrap();
+        assert!(comment_pos < rust_pos);
+    }
+
+    #[gitreqd::verifies("GRD-HTML-007")]
+    #[test]
+    fn satisfied_by_combines_yaml_and_source_links() {
+        let mut r = req("GRD-MIX-002", "Mixed impl");
+        r.satisfied_by = Some(vec![ArtifactRef {
+            artifact: "src/feature.ts".into(),
+            description: Some("Primary implementation.".into()),
+        }]);
+        let implements = SourceLink::new(
+            "GRD-MIX-002",
+            SourceLinkKind::Implements,
+            "src/lib.rs",
+            "function",
+            vec![8, 9, 10],
+        )
+        .unwrap();
+        let html = generate_full_html_with_source_links(&[r], &[implements]);
+        let start = html.find("id=\"GRD-MIX-002\"").unwrap();
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        assert_eq!(detail.matches("Satisfied by").count(), 1);
+        assert!(detail.contains("By comment"));
+        assert!(detail.contains("Rust"));
+        assert!(detail.contains("<code>src/feature.ts</code>"));
+        assert!(detail.contains("Primary implementation."));
+        assert!(detail.contains("<code>src/lib.rs</code>"));
+        assert!(detail.contains("L8–L10"));
+        assert!(!detail.contains("Implemented by"));
+        assert!(!detail.contains("Verified by"));
     }
 
     #[gitreqd::verifies("GRD-HTML-007")]
