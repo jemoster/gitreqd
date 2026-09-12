@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["crates/gitreqd-core", "crates/gitreqd", "crates/gitreqd-macros", "crates/gitreqd-wasm"]
+members = [
+    "crates/gitreqd-core",
+    "crates/gitreqd",
+    "crates/gitreqd-macros",
+    "crates/gitreqd-wasm",
+    "sample_projects/rust",
+]
 
 [workspace.package]
 edition = "2021"

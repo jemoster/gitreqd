@@ -128,6 +128,75 @@ fn html_dot_output_prints_normalized_path() {
 }
 
 #[test]
+fn validate_sample_project_rust() {
+    let root = repo_root();
+    let out = Command::new(bin())
+        .args([
+            "validate",
+            "--project-dir",
+            root.join("sample_projects/rust").to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        out.status.success(),
+        "validate rust sample failed: stdout={stdout} stderr={stderr}"
+    );
+    assert!(stdout.contains("Validated"));
+}
+
+#[test]
+fn html_sample_project_rust_includes_source_links() {
+    let root = repo_root();
+    let tmp = std::env::temp_dir().join(format!("gitreqd-bin-html-rust-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let out = Command::new(bin())
+        .args([
+            "html",
+            "--project-dir",
+            root.join("sample_projects/rust").to_str().unwrap(),
+            "--output",
+            tmp.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let html = fs::read_to_string(tmp.join("index.html")).unwrap();
+    for id in ["TEMP-001", "TEMP-002"] {
+        let start = html
+            .find(&format!("id=\"{id}\""))
+            .unwrap_or_else(|| panic!("missing detail section for {id}"));
+        let end = html[start..].find("</section>").unwrap() + start;
+        let detail = &html[start..end];
+        assert!(detail.contains("Satisfied by"), "{id} missing Satisfied by");
+        assert!(
+            detail.contains("Implemented by"),
+            "{id} missing Implemented by"
+        );
+        assert!(detail.contains("Verified by"), "{id} missing Verified by");
+        assert!(
+            detail.contains("<code>src/lib.rs</code>"),
+            "{id} missing src/lib.rs"
+        );
+        assert!(
+            detail.contains("source-link-item\">function"),
+            "{id} missing function source link"
+        );
+        assert!(
+            detail.contains("source-link-item\">test"),
+            "{id} missing test source link"
+        );
+    }
+}
+
+#[test]
 fn validate_this_repository() {
     let root = repo_root();
     let out = Command::new(bin())

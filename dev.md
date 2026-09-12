@@ -31,7 +31,7 @@ Rust crates:
 Shared product data:
 
 - `requirements/` - product requirements for gitreqd itself.
-- `sample_projects/` - test data only.
+- `sample_projects/` - test data and examples (`basic` YAML tree; `rust` crate with `implements` / `verifies` source links).
 
 ## Build From Source
 
@@ -41,6 +41,7 @@ CLI (bootstrap, validate, format, html, schema):
 cargo build --workspace
 cargo test --workspace
 cargo run -p gitreqd -- validate --project-dir sample_projects/basic
+cargo run -p gitreqd -- html --project-dir sample_projects/rust --output ./out
 ```
 
 Install a local Rust binary onto PATH:

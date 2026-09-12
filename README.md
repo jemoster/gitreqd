@@ -107,6 +107,8 @@ The HTML report (Rust `gitreqd html`) lists matching source links on each requir
 
 Each entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading is omitted when that requirement has no matching links.
 
+A complete crate is in `sample_projects/rust`: a tiny temperature converter with `implements` on the library functions, `verifies` on the tests, YAML `satisfied_by` / `verified_by` artifacts, and instructions for generating the HTML report with the latest `gitreqd` release.
+
 ## Optional Configuration
 
 ### `requirement_dirs` in `gitreqd.yaml`

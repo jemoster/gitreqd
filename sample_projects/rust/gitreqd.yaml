@@ -1,0 +1,3 @@
+requirement_dirs:
+  - requirements
+profile: standard
