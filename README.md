@@ -30,17 +30,15 @@ Run commands from the project root (where `gitreqd.yaml` or `gitreqd.yml` exists
 
 Use Cursor [Agent Skills](https://cursor.com/docs/context/skills) in `.cursor/skills/` to move from requirement text to implementation:
 
-- `/require` helps draft or update requirement files in your `requirements/` directory.
-- `/implement` helps generate code changes that satisfy selected requirements.
-
-A common flow is: define/refine requirements with `/require`, then switch to `/implement` to build the related code changes.
+- `/require` - draft or update requirement files in `requirements/`.
+- `/implement` - generate code that satisfies selected requirements.
 
 ## Core Commands
 
 - `gitreqd bootstrap` - initialize `gitreqd.yaml` and `requirements/`.
 - `gitreqd validate` - check requirement YAML against the active schema.
 - `gitreqd format` - rewrite requirement YAML into canonical format.
-- `gitreqd html` - generate a static HTML report. When this command runs inside VS Code, Cursor, or another VS Code-based editor, file paths in the report become links that open in that editor. Over SSH or in a container, links target the remote window when the generator can see the remote authority. Built-in HTML preview servers (including Live Preview) often intercept those links; open the report in an external browser, or use the gitreqd requirement preview.
+- `gitreqd html` - generate a static HTML report. When `origin` is GitHub, file paths link to the blob at `HEAD`.
 - `gitreqd schema` - print or export the effective requirement schema.
 
 Use `gitreqd --help` or `gitreqd <command> --help` for full options.
@@ -100,14 +98,14 @@ fn report_contains_index() {}
 
 `implements` marks implementation; `verifies` marks verification. Each attribute accepts one or more requirement ID strings. `#[gitreqd_macros::implements]` / `#[gitreqd_macros::verifies]` are equivalent without the alias.
 
-The HTML report (Rust `gitreqd html`) lists matching source links on each requirement under the same headings as YAML artifacts:
+The HTML report lists matching source links on each requirement under the same headings as YAML artifacts:
 
 - **Satisfied by** — YAML `satisfied_by` under **By comment**, `implements` tags under **Rust**
 - **Verified by** — YAML `verified_by` under **By comment**, `verifies` tags under **Rust**
 
-Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items. When the git `origin` remote is GitHub (github.com or a `github.*` Enterprise host), those file paths and the requirement source file are links to the file at `HEAD` on that host. Otherwise the paths stay plain text.
+Each Rust entry shows the file path, the kind of language item, and the line range (for example `L10–L12`). A heading or origin group is omitted when that requirement has no matching items.
 
-A complete crate is in `sample_projects/rust`: a tiny temperature converter with `implements` on the library functions, `verifies` on the tests, YAML `satisfied_by` / `verified_by` artifacts, and instructions for generating the HTML report with the latest `gitreqd` release.
+See `sample_projects/rust` for a complete example.
 
 ## Optional Configuration
 
@@ -121,4 +119,4 @@ Choose how requirement YAML is interpreted and rendered. If omitted, `standard` 
 
 ## Developer Documentation
 
-Developer-focused material (workspace layout, building from source, packaging, extension distribution, and pre-commit setup) is now in `dev.md`.
+See `dev.md` for workspace layout, building from source, packaging, the VS Code extension, and pre-commit setup.
