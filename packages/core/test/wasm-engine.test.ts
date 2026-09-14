@@ -176,4 +176,25 @@ satisfied_by:
       encoding: "utf-8",
     });
   });
+
+  it("loads the CommonJS package export and its WASM bindings", () => {
+    const cjsIndex = path.join(REPO_ROOT, "packages", "core", "dist-cjs", "index.js");
+    expect(fs.existsSync(cjsIndex)).toBe(true);
+    const script = `
+      const core = require("@gitreqd/core");
+      const result = core.parseRequirementContent(
+        "id: GRD-CJS-001\\ntitle: CommonJS\\nrequire: The CommonJS export shall load WASM bindings.\\n",
+        "GRD-CJS-001.req.yml"
+      );
+      if ("error" in result) throw new Error(result.error.message);
+      if (result.requirement.id !== "GRD-CJS-001") throw new Error(result.requirement.id);
+      process.stdout.write(require.resolve("@gitreqd/core"));
+    `;
+    const resolved = execFileSync(
+      process.execPath,
+      ["--no-experimental-require-module", "-e", script],
+      { cwd: REPO_ROOT, encoding: "utf-8" }
+    ).trim();
+    expect(resolved).toBe(cjsIndex);
+  });
 });
