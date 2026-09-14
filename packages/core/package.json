@@ -12,6 +12,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "browser": "./dist/browser.js",
+      "require": "./dist-cjs/index.js",
       "node": "./dist/index.js",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
@@ -19,18 +20,21 @@
     "./html": {
       "types": "./dist/html.d.ts",
       "browser": "./dist/html.js",
+      "require": "./dist-cjs/html.js",
       "node": "./dist/html.js",
       "import": "./dist/html.js",
       "default": "./dist/html.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
+      "require": "./dist-cjs/types.js",
       "import": "./dist/types.js",
       "default": "./dist/types.js"
     },
     "./engine": {
       "types": "./dist/engine.d.ts",
       "browser": "./dist/engine.js",
+      "require": "./dist-cjs/engine.js",
       "node": "./dist/engine.js",
       "import": "./dist/engine.js",
       "default": "./dist/engine.js"
@@ -38,16 +42,18 @@
     "./wasm": {
       "types": "./dist/wasm.d.ts",
       "browser": "./dist/wasm.browser.js",
+      "require": "./dist-cjs/wasm.js",
       "node": "./dist/wasm.js",
       "default": "./dist/wasm.js"
     }
   },
   "scripts": {
-    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist && tsc && mkdir -p dist/wasm dist/wasm-web && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist/wasm-web/",
-    "clean": "rm -rf dist wasm wasm-web"
+    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist dist-cjs && tsc && tsc -p tsconfig.cjs.json && printf '{ \"type\": \"commonjs\" }\\n' > dist-cjs/package.json && mkdir -p dist/wasm dist/wasm-web dist-cjs/wasm dist-cjs/wasm-web && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist/wasm-web/ && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist-cjs/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist-cjs/wasm-web/",
+    "clean": "rm -rf dist dist-cjs wasm wasm-web"
   },
   "files": [
-    "dist"
+    "dist",
+    "dist-cjs"
   ],
   "keywords": [
     "requirements",
