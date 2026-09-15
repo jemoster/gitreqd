@@ -1,4 +1,5 @@
 import type { ArtifactLinkRenderOptions } from "../artifact-links.js";
+import type { FullHtmlOptions } from "../html.js";
 import type { RequirementSchemaComposeOptions } from "../requirement-schema.js";
 import type { RequirementWithSource, ValidationError } from "../types.js";
 
@@ -13,7 +14,7 @@ export interface RequirementProfile {
   validateRequirements(requirements: RequirementWithSource[]): ValidationError[];
   exportRequirementFileJsonSchema(options?: RequirementSchemaComposeOptions): Record<string, unknown>;
   requirementSchemaComposeOptionsForProject(projectRoot: string): RequirementSchemaComposeOptions | undefined;
-  generateFullHtml(requirements: RequirementWithSource[]): string;
+  generateFullHtml(requirements: RequirementWithSource[], options?: FullHtmlOptions): string;
   generateSingleRequirementHtml(
     requirement: RequirementWithSource,
     allRequirements?: RequirementWithSource[],

@@ -121,8 +121,15 @@ export {
 export type { LlmRuntimeConfig, ParseLlmConfigResult } from "./llm-config.js";
 
 export {
+  githubBlobUrl,
   githubBlobUrlForArtifact,
   posixJoinRepoPath,
   type ArtifactLinkRenderOptions,
 } from "./artifact-links.js";
-export { generateFullHtml, generateSingleRequirementHtml } from "./html.js";
+export { generateFullHtml, generateSingleRequirementHtml, type FullHtmlOptions } from "./html.js";
+export {
+  detectGithubHtmlOptions,
+  parseGithubRemoteUrl,
+  posixPathRelativeToRoot,
+} from "./github-html-context.js";
+export type { GitCommandRunner } from "./github-html-context.js";

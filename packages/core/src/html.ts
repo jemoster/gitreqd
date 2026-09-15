@@ -1,5 +1,6 @@
 import MarkdownIt from "markdown-it";
 import {
+  githubBlobUrl,
   githubBlobUrlForArtifact,
   type ArtifactLinkRenderOptions,
 } from "./artifact-links.js";
@@ -197,7 +198,9 @@ function requirementDetailHtml(
   linkedFromIds?: string[],
   requirementsById?: Map<string, RequirementWithSource>,
   editableFieldMarkers?: boolean,
-  artifactLinks?: ArtifactLinkRenderOptions
+  artifactLinks?: ArtifactLinkRenderOptions,
+  /** GRD-HTML-007: repository-relative posix path of this requirement's source file. */
+  sourceRepoPath?: string
 ): string {
   const byId = requirementsById ?? new Map<string, RequirementWithSource>([[r.id, r]]);
   const resolve = (text: string, useMarkdown: boolean) =>
@@ -293,6 +296,13 @@ function requirementDetailHtml(
   const requireHtml = resolve(r.require, false);
   const refinementHtml = r.refinement ? resolve(r.refinement, true) : "";
 
+  /** GRD-HTML-007: Link the source file to its repository location at the loaded commit when context is available. */
+  const sourceRepoRel = sourceRepoPath?.trim();
+  const sourceHtml =
+    artifactLinks?.github && sourceRepoRel
+      ? `<a href="${escapeHtml(githubBlobUrl(sourceRepoRel, artifactLinks.github))}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.sourcePath)}</a>`
+      : escapeHtml(r.sourcePath);
+
   return `
     <section id="${escapeHtml(r.id)}" class="requirement-detail">
       <h2>${escapeHtml(r.id)} – ${titleHtml}</h2>
@@ -310,7 +320,7 @@ function requirementDetailHtml(
       }
       ${rationaleHtml}
       ${linksAtBottom}
-      <p class="source"><span class="label">Source file</span> ${escapeHtml(r.sourcePath)}</p>
+      <p class="source"><span class="label">Source file</span> ${sourceHtml}</p>
     </section>`;
 }
 
@@ -365,8 +375,19 @@ function artifactRefsSectionHtml(
   return `<div class="labeled-block artifact-refs-block"><span class="label">${escapeHtml(label)}</span><ul class="artifact-refs-list">${list}</ul></div>`;
 }
 
+/** GRD-HTML-007: Optional context so the full report can deep-link artifacts and source files to the repository at a commit. */
+export type FullHtmlOptions = {
+  /** GRD-UI-009 / GRD-HTML-007: repository identity and commit for building blob URLs. */
+  artifactLinks?: ArtifactLinkRenderOptions;
+  /** GRD-HTML-007: map of requirement id to the repository-relative posix path of its source file. */
+  sourceRepoPaths?: Map<string, string>;
+};
+
 /** GRD-HTML-001: HTML report represents the full set of information in the requirements file. GRD-SYS-010: Invoked via the active profile. */
-export function generateFullHtml(requirements: RequirementWithSource[]): string {
+export function generateFullHtml(
+  requirements: RequirementWithSource[],
+  options?: FullHtmlOptions
+): string {
   /** GRD-SYS-005: Map for resolving cross-requirement parameter references. */
   const requirementsById = new Map(requirements.map((r) => [r.id, r]));
   /** GRD-HTML-003: Top-level index of requirements, hierarchical list grouped by category. */
@@ -374,7 +395,16 @@ export function generateFullHtml(requirements: RequirementWithSource[]): string 
   /** GRD-HTML-002: Reverse lookup so each requirement shows who links to it. */
   const linkedFrom = linkedFromMap(requirements);
   const details = requirements
-    .map((r) => requirementDetailHtml(r, linkedFrom.get(r.id), requirementsById, false))
+    .map((r) =>
+      requirementDetailHtml(
+        r,
+        linkedFrom.get(r.id),
+        requirementsById,
+        false,
+        options?.artifactLinks,
+        options?.sourceRepoPaths?.get(r.id)
+      )
+    )
     .join("\n");
 
   return `<!DOCTYPE html>
@@ -420,7 +450,12 @@ ${details}
 export function generateSingleRequirementHtml(
   requirement: RequirementWithSource,
   allRequirements?: RequirementWithSource[],
-  options?: { editableFieldMarkers?: boolean; artifactLinks?: ArtifactLinkRenderOptions }
+  options?: {
+    editableFieldMarkers?: boolean;
+    artifactLinks?: ArtifactLinkRenderOptions;
+    /** GRD-HTML-007: repository-relative posix path of the requirement's source file. */
+    sourceRepoPath?: string;
+  }
 ): string {
   // Use the same head, styling, and detail rendering as the full report (including markdown).
   // Only the scope differs: single requirement, no index/list.
@@ -432,7 +467,8 @@ export function generateSingleRequirementHtml(
     linkedFromIds,
     requirementsById,
     options?.editableFieldMarkers === true,
-    options?.artifactLinks
+    options?.artifactLinks,
+    options?.sourceRepoPath
   );
   return `<!DOCTYPE html>
 <html lang="en">

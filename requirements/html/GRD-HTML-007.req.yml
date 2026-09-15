@@ -9,5 +9,19 @@ attributes:
   rationale: |
     Readers often need to open or edit a requirement's source YAML.
   status: active
+satisfied_by:
+  - artifact: packages/core/src/html.ts
+    description: Renders the Source file entry as a commit-pinned link when github context and a repo-relative path are supplied.
+  - artifact: packages/core/src/artifact-links.ts
+    description: githubBlobUrl builds the blob URL from a repository-relative path at the loaded commit.
+  - artifact: packages/core/src/github-html-context.ts
+    description: Discovers GitHub owner/repo and HEAD commit from the local Git working tree.
+  - artifact: packages/cli/src/html-cmd.ts
+    description: Passes discovered GitHub context into the full HTML report.
+verified_by:
+  - artifact: packages/core/test/html.test.ts
+    description: Covers source-file linking and plain-text fallback when context is absent.
+  - artifact: packages/core/test/github-html-context.test.ts
+    description: Parses GitHub remotes and builds HTML link options from git metadata.
 links:
   - satisfies: GRD-HTML-001
