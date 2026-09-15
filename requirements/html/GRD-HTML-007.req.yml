@@ -1,0 +1,13 @@
+id: GRD-HTML-007
+title: Link the source file to its location in the source repository
+require: The "Source file" entry shall link to that file at that commit.
+refinement: |
+  The link shall be a commit-pinned web URL to the file (for example a GitHub `blob` URL), resolving the path relative to the repository root and any configured project-root subfolder.
+
+  The link shall keep the existing "Source file" label and open in a new window.
+attributes:
+  rationale: |
+    Readers often need to open or edit a requirement's source YAML.
+  status: active
+links:
+  - satisfies: GRD-HTML-001
