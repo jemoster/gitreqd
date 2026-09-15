@@ -39,7 +39,7 @@ export function parseGithubRemoteUrl(remoteUrl: string): { owner: string; repo: 
 /** Repository-relative posix path, or null when `absPath` is outside `root`. */
 export function posixPathRelativeToRoot(root: string, absPath: string): string | null {
   const rel = path.relative(path.resolve(root), path.resolve(absPath));
-  if (!rel || rel.startsWith("..") || path.isAbsolute(rel)) {
+  if (!rel || rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
     return rel === "" ? "" : null;
   }
   return rel.split(path.sep).filter(Boolean).join("/");
