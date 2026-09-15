@@ -11,7 +11,7 @@ attributes:
   status: active
 satisfied_by:
   - artifact: packages/core/src/html.ts
-    description: Renders the Source file entry as a commit-pinned link when github context and a repo-relative path are supplied.
+    description: Renders the Source file entry as a commit-pinned link when GitHub context and a repo-relative path are supplied.
   - artifact: packages/core/src/artifact-links.ts
     description: githubBlobUrl builds the blob URL from a repository-relative path at the loaded commit.
   - artifact: packages/core/src/github-html-context.ts
