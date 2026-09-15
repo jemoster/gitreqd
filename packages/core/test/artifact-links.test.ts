@@ -1,4 +1,4 @@
-import { githubBlobUrlForArtifact, posixJoinRepoPath } from "../src/artifact-links.js";
+import { githubBlobUrl, githubBlobUrlForArtifact, posixJoinRepoPath } from "../src/artifact-links.js";
 
 /** GRD-UI-009 */
 describe("artifact-links", () => {
@@ -16,6 +16,18 @@ describe("artifact-links", () => {
     });
     expect(url).toBe(
       "https://github.com/acme/widgets/blob/deadbeef/apps/reqs/packages/core/src/a.ts"
+    );
+  });
+
+  it("builds GitHub blob URLs from a repository-relative path without prepending the project root", () => {
+    const url = githubBlobUrl("apps/reqs/GRD-SRC-001.req.yml", {
+      owner: "acme",
+      repo: "widgets",
+      commitSha: "deadbeef",
+      projectRootRel: "apps/reqs",
+    });
+    expect(url).toBe(
+      "https://github.com/acme/widgets/blob/deadbeef/apps/reqs/GRD-SRC-001.req.yml"
     );
   });
 });

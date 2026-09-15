@@ -16,16 +16,24 @@ export function posixJoinRepoPath(projectRootRel: string, artifactPath: string):
   return root ? `${root}/${artifact}` : artifact;
 }
 
-/** Build a GitHub blob URL for an artifact at the loaded commit. */
-export function githubBlobUrlForArtifact(
-  artifactPath: string,
+/** Build a GitHub blob URL for a repository-relative posix path at the loaded commit. */
+export function githubBlobUrl(
+  repoRelativePosixPath: string,
   github: NonNullable<ArtifactLinkRenderOptions["github"]>
 ): string {
-  const repoPath = posixJoinRepoPath(github.projectRootRel, artifactPath);
-  const encodedPath = repoPath
+  const encodedPath = repoRelativePosixPath
+    .replace(/\\/g, "/")
     .split("/")
     .filter((segment) => segment.length > 0)
     .map(encodeURIComponent)
     .join("/");
   return `https://github.com/${github.owner}/${github.repo}/blob/${encodeURIComponent(github.commitSha)}/${encodedPath}`;
+}
+
+/** Build a GitHub blob URL for a project-relative artifact at the loaded commit. */
+export function githubBlobUrlForArtifact(
+  artifactPath: string,
+  github: NonNullable<ArtifactLinkRenderOptions["github"]>
+): string {
+  return githubBlobUrl(posixJoinRepoPath(github.projectRootRel, artifactPath), github);
 }

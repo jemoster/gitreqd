@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  detectGithubHtmlOptions,
   discoverProjectRootCandidates,
   loadActiveProfile,
   loadRequirements,
@@ -36,7 +37,8 @@ export async function runHtml(
   const outDir = path.resolve(process.cwd(), outputDir);
   fs.mkdirSync(outDir, { recursive: true });
   const htmlPath = path.join(outDir, "index.html");
-  fs.writeFileSync(htmlPath, profile.generateFullHtml(requirements), "utf-8");
+  const htmlOptions = detectGithubHtmlOptions(root, requirements);
+  fs.writeFileSync(htmlPath, profile.generateFullHtml(requirements, htmlOptions), "utf-8");
   console.log(`Wrote ${htmlPath} (${requirements.length} requirements).`);
   return { success: true };
 }

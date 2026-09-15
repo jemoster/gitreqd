@@ -197,6 +197,83 @@ describe("generateFullHtml", () => {
     });
   });
 
+  describe("GRD-HTML-007: source file links to repository at loaded commit", () => {
+    it("links the Source file to a GitHub blob URL when repo path and commit context are supplied", () => {
+      const r = req("GRD-SRC-001", "Source linking", {
+        sourcePath: "/gitreqd-cloud-github/apps/reqs/GRD-SRC-001.req.yml",
+      });
+      const html = generateSingleRequirementHtml(r, [r], {
+        artifactLinks: {
+          github: {
+            owner: "acme",
+            repo: "widgets",
+            commitSha: "abcdef1234567890",
+            projectRootRel: "apps/reqs",
+          },
+        },
+        sourceRepoPath: "apps/reqs/GRD-SRC-001.req.yml",
+      });
+      const detail = html.slice(html.indexOf('class="source"'));
+      expect(detail).toContain(
+        'href="https://github.com/acme/widgets/blob/abcdef1234567890/apps/reqs/GRD-SRC-001.req.yml"'
+      );
+      expect(detail).toContain('target="_blank" rel="noopener noreferrer"');
+      // Visible link text keeps the original source path.
+      expect(detail).toContain("/gitreqd-cloud-github/apps/reqs/GRD-SRC-001.req.yml");
+    });
+
+    it("renders the Source file as plain text when no github context is supplied", () => {
+      const r = req("GRD-SRC-002", "No context", {
+        sourcePath: "/project/reqs/GRD-SRC-002.req.yml",
+      });
+      const html = generateSingleRequirementHtml(r, [r], {
+        sourceRepoPath: "reqs/GRD-SRC-002.req.yml",
+      });
+      const detail = html.slice(html.indexOf('class="source"'));
+      expect(detail).not.toContain("<a ");
+      expect(detail).toContain("/project/reqs/GRD-SRC-002.req.yml");
+    });
+
+    it("renders the Source file as plain text when repo path is unavailable even with github context", () => {
+      const r = req("GRD-SRC-003", "Missing repo path", {
+        sourcePath: "/project/reqs/GRD-SRC-003.req.yml",
+      });
+      const html = generateSingleRequirementHtml(r, [r], {
+        artifactLinks: {
+          github: { owner: "acme", repo: "widgets", commitSha: "abc123", projectRootRel: "" },
+        },
+      });
+      const detail = html.slice(html.indexOf('class="source"'));
+      expect(detail).not.toContain("<a ");
+      expect(detail).toContain("/project/reqs/GRD-SRC-003.req.yml");
+    });
+
+    it("links source files and artifacts in the full report when options are supplied", () => {
+      const r = req("GRD-SRC-004", "Full report links", {
+        sourcePath: "/repo/requirements/html/GRD-SRC-004.req.yml",
+        satisfied_by: [{ artifact: "packages/core/src/html.ts" }],
+      });
+      const html = generateFullHtml([r], {
+        artifactLinks: {
+          github: {
+            owner: "acme",
+            repo: "widgets",
+            commitSha: "c0ffee",
+            projectRootRel: "",
+          },
+        },
+        sourceRepoPaths: new Map([["GRD-SRC-004", "requirements/html/GRD-SRC-004.req.yml"]]),
+      });
+      const detail = html.slice(html.indexOf('id="GRD-SRC-004"'), html.indexOf("</section>"));
+      expect(detail).toContain(
+        'href="https://github.com/acme/widgets/blob/c0ffee/requirements/html/GRD-SRC-004.req.yml"'
+      );
+      expect(detail).toContain(
+        'href="https://github.com/acme/widgets/blob/c0ffee/packages/core/src/html.ts"'
+      );
+    });
+  });
+
   describe("GRD-HTML-002", () => {
     it("includes a list of requirements that link to each requirement (reverse lookup)", () => {
       const requirements = [
