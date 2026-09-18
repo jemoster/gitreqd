@@ -1,9 +1,9 @@
 /**
- * Browser entry for `@gitreqd/core`. Omits the Node filesystem adapter.
+ * Browser entry for `@shallgraph/core`. Omits the Node filesystem adapter.
  * Selected via the package `"browser"` export condition.
  */
 export {
-  initGitreqdWasm,
+  initShallgraphWasm,
   loadWasmBindings,
   generateSingleRequirementHtml,
   stampEditableFieldMarkers,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GRD-GIT-003: Install the gitreqd pre-commit hook into a repository's .git/hooks.
+# GRD-GIT-003: Install the shallgraph pre-commit hook into a repository's .git/hooks.
 # Usage: ./scripts/install-pre-commit.sh [REPO_DIR]
 #   REPO_DIR  Optional. Git repository path. Default: repository containing the current working directory.
 

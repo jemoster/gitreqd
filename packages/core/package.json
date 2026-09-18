@@ -1,7 +1,7 @@
 {
-  "name": "@gitreqd/core",
+  "name": "@shallgraph/core",
   "version": "0.6.0",
-  "description": "JS facade over gitreqd-core WASM — parse, validate, format, and HTML",
+  "description": "JS facade over shallgraph-core WASM — parse, validate, format, and HTML",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,7 +48,7 @@
     }
   },
   "scripts": {
-    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist dist-cjs && tsc && tsc -p tsconfig.cjs.json && printf '{ \"type\": \"commonjs\" }\\n' > dist-cjs/package.json && mkdir -p dist/wasm dist/wasm-web dist-cjs/wasm dist-cjs/wasm-web && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist/wasm-web/ && cp wasm/gitreqd_wasm.js wasm/gitreqd_wasm_bg.wasm wasm/package.json dist-cjs/wasm/ && cp wasm-web/gitreqd_wasm.js wasm-web/gitreqd_wasm_bg.wasm dist-cjs/wasm-web/",
+    "build": "bash ../../scripts/build-wasm-core.sh && rm -rf dist dist-cjs && tsc && tsc -p tsconfig.cjs.json && printf '{ \"type\": \"commonjs\" }\\n' > dist-cjs/package.json && mkdir -p dist/wasm dist/wasm-web dist-cjs/wasm dist-cjs/wasm-web && cp wasm/shallgraph_wasm.js wasm/shallgraph_wasm_bg.wasm wasm/package.json dist/wasm/ && cp wasm-web/shallgraph_wasm.js wasm-web/shallgraph_wasm_bg.wasm dist/wasm-web/ && cp wasm/shallgraph_wasm.js wasm/shallgraph_wasm_bg.wasm wasm/package.json dist-cjs/wasm/ && cp wasm-web/shallgraph_wasm.js wasm-web/shallgraph_wasm_bg.wasm dist-cjs/wasm-web/",
     "clean": "rm -rf dist dist-cjs wasm wasm-web"
   },
   "files": [

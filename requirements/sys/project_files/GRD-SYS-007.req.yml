@@ -4,6 +4,8 @@ require: The project root shall contain a {{ :root_marker_filename }} file that 
 refinement: |
   The {{ :root_marker_filename }} file shall be valid YAML whose top-level document is a mapping.
 
+  Bootstrap and new projects shall write `shallgraph.yaml`. Existing `gitreqd.yaml` and `gitreqd.yml` files shall still be accepted as project root markers when no primary marker is present.
+
   * The mapping shall contain a key `requirement_dirs` whose value is a list of directories to search for requirement files.
 
   * The `requirement_dirs` value shall be a sequence.
@@ -46,4 +48,4 @@ links:
 parameters:
   directory_metadata_filename: reqs.yaml | reqs.yml
   requirement_file_extension: .req.yaml | .req.yml
-  root_marker_filename: gitreqd.yaml | gitreqd.yml
+  root_marker_filename: shallgraph.yaml | shallgraph.yml

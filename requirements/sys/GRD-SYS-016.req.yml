@@ -19,10 +19,10 @@ refinement: |
 
   ```yaml
   satisfied_by:
-    - artifact: crates/gitreqd-core/src/schema.rs
+    - artifact: crates/shallgraph-core/src/schema.rs
       description: Requirement YAML schema defines the requirement file shape.
   verified_by:
-    - artifact: crates/gitreqd-core/src/schema.rs
+    - artifact: crates/shallgraph-core/src/schema.rs
       description: Unit tests cover schema parsing and rejection of unknown keys.
     - artifact: https://ci.example.com/runs/12345
       description: CI run for the release that introduced the fields.
@@ -33,12 +33,12 @@ attributes:
     traceability from normative text to code and evidence without overloading requirement-to-requirement links.
   status: active
 satisfied_by:
-  - artifact: crates/gitreqd-core/src/schema.rs
+  - artifact: crates/shallgraph-core/src/schema.rs
     description: Requirement YAML schema defines satisfied_by and verified_by on each requirement file.
-  - artifact: crates/gitreqd-core/src/types.rs
+  - artifact: crates/shallgraph-core/src/types.rs
     description: Requirement contract includes ArtifactRef and optional traceability fields.
 verified_by:
-  - artifact: crates/gitreqd-core/src/schema.rs
+  - artifact: crates/shallgraph-core/src/schema.rs
     description: Schema parsing, rejection of invalid entries, and JSON Schema export coverage.
 links:
   - satisfies: GRD-SYS-001

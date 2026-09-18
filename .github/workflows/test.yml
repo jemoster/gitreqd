@@ -29,7 +29,7 @@ jobs:
         run: npm run build
       # GRD-DEVOPS-002: same package step as the release workflow; catches packaging regressions on PRs.
       - name: Package VSCode extension
-        run: npm run package -w gitreqd-vscode
+        run: npm run package -w shallgraph-vscode
       - name: Run tests
         run: npm test
 
@@ -49,6 +49,6 @@ jobs:
       - name: Upload native Linux CLI binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gitreqd-linux-x86_64
-          path: release/gitreqd-linux-x86_64
+          name: shallgraph-linux-x86_64
+          path: release/shallgraph-linux-x86_64
           if-no-files-found: error

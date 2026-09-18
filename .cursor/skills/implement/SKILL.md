@@ -3,11 +3,11 @@ name: implement
 description: >-
   Implements features from requirements files with tests, annotations, and
   cleanup. Use when the user wants code changes that satisfy requirements in a
-  gitreqd project.
+  shallgraph project.
 disable-model-invocation: true
 ---
 
-# gitreqd — implement from requirements
+# shallgraph — implement from requirements
 
 If no requirement is provided, look for all requirements that have been edited since the last commit. If there are no changes, stop and ask the user which requirement they want to implement.
 

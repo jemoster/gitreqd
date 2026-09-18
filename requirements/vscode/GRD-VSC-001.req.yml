@@ -1,6 +1,6 @@
 id: GRD-VSC-001
-title: VSCode plugin for gitreqd
-require: A VSCode extension shall provide gitreqd functionality within the editor,
+title: VSCode plugin for shallgraph
+require: A VSCode extension shall provide shallgraph functionality within the editor,
 refinement: enabling users to work with requirement files without leaving the IDE.
 attributes:
   rationale: |

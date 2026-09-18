@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# GRD-GIT-003: Pre-commit hook – run gitreqd validate for the repository's requirements.
+# GRD-GIT-003: Pre-commit hook – run shallgraph validate for the repository's requirements.
 # Install with: ./scripts/install-pre-commit.sh [REPO_DIR]
-# Project directory: git repo root unless GITREQD_PROJECT_DIR is set.
+# Project directory: git repo root unless SHALLGRAPH_PROJECT_DIR is set.
 
 set -euo pipefail
 
 GIT_ROOT="$(git rev-parse --show-toplevel)"
-PROJECT_DIR="${GITREQD_PROJECT_DIR:-${GIT_ROOT}}"
-exec gitreqd validate --project-dir "${PROJECT_DIR}"
+PROJECT_DIR="${SHALLGRAPH_PROJECT_DIR:-${GITREQD_PROJECT_DIR:-${GIT_ROOT}}}"
+exec shallgraph validate --project-dir "${PROJECT_DIR}"

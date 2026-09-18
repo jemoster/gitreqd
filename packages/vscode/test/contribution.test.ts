@@ -8,7 +8,7 @@
  */
 import * as path from "node:path";
 import * as fs from "node:fs";
-import { exportRequirementFileJsonSchema } from "@gitreqd/core";
+import { exportRequirementFileJsonSchema } from "@shallgraph/core";
 
 const packagePath = path.join(__dirname, "..", "package.json");
 const pkg = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as {
@@ -19,19 +19,19 @@ const pkg = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as {
 };
 
 describe("GRD-VSC-003 requirement preview contributions", () => {
-  it("contributes openPreview command with Gitreqd category and icon", () => {
+  it("contributes openPreview command with ShallGraph category and icon", () => {
     const commands = pkg.contributes?.commands ?? [];
-    const preview = commands.find((c) => c.command === "gitreqd.requirement.openPreview");
+    const preview = commands.find((c) => c.command === "shallgraph.requirement.openPreview");
     expect(preview).toBeDefined();
     expect(preview!.title).toContain("Preview");
-    expect(preview!.category).toBe("Gitreqd");
+    expect(preview!.category).toBe("ShallGraph");
     expect(preview!.icon).toBe("$(open-preview)");
   });
 
   it("contributes editor/title menu so Preview is shown only for .req.yml / .req.yaml", () => {
     const editorTitle = pkg.contributes?.menus?.["editor/title"] ?? [];
     const previewEntry = editorTitle.find(
-      (m) => m.command === "gitreqd.requirement.openPreview"
+      (m) => m.command === "shallgraph.requirement.openPreview"
     );
     expect(previewEntry).toBeDefined();
     expect(previewEntry!.when).toBe(
@@ -68,21 +68,21 @@ describe("GRD-VSC-004 YAML schema for requirement files", () => {
 });
 
 describe("GRD-VSC-005 Add new requirement from explorer context menu", () => {
-  it("contributes gitreqd.requirement.new command with Gitreqd category", () => {
+  it("contributes shallgraph.requirement.new command with ShallGraph category", () => {
     const commands = pkg.contributes?.commands ?? [];
-    const newReq = commands.find((c) => c.command === "gitreqd.requirement.new");
+    const newReq = commands.find((c) => c.command === "shallgraph.requirement.new");
     expect(newReq).toBeDefined();
     expect(newReq!.title).toContain("Add New Requirement");
-    expect(newReq!.category).toBe("Gitreqd");
+    expect(newReq!.category).toBe("ShallGraph");
   });
 
   it("contributes explorer/context menu for the new requirement command", () => {
     const explorerContext = pkg.contributes?.menus?.["explorer/context"] ?? [];
     const newReqEntry = explorerContext.find(
-      (m) => m.command === "gitreqd.requirement.new"
+      (m) => m.command === "shallgraph.requirement.new"
     );
     expect(newReqEntry).toBeDefined();
-    expect(newReqEntry!.group).toBe("Gitreqd");
+    expect(newReqEntry!.group).toBe("ShallGraph");
   });
 
   it("newRequirementYamlTemplate produces YAML matching requirement schema (id, title, require, refinement, attributes, links)", async () => {

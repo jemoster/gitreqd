@@ -1,6 +1,6 @@
-# gitreqd product requirements
+# shallgraph product requirements
 
-Product requirements for the gitreqd requirement management tool are stored here.
+Product requirements for the shallgraph requirement management tool are stored here.
 
 ## Numbering
 

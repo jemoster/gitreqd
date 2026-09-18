@@ -1,8 +1,8 @@
 id: GRD-GIT-003
 title: Pre-commit hook
-require: A pre-commit hook shall call the gitreqd CLI to validate the current state of the repository's requirements.
+require: A pre-commit hook shall call the shallgraph CLI to validate the current state of the repository's requirements.
 refinement: |
-  The pre-commit hook shall use the root of the git repository as the project directory unless the GITREQD_PROJECT_DIR environment variable is set.
+  The pre-commit hook shall use the root of the git repository as the project directory unless the SHALLGRAPH_PROJECT_DIR environment variable is set. GITREQD_PROJECT_DIR remains accepted as a legacy alias when SHALLGRAPH_PROJECT_DIR is unset.
 
   An installation script shall be provided that installs the pre-commit hook into the repository's .git/hooks directory.
 

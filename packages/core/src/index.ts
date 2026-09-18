@@ -1,8 +1,8 @@
 /**
- * JS facade over gitreqd-core WASM. Node filesystem helpers stay in this package
+ * JS facade over shallgraph-core WASM. Node filesystem helpers stay in this package
  * so desktop VS Code can load projects without a web-extension rewrite.
  */
-export { initGitreqdWasm, loadWasmBindings } from "./wasm.js";
+export { initShallgraphWasm, loadWasmBindings } from "./wasm.js";
 
 export {
   ROOT_MARKER,

@@ -21,9 +21,9 @@ CARGO_WORKSPACE_VERSION = re.compile(
     re.S,
 )
 ARTIFACTS = {
-    "cli": ("release/gitreqd-core-{version}.tgz",),
-    "vscode": ("packages/vscode/gitreqd-vscode-{version}.vsix",),
-    "native": ("release/gitreqd-linux-x86_64",),
+    "cli": ("release/shallgraph-core-{version}.tgz",),
+    "vscode": ("packages/vscode/shallgraph-vscode-{version}.vsix",),
+    "native": ("release/shallgraph-linux-x86_64",),
 }
 
 
@@ -44,8 +44,8 @@ def shared_version(root: Path) -> str:
             die(f"{rel} has no version")
         versions.append(version)
         deps = pkg.get("dependencies")
-        if isinstance(deps, dict) and "@gitreqd/core" in deps and deps["@gitreqd/core"] != version:
-            die(f"{rel} pins @gitreqd/core@{deps['@gitreqd/core']} but package version is {version}")
+        if isinstance(deps, dict) and "@shallgraph/core" in deps and deps["@shallgraph/core"] != version:
+            die(f"{rel} pins @shallgraph/core@{deps['@shallgraph/core']} but package version is {version}")
 
     if len(set(versions)) != 1:
         die(f"package versions differ: {versions}")

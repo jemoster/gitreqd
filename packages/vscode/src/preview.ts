@@ -21,14 +21,14 @@ import {
   loadActiveProfile,
   loadRequirements,
   STANDARD_PROFILE_ID,
-} from "@gitreqd/core";
-import type { RequirementProfile } from "@gitreqd/core";
+} from "@shallgraph/core";
+import type { RequirementProfile } from "@shallgraph/core";
 import type {
   ArtifactLinkRenderOptions,
   ArtifactRef,
   ParameterValue,
   RequirementWithSource,
-} from "@gitreqd/core";
+} from "@shallgraph/core";
 import { parse as parseYaml } from "yaml";
 import { isRequirementDocument } from "./requirement-document.js";
 import {
@@ -41,7 +41,7 @@ function previewTitle(uri: vscode.Uri): string {
   return `Requirement Preview: ${path.basename(uri.fsPath)}`;
 }
 
-const PREVIEW_VIEW_TYPE = "gitreqd.requirementPreview";
+const PREVIEW_VIEW_TYPE = "shallgraph.requirementPreview";
 
 /** GRD-VSC-003: Delegated click handler so links work after WYSIWYG updates (GRD-VSC-006). */
 const PREVIEW_LINK_SCRIPT =
@@ -485,7 +485,7 @@ export class RequirementPreviewManager {
 
   openPreviewForDocument(document: vscode.TextDocument): void {
     if (!isRequirementDocument(document)) {
-      this.log("[Gitreqd] Preview is only available for `.req.yml` or `.req.yaml` requirement files.");
+      this.log("[ShallGraph] Preview is only available for `.req.yml` or `.req.yaml` requirement files.");
       return;
     }
 
@@ -545,7 +545,7 @@ export class RequirementPreviewManager {
       }) => {
         if (msg.type === "openPreview" && typeof msg.requirementId === "string") {
           this.openPreviewForId(msg.requirementId).catch((err) =>
-            this.log(`[Gitreqd] Failed to open preview for ${msg.requirementId}: ${String(err)}`)
+            this.log(`[ShallGraph] Failed to open preview for ${msg.requirementId}: ${String(err)}`)
           );
           return;
         }
@@ -586,7 +586,7 @@ export class RequirementPreviewManager {
 `;
     let html = baseHtml.replace("<head>", `<head>${headInject}`);
     const bodyAppend = `
-  <script type="application/json" id="gitreqd-bootstrap">${escaped}</script>
+  <script type="application/json" id="shallgraph-bootstrap">${escaped}</script>
   <script type="module" src="${editorJsUri}"></script>
   ${PREVIEW_LINK_SCRIPT}
 `;
@@ -709,7 +709,7 @@ export class RequirementPreviewManager {
       }
     } catch (err) {
       this.lastStructureKey = undefined;
-      const message = `[Gitreqd] Failed to render preview for ${document.uri.fsPath}: ${String(
+      const message = `[ShallGraph] Failed to render preview for ${document.uri.fsPath}: ${String(
         err
       )}`;
       this.log(message);
@@ -718,7 +718,7 @@ export class RequirementPreviewManager {
         <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <title>Gitreqd requirement preview error</title>
+          <title>ShallGraph requirement preview error</title>
           <style>
             body { font-family: system-ui, sans-serif; padding: 1rem; color: #b00020; }
             pre { white-space: pre-wrap; background: #fef2f2; padding: 0.75rem; border-radius: 4px; }

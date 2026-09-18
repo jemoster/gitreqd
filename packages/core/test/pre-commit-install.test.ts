@@ -1,7 +1,7 @@
 /**
  * GRD-GIT-003: Pre-commit hook installation script and hook content.
  * Verifies the install script installs the hook into .git/hooks and that the hook
- * uses repo root as project dir unless GITREQD_PROJECT_DIR is set and calls gitreqd validate.
+ * uses repo root as project dir unless SHALLGRAPH_PROJECT_DIR is set and calls shallgraph validate.
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -14,7 +14,7 @@ const HOOK_SOURCE = path.join(REPO_ROOT, "scripts/pre-commit");
 
 describe("GRD-GIT-003: Pre-commit hook and installation script", () => {
   function makeTempDir(): string {
-    return fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-grd-git-003-"));
+    return fs.mkdtempSync(path.join(os.tmpdir(), "shallgraph-grd-git-003-"));
   }
 
   it("install script installs pre-commit hook into .git/hooks when repo path is given", () => {
@@ -28,7 +28,8 @@ describe("GRD-GIT-003: Pre-commit hook and installation script", () => {
     const mode = fs.statSync(hookPath).mode;
     expect((mode & 0o111) !== 0).toBe(true); // executable
     const content = fs.readFileSync(hookPath, "utf-8");
-    expect(content).toContain("gitreqd validate");
+    expect(content).toContain("shallgraph validate");
+    expect(content).toContain("SHALLGRAPH_PROJECT_DIR");
     expect(content).toContain("GITREQD_PROJECT_DIR");
     expect(content).toContain("--project-dir");
   });
@@ -43,11 +44,12 @@ describe("GRD-GIT-003: Pre-commit hook and installation script", () => {
     expect(fs.existsSync(hookPath)).toBe(true);
   });
 
-  it("pre-commit hook source uses repo root as project dir unless GITREQD_PROJECT_DIR set", () => {
+  it("pre-commit hook source uses repo root as project dir unless SHALLGRAPH_PROJECT_DIR set", () => {
     const content = fs.readFileSync(HOOK_SOURCE, "utf-8");
     expect(content).toContain('git rev-parse --show-toplevel');
+    expect(content).toContain("SHALLGRAPH_PROJECT_DIR");
     expect(content).toContain("GITREQD_PROJECT_DIR");
     expect(content).toContain("GIT_ROOT");
-    expect(content).toContain("gitreqd validate --project-dir");
+    expect(content).toContain("shallgraph validate --project-dir");
   });
 });

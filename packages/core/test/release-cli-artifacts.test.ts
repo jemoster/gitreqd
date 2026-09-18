@@ -1,5 +1,5 @@
 /**
- * Release workflow publishes the WASM @gitreqd/core tarball (and native CLI in a sibling job).
+ * Release workflow publishes the WASM @shallgraph/core tarball (and native CLI in a sibling job).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -10,7 +10,7 @@ const RELEASE_GUIDE = path.join(REPO_ROOT, "release.md");
 const PACKAGE_SCRIPT = path.join(REPO_ROOT, "scripts", "package.sh");
 
 describe("core tarball release artifacts", () => {
-  it("packaging script packs only the @gitreqd/core tarball", () => {
+  it("packaging script packs only the @shallgraph/core tarball", () => {
     const script = fs.readFileSync(PACKAGE_SCRIPT, "utf-8");
     expect(script).toContain("npm pack --pack-destination");
     expect(script).toContain("packages/core");
@@ -40,9 +40,9 @@ describe("core tarball release artifacts", () => {
     expect(guide).toContain("# Release Instructions");
     expect(guide).toContain("git tag vX.Y.Z");
     expect(guide).toContain("Publish the GitHub Release");
-    expect(guide).toContain("gitreqd-core-X.Y.Z.tgz");
-    expect(guide).toContain("gitreqd-vscode-X.Y.Z.vsix");
-    expect(guide).toContain("gitreqd-linux-x86_64");
-    expect(guide).not.toContain("gitreqd-X.Y.Z.tgz");
+    expect(guide).toContain("shallgraph-core-X.Y.Z.tgz");
+    expect(guide).toContain("shallgraph-vscode-X.Y.Z.vsix");
+    expect(guide).toContain("shallgraph-linux-x86_64");
+    expect(guide).not.toContain("shallgraph-X.Y.Z.tgz");
   });
 });

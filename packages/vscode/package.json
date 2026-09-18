@@ -1,17 +1,17 @@
 {
-  "name": "gitreqd-vscode",
+  "name": "shallgraph-vscode",
   "version": "0.6.0",
-  "description": "VSCode extension for gitreqd — follow links in requirement files",
+  "description": "VS Code extension for ShallGraph — follow links in requirement files",
   "main": "dist/extension.js",
   "scripts": {
     "build:webview": "mkdir -p dist/webview && esbuild webview/editor-main.ts --bundle --outfile=dist/webview/editor-webview.js --platform=browser --format=esm --sourcemap --log-level=warning && cp ../../node_modules/@toast-ui/editor/dist/toastui-editor.css dist/webview/",
-    "copy-wasm": "mkdir -p dist && cp ../core/wasm/gitreqd_wasm_bg.wasm dist/",
-    "build": "npm run build -w @gitreqd/core && npm run build:webview && npm run copy-wasm && esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --format=cjs --external:vscode --sourcemap",
+    "copy-wasm": "mkdir -p dist && cp ../core/wasm/shallgraph_wasm_bg.wasm dist/",
+    "build": "npm run build -w @shallgraph/core && npm run build:webview && npm run copy-wasm && esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --format=cjs --external:vscode --sourcemap",
     "clean": "rm -rf dist",
     "package": "npm run copy-wasm && npx vsce package --no-dependencies --allow-missing-repository"
   },
-  "displayName": "gitreqd",
-  "publisher": "gitreqd",
+  "displayName": "ShallGraph",
+  "publisher": "shallgraph",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -25,11 +25,11 @@
   "keywords": [
     "requirements",
     "yaml",
-    "gitreqd"
+    "shallgraph"
   ],
   "license": "MIT",
   "dependencies": {
-    "@gitreqd/core": "0.6.0",
+    "@shallgraph/core": "0.6.0",
     "@toast-ui/editor": "^3.2.2",
     "yaml": "^2.6.1"
   },
@@ -49,29 +49,29 @@
     },
     "commands": [
       {
-        "command": "gitreqd.requirement.openPreview",
-        "title": "Gitreqd: Open Requirement Preview",
-        "category": "Gitreqd",
+        "command": "shallgraph.requirement.openPreview",
+        "title": "ShallGraph: Open Requirement Preview",
+        "category": "ShallGraph",
         "icon": "$(open-preview)"
       },
       {
-        "command": "gitreqd.requirement.new",
-        "title": "GitReqD: Add New Requirement",
-        "category": "Gitreqd"
+        "command": "shallgraph.requirement.new",
+        "title": "ShallGraph: Add New Requirement",
+        "category": "ShallGraph"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "gitreqd.requirement.openPreview",
+          "command": "shallgraph.requirement.openPreview",
           "group": "navigation@1",
           "when": "editorLangId == yaml && resourceFilename =~ /\\.req\\.(yaml|yml)$/"
         }
       ],
       "explorer/context": [
         {
-          "command": "gitreqd.requirement.new",
-          "group": "Gitreqd"
+          "command": "shallgraph.requirement.new",
+          "group": "ShallGraph"
         }
       ]
     }

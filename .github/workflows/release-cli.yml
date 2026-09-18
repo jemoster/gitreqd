@@ -1,4 +1,4 @@
-# Publish @gitreqd/core tarball and native CLI binary to GitHub Releases.
+# Publish @shallgraph/core tarball and native CLI binary to GitHub Releases.
 # workflow_dispatch runs the same packaging and uploads workflow artifacts (no GitHub Release).
 name: Release CLI artifacts
 on:
@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: error
 
   native-cli-binary:
-    # GRD-CLI-009: Publish a native gitreqd CLI binary for Linux x86_64 as a GitHub Release asset.
+    # GRD-CLI-009: Publish a native shallgraph CLI binary for Linux x86_64 as a GitHub Release asset.
     name: Build and upload Linux x86_64 CLI binary
     runs-on: ubuntu-latest
     steps:
@@ -85,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          asset="release/gitreqd-linux-x86_64"
+          asset="release/shallgraph-linux-x86_64"
           if [ ! -f "${asset}" ]; then
             echo "ERROR: Native CLI binary not found: ${asset}"
             exit 1
@@ -95,6 +95,6 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: gitreqd-linux-x86_64
-          path: release/gitreqd-linux-x86_64
+          name: shallgraph-linux-x86_64
+          path: release/shallgraph-linux-x86_64
           if-no-files-found: error

@@ -1,8 +1,8 @@
 /**
  * Browser wasm-bindgen loader (--target web). Instantiation is async; await
- * `initGitreqdWasm()` before any other binding call.
+ * `initShallgraphWasm()` before any other binding call.
  */
-import init, * as wasm from "./wasm-web/gitreqd_wasm.js";
+import init, * as wasm from "./wasm-web/shallgraph_wasm.js";
 import type { WasmBindings } from "./wasm-types.js";
 
 export type { WasmBindings };
@@ -10,7 +10,7 @@ export type { WasmBindings };
 let cached: WasmBindings | undefined;
 let pending: Promise<WasmBindings> | undefined;
 
-export async function initGitreqdWasm(moduleOrPath?: unknown): Promise<void> {
+export async function initShallgraphWasm(moduleOrPath?: unknown): Promise<void> {
   if (cached) return;
   if (!pending) {
     pending = Promise.resolve(
@@ -26,7 +26,7 @@ export async function initGitreqdWasm(moduleOrPath?: unknown): Promise<void> {
 export function loadWasmBindings(_explicitDir?: string): WasmBindings {
   if (!cached) {
     throw new Error(
-      "gitreqd WASM is not initialized; await initGitreqdWasm() before parse, validate, or HTML helpers in the browser"
+      "shallgraph WASM is not initialized; await initShallgraphWasm() before parse, validate, or HTML helpers in the browser"
     );
   }
   return cached;

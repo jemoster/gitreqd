@@ -1,13 +1,13 @@
 ---
 name: require
 description: >-
-  Drafts or updates gitreqd requirement YAML under requirements/ without
+  Drafts or updates shallgraph requirement YAML under requirements/ without
   implementing code. Use when the user wants to add or refine requirements,
-  requirement files, or a requirements-only workflow in a gitreqd project.
+  requirement files, or a requirements-only workflow in a shallgraph project.
 disable-model-invocation: true
 ---
 
-# gitreqd — define requirements only
+# shallgraph — define requirements only
 
 Do not implement the requirement. Only define the requirement.
 

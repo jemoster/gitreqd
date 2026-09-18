@@ -1,8 +1,8 @@
 /**
- * Node-free HTML renderer. Import `@gitreqd/core/html` from browser bundles so
+ * Node-free HTML renderer. Import `@shallgraph/core/html` from browser bundles so
  * webpack/Next never trace `fs-adapter` (`glob`, `node:fs`).
  *
- * In the browser, await `initGitreqdWasm()` once before calling
+ * In the browser, await `initShallgraphWasm()` once before calling
  * `generateSingleRequirementHtml`. After init the renderer is synchronous.
  *
  * Pass `artifactLinks.github` to turn presented file paths into GitHub blob
@@ -14,7 +14,7 @@ import {
   stampEditableFieldMarkers,
 } from "./engine.js";
 
-export { initGitreqdWasm, loadWasmBindings } from "./wasm.js";
+export { initShallgraphWasm, loadWasmBindings } from "./wasm.js";
 export type { WasmBindings } from "./wasm-types.js";
 export { stampEditableFieldMarkers } from "./engine.js";
 
