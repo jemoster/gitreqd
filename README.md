@@ -1,4 +1,4 @@
-# gitreqd
+# shallgraph
 
 A requirements management CLI for repositories that store requirements as YAML files.
 
@@ -6,12 +6,12 @@ A requirements management CLI for repositories that store requirements as YAML f
 
 ## Installation
 
-On Linux x86_64, download `gitreqd-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact.
+On Linux x86_64, download `shallgraph-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact.
 
 To build from source:
 
 ```bash
-cargo install --path crates/gitreqd
+cargo install --path crates/shallgraph
 ```
 
 See `dev.md` for developer builds.
@@ -21,10 +21,10 @@ See `dev.md` for developer builds.
 From your repository root:
 
 ```bash
-gitreqd bootstrap
+shallgraph bootstrap
 ```
 
-Run commands from the project root (where `gitreqd.yaml` or `gitreqd.yml` exists), or pass `--project-dir /path/to/project`.
+Run commands from the project root (where `shallgraph.yaml` or `shallgraph.yml` exists), or pass `--project-dir /path/to/project`.
 
 ## Cursor Workflow
 
@@ -35,13 +35,13 @@ Use Cursor [Agent Skills](https://cursor.com/docs/context/skills) in `.cursor/sk
 
 ## Core Commands
 
-- `gitreqd bootstrap` - initialize `gitreqd.yaml` and `requirements/`.
-- `gitreqd validate` - check requirement YAML against the active schema.
-- `gitreqd format` - rewrite requirement YAML into canonical format.
-- `gitreqd html` - generate a static HTML report. When `origin` is GitHub, file paths link to the blob at `HEAD`.
-- `gitreqd schema` - print or export the effective requirement schema.
+- `shallgraph bootstrap` - initialize `shallgraph.yaml` and `requirements/`.
+- `shallgraph validate` - check requirement YAML against the active schema.
+- `shallgraph format` - rewrite requirement YAML into canonical format.
+- `shallgraph html` - generate a static HTML report. When `origin` is GitHub, file paths link to the blob at `HEAD`.
+- `shallgraph schema` - print or export the effective requirement schema.
 
-Use `gitreqd --help` or `gitreqd <command> --help` for full options.
+Use `shallgraph --help` or `shallgraph <command> --help` for full options.
 
 ## Requirement File Basics
 
@@ -83,20 +83,20 @@ Parameter placeholders in strings:
 
 ## Tracing Rust source
 
-Tag implementation and test items so gitreqd can collect source links. Add the `gitreqd-macros` crate and alias it as `gitreqd`, then attach the attributes:
+Tag implementation and test items so shallgraph can collect source links. Add the `shallgraph-macros` crate and alias it as `shallgraph`, then attach the attributes:
 
 ```rust
-extern crate gitreqd_macros as gitreqd;
+extern crate shallgraph_macros as shallgraph;
 
-#[gitreqd::implements("REQ-001")]
+#[shallgraph::implements("REQ-001")]
 pub fn render_report() {}
 
-#[gitreqd::verifies("REQ-001")]
+#[shallgraph::verifies("REQ-001")]
 #[test]
 fn report_contains_index() {}
 ```
 
-`implements` marks implementation; `verifies` marks verification. Each attribute accepts one or more requirement ID strings. `#[gitreqd_macros::implements]` / `#[gitreqd_macros::verifies]` are equivalent without the alias.
+`implements` marks implementation; `verifies` marks verification. Each attribute accepts one or more requirement ID strings. `#[shallgraph_macros::implements]` / `#[shallgraph_macros::verifies]` are equivalent without the alias.
 
 The HTML report lists matching source links on each requirement under the same headings as YAML artifacts:
 
@@ -109,11 +109,11 @@ See `sample_projects/rust` for a complete example.
 
 ## Optional Configuration
 
-### `requirement_dirs` in `gitreqd.yaml`
+### `requirement_dirs` in `shallgraph.yaml`
 
 Bootstrap creates a `requirements/` folder and lists it under `requirement_dirs`. Each entry is a path relative to the project root; the tool collects every `*.req.yml` and `*.req.yaml` file under those directories (recursively), except under `node_modules`. Use a single entry of `.` to include the whole project tree from the root down.
 
-### `profile` in `gitreqd.yaml`
+### `profile` in `shallgraph.yaml`
 
 Choose how requirement YAML is interpreted and rendered. If omitted, `standard` is used.
 

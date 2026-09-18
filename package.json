@@ -1,15 +1,15 @@
 {
-  "name": "gitreqd",
+  "name": "shallgraph",
   "private": true,
   "description": "Requirement management tool",
   "type": "module",
   "scripts": {
     "build": "bash ./scripts/build-wasm-core.sh && npm run build --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
-    "validate": "cargo run -p gitreqd -- validate",
-    "format": "cargo run -p gitreqd -- format",
-    "html": "cargo run -p gitreqd -- html",
-    "bootstrap": "cargo run -p gitreqd -- bootstrap",
+    "validate": "cargo run -p shallgraph -- validate",
+    "format": "cargo run -p shallgraph -- format",
+    "html": "cargo run -p shallgraph -- html",
+    "bootstrap": "cargo run -p shallgraph -- bootstrap",
     "test": "jest"
   },
   "workspaces": [

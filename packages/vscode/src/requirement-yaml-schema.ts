@@ -1,6 +1,6 @@
 /**
  * GRD-VSC-004 / GRD-SYS-009: Register the requirement JSON Schema with the YAML extension at runtime.
- * The schema is regenerated when workspace folders or project root marker (`gitreqd.yaml` / `gitreqd.yml`)
+ * The schema is regenerated when workspace folders or project root marker (`shallgraph.yaml` / `shallgraph.yml`)
  * change so future runtime-config-driven composition can update validation without rebuilding the extension.
  */
 import * as vscode from "vscode";
@@ -8,10 +8,11 @@ import {
   discoverProjectRoot,
   getRequirementProfile,
   loadActiveProfile,
+  ROOT_MARKER_FILENAMES,
   STANDARD_PROFILE_ID,
   type RequirementProfile,
   type RequirementSchemaComposeOptions,
-} from "@gitreqd/core";
+} from "@shallgraph/core";
 
 const SCHEMA_FILE = "requirement.json";
 const GLOB_REQ_YML = "**/requirements/**/*.req.yml";
@@ -67,7 +68,7 @@ export function registerRequirementYamlSchema(context: vscode.ExtensionContext):
 
   const scheduleRegenerate = (): void => {
     void regenerate().catch((err: unknown) => {
-      console.error("[Gitreqd] requirement YAML schema refresh failed:", err);
+      console.error("[ShallGraph] requirement YAML schema refresh failed:", err);
     });
   };
 
@@ -75,7 +76,7 @@ export function registerRequirementYamlSchema(context: vscode.ExtensionContext):
     markerWatchers?.dispose();
     const parts: vscode.Disposable[] = [];
     for (const folder of vscode.workspace.workspaceFolders ?? []) {
-      for (const name of ["gitreqd.yaml", "gitreqd.yml"] as const) {
+      for (const name of ROOT_MARKER_FILENAMES) {
         const w = vscode.workspace.createFileSystemWatcher(
           new vscode.RelativePattern(folder, `**/${name}`)
         );

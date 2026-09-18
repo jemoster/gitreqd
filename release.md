@@ -1,8 +1,8 @@
 # Release Instructions
 
-This guide describes the minimum steps to cut a new GitHub release that publishes installable artifacts for `gitreqd`.
+This guide describes the minimum steps to cut a new GitHub release that publishes installable artifacts for `shallgraph`.
 
-The `@gitreqd/core` package, `gitreqd-vscode` extension, and Cargo workspace share one version. The GitHub release tag must be `v` plus that version. Packed npm tarball and VSIX names include that version.
+The `@shallgraph/core` package, `shallgraph-vscode` extension, and Cargo workspace share one version. The GitHub release tag must be `v` plus that version. Packed npm tarball and VSIX names include that version.
 
 ## 1) Prepare the release
 
@@ -40,8 +40,8 @@ Publishing the release triggers automation that packs artifacts and uploads them
 ## 4) Verify artifacts and install path
 
 1. Confirm release automation completed successfully.
-2. Confirm required artifacts are attached to the release, including the `@gitreqd/core` tarball `gitreqd-core-X.Y.Z.tgz`, the VS Code extension `gitreqd-vscode-X.Y.Z.vsix`, and the Linux x86_64 native CLI binary (`gitreqd-linux-x86_64`) produced by workflow automation.
-3. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `gitreqd`.
+2. Confirm required artifacts are attached to the release, including the `@shallgraph/core` tarball `shallgraph-core-X.Y.Z.tgz`, the VS Code extension `shallgraph-vscode-X.Y.Z.vsix`, and the Linux x86_64 native CLI binary (`shallgraph-linux-x86_64`) produced by workflow automation.
+3. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `shallgraph`.
 
 ## Testing release generation
 
@@ -54,27 +54,27 @@ Use these steps before (or instead of) publishing a GitHub Release.
 ./scripts/package-native-cli.sh
 ```
 
-Confirm `release/` contains `gitreqd-core-X.Y.Z.tgz` named with the shared version and `gitreqd-linux-x86_64`. On Linux x86_64, run `./release/gitreqd-linux-x86_64 --help`.
+Confirm `release/` contains `shallgraph-core-X.Y.Z.tgz` named with the shared version and `shallgraph-linux-x86_64`. On Linux x86_64, run `./release/shallgraph-linux-x86_64 --help`.
 
 ### Download the native binary from a branch or pull request
 
-The Tests workflow packages the native CLI and uploads it as a workflow artifact named `gitreqd-linux-x86_64`.
+The Tests workflow packages the native CLI and uploads it as a workflow artifact named `shallgraph-linux-x86_64`.
 
-From the GitHub UI: open the Actions run for the branch, open the `cargo test` job, and download the `gitreqd-linux-x86_64` artifact.
+From the GitHub UI: open the Actions run for the branch, open the `cargo test` job, and download the `shallgraph-linux-x86_64` artifact.
 
 From the CLI (replace the run id with the latest Tests run for the branch):
 
 ```bash
 gh run list --workflow=test.yml --branch <branch> --limit 1
-gh run download <run-id> --name gitreqd-linux-x86_64
-chmod +x gitreqd-linux-x86_64
-./gitreqd-linux-x86_64 --help
+gh run download <run-id> --name shallgraph-linux-x86_64
+chmod +x shallgraph-linux-x86_64
+./shallgraph-linux-x86_64 --help
 ```
 
 ### Dry-run the CLI release workflow
 
-Actions → **Release CLI artifacts** → **Run workflow**. Manual `workflow_dispatch` runs the same packaging as a published release, then uploads `cli-tarballs` and `gitreqd-linux-x86_64` as workflow artifacts. It does not create or modify a GitHub Release.
+Actions → **Release CLI artifacts** → **Run workflow**. Manual `workflow_dispatch` runs the same packaging as a published release, then uploads `cli-tarballs` and `shallgraph-linux-x86_64` as workflow artifacts. It does not create or modify a GitHub Release.
 
 ### Full GitHub Release path
 
-Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes `gitreqd-core-X.Y.Z.tgz`, `gitreqd-vscode-X.Y.Z.vsix`, and `gitreqd-linux-x86_64`.
+Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes `shallgraph-core-X.Y.Z.tgz`, `shallgraph-vscode-X.Y.Z.vsix`, and `shallgraph-linux-x86_64`.

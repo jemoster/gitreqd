@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/gitreqd-core",
-    "crates/gitreqd",
-    "crates/gitreqd-macros",
-    "crates/gitreqd-wasm",
+    "crates/shallgraph-core",
+    "crates/shallgraph",
+    "crates/shallgraph-macros",
+    "crates/shallgraph-wasm",
     "sample_projects/rust",
 ]
 
@@ -14,8 +14,8 @@ license = "MIT"
 version = "0.6.0"
 
 [workspace.dependencies]
-gitreqd-core = { path = "crates/gitreqd-core", default-features = false }
-gitreqd-macros = { path = "crates/gitreqd-macros" }
+shallgraph-core = { path = "crates/shallgraph-core", default-features = false }
+shallgraph-macros = { path = "crates/shallgraph-macros" }
 wasm-bindgen = "=0.2.100"
 serde = { version = "1", features = ["derive"] }
 syn = { version = "2", features = ["full", "visit", "parsing"] }

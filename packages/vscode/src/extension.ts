@@ -1,12 +1,12 @@
 /**
- * VSCode extension for gitreqd: link resolution, preview (GRD-VSC-003), WYSIWYG/Markdown fields in preview (GRD-VSC-006), navigation,
+ * VSCode extension for shallgraph: link resolution, preview (GRD-VSC-003), WYSIWYG/Markdown fields in preview (GRD-VSC-006), navigation,
  * YAML schema for requirement files (GRD-VSC-004): registered at runtime from core (GRD-SYS-009),
  * refreshed when project root markers change, new requirement from explorer (GRD-VSC-005),
  * and hover titles for requirement id references (GRD-VSC-007).
  */
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { REQUIREMENT_FILE_EXTENSION } from "@gitreqd/core";
+import { REQUIREMENT_FILE_EXTENSION } from "@shallgraph/core";
 import { isRequirementDocument } from "./requirement-document.js";
 import { resolveRequirementPath } from "./link-resolver.js";
 import { newRequirementYamlTemplate } from "./new-requirement-template.js";
@@ -34,14 +34,14 @@ function* findLinkRanges(document: vscode.TextDocument): Generator<{ range: vsco
   }
 }
 
-const OUTPUT_CHANNEL_NAME = "Gitreqd";
+const OUTPUT_CHANNEL_NAME = "ShallGraph";
 
 export function activate(context: vscode.ExtensionContext): void {
   const outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
   const log = (message: string) => outputChannel.appendLine(message);
   context.subscriptions.push(outputChannel);
   log(
-    "[Gitreqd] Extension active. Open a `.req.yml` or `.req.yaml` requirement file to resolve links; logs will appear here."
+    "[ShallGraph] Extension active. Open a `.req.yml` or `.req.yaml` requirement file to resolve links; logs will appear here."
   );
 
   context.subscriptions.push(registerRequirementYamlSchema(context));
@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
         (activeUri && vscode.workspace.getWorkspaceFolder(activeUri)) ??
         vscode.workspace.workspaceFolders?.[0];
       if (!folder) {
-        log("[Gitreqd] No workspace folder; cannot open preview for " + requirementId);
+        log("[ShallGraph] No workspace folder; cannot open preview for " + requirementId);
         return;
       }
       const targetPath = await resolveRequirementPath(
@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext): void {
         log
       );
       if (!targetPath) {
-        log("[Gitreqd] Requirement not found: " + requirementId);
+        log("[ShallGraph] Requirement not found: " + requirementId);
         return;
       }
       const doc = await vscode.workspace.openTextDocument(targetPath);
@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext): void {
       ): Promise<vscode.DocumentLink[]> {
         const folder = vscode.workspace.getWorkspaceFolder(document.uri);
         if (!folder) {
-          log("[Gitreqd] No workspace folder for document; links disabled.");
+          log("[ShallGraph] No workspace folder for document; links disabled.");
           return [];
         }
         const workspaceRoot = folder.uri.fsPath;
@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext): void {
       ): Promise<vscode.Definition | undefined> {
         const folder = vscode.workspace.getWorkspaceFolder(document.uri);
         if (!folder) {
-          log("[Gitreqd] No workspace folder for document; Go to Definition disabled.");
+          log("[ShallGraph] No workspace folder for document; Go to Definition disabled.");
           return undefined;
         }
         const workspaceRoot = folder.uri.fsPath;
@@ -140,15 +140,15 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // GRD-VSC-003: Editor title action (Preview button) — opens requirement preview webview side-by-side.
   const openPreviewCommand = vscode.commands.registerCommand(
-    "gitreqd.requirement.openPreview",
+    "shallgraph.requirement.openPreview",
     () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
-        log("[Gitreqd] No active editor for preview command.");
+        log("[ShallGraph] No active editor for preview command.");
         return;
       }
       if (!isRequirementDocument(editor.document)) {
-        log("[Gitreqd] Preview applies only to `.req.yml` / `.req.yaml` requirement files.");
+        log("[ShallGraph] Preview applies only to `.req.yml` / `.req.yaml` requirement files.");
         return;
       }
       previewManager.openPreviewForDocument(editor.document);
@@ -157,7 +157,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // GRD-VSC-005: Explorer context menu — create a new requirement with schema-based template.
   const newRequirementCommand = vscode.commands.registerCommand(
-    "gitreqd.requirement.new",
+    "shallgraph.requirement.new",
     async (resource?: vscode.Uri) => {
       let targetDir: string;
       if (resource) {
@@ -169,15 +169,15 @@ export function activate(context: vscode.ExtensionContext): void {
       } else {
         const folder = vscode.workspace.workspaceFolders?.[0];
         if (!folder) {
-          log("[Gitreqd] No workspace folder; open a folder to add a new requirement.");
-          vscode.window.showErrorMessage("GitReqD: Open a workspace folder first.");
+          log("[ShallGraph] No workspace folder; open a folder to add a new requirement.");
+          vscode.window.showErrorMessage("ShallGraph: Open a workspace folder first.");
           return;
         }
         targetDir = folder.uri.fsPath;
       }
 
       const id = await vscode.window.showInputBox({
-        title: "GitReqD: New Requirement",
+        title: "ShallGraph: New Requirement",
         prompt: `Requirement ID (e.g. GRD-VSC-006). Filename will be {id}${REQUIREMENT_FILE_EXTENSION}`,
         placeHolder: "GRD-XXX-001",
         validateInput(value) {
@@ -198,7 +198,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const uri = vscode.Uri.file(filePath);
       try {
         await vscode.workspace.fs.stat(uri);
-        vscode.window.showErrorMessage(`GitReqD: File already exists: ${trimmedId}${REQUIREMENT_FILE_EXTENSION}`);
+        vscode.window.showErrorMessage(`ShallGraph: File already exists: ${trimmedId}${REQUIREMENT_FILE_EXTENSION}`);
         return;
       } catch {
         // file does not exist, ok to create
@@ -207,7 +207,7 @@ export function activate(context: vscode.ExtensionContext): void {
       await vscode.workspace.fs.writeFile(uri, Buffer.from(content, "utf8"));
       const doc = await vscode.workspace.openTextDocument(uri);
       await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Active });
-      log(`[Gitreqd] Created requirement: ${filePath}`);
+      log(`[ShallGraph] Created requirement: ${filePath}`);
     }
   );
 

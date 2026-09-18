@@ -35,7 +35,7 @@ const standardProfile: RequirementProfile = {
     return undefined;
   },
   generateFullHtml() {
-    throw new Error("Full-report HTML is provided by the native gitreqd CLI");
+    throw new Error("Full-report HTML is provided by the native shallgraph CLI");
   },
   generateSingleRequirementHtml(requirement, allRequirements, options) {
     return renderSingleRequirementHtml(requirement, allRequirements, options);

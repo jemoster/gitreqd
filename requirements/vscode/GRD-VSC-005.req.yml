@@ -1,8 +1,8 @@
 id: GRD-VSC-005
 title: Add new requirement from explorer context menu
-require: The VSCode extension shall add a context menu item in the file explorer for GitReqD.
+require: The VSCode extension shall add a context menu item in the file explorer for ShallGraph.
 refinement: |
-  When the user right-clicks in the explorer and selects the GitReqD menu item to add a new
+  When the user right-clicks in the explorer and selects the ShallGraph menu item to add a new
 
   requirement, the extension shall create a new YAML requirement file at the chosen location.
 

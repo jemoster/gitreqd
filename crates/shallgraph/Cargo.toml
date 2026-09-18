@@ -1,0 +1,25 @@
+[package]
+name = "shallgraph"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Requirement management CLI — discover, validate, and report requirements from YAML"
+publish = false
+
+[lib]
+name = "shallgraph_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "shallgraph"
+path = "src/main.rs"
+
+[dependencies]
+shallgraph-core = { workspace = true, features = ["std-fs", "source-links"] }
+shallgraph-macros.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+
+[dev-dependencies]
+shallgraph-macros.workspace = true

@@ -30,7 +30,7 @@ function sharedPackageVersion(): string {
 }
 
 function makeTempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-grd-devops-003-"));
+  return fs.mkdtempSync(path.join(os.tmpdir(), "shallgraph-grd-devops-003-"));
 }
 
 function writeJson(filePath: string, data: unknown): void {
@@ -42,10 +42,10 @@ function fixturePackageJson(name: string, version: string, withCoreDep: boolean)
   const pkg: Record<string, unknown> = {
     name,
     version,
-    description: "gitreqd — fixture",
+    description: "shallgraph — fixture",
   };
   if (withCoreDep) {
-    pkg.dependencies = { "@gitreqd/core": version };
+    pkg.dependencies = { "@shallgraph/core": version };
   }
   return pkg;
 }
@@ -57,17 +57,17 @@ function seedVersionTree(tmpDir: string, version: string): void {
   fs.chmodSync(path.join(tmpDir, "scripts", "bump-version.py"), 0o755);
   fs.chmodSync(path.join(tmpDir, "scripts", "assert-release-tag.py"), 0o755);
 
-  writeJson(path.join(tmpDir, "packages", "core", "package.json"), fixturePackageJson("@gitreqd/core", version, false));
+  writeJson(path.join(tmpDir, "packages", "core", "package.json"), fixturePackageJson("@shallgraph/core", version, false));
   writeJson(
     path.join(tmpDir, "packages", "vscode", "package.json"),
-    fixturePackageJson("gitreqd-vscode", version, true)
+    fixturePackageJson("shallgraph-vscode", version, true)
   );
   writeJson(path.join(tmpDir, "package-lock.json"), {
-    name: "gitreqd",
+    name: "shallgraph",
     lockfileVersion: 3,
     packages: {
-      "packages/core": { name: "@gitreqd/core", version },
-      "packages/vscode": { name: "gitreqd-vscode", version, dependencies: { "@gitreqd/core": version } },
+      "packages/core": { name: "@shallgraph/core", version },
+      "packages/vscode": { name: "shallgraph-vscode", version, dependencies: { "@shallgraph/core": version } },
     },
   });
   fs.writeFileSync(
@@ -76,29 +76,29 @@ function seedVersionTree(tmpDir: string, version: string): void {
   );
   fs.writeFileSync(
     path.join(tmpDir, "Cargo.lock"),
-    `[[package]]\nname = "gitreqd"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-core"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-macros"\nversion = "${version}"\n\n[[package]]\nname = "gitreqd-wasm"\nversion = "${version}"\n`
+    `[[package]]\nname = "shallgraph"\nversion = "${version}"\n\n[[package]]\nname = "shallgraph-core"\nversion = "${version}"\n\n[[package]]\nname = "shallgraph-macros"\nversion = "${version}"\n\n[[package]]\nname = "shallgraph-wasm"\nversion = "${version}"\n`
   );
   fs.writeFileSync(
     path.join(tmpDir, "README.md"),
     [
-      `Download gitreqd-core-${version}.tgz from`,
-      `https://github.com/example/gitreqd/releases/download/v${version}/gitreqd-core-${version}.tgz`,
+      `Download shallgraph-core-${version}.tgz from`,
+      `https://github.com/example/shallgraph/releases/download/v${version}/shallgraph-core-${version}.tgz`,
       "",
     ].join("\n")
   );
   fs.mkdirSync(path.join(tmpDir, "packages", "vscode"), { recursive: true });
   fs.writeFileSync(
     path.join(tmpDir, "packages", "vscode", "README.md"),
-    `This produces gitreqd-vscode-${version}.vsix.\n`
+    `This produces shallgraph-vscode-${version}.vsix.\n`
   );
 }
 
 describe("GRD-DEVOPS-003: shared release version", () => {
-  it("workspace packages, @gitreqd/core pins, and Cargo workspace version match", () => {
+  it("workspace packages, @shallgraph/core pins, and Cargo workspace version match", () => {
     const version = sharedPackageVersion();
     expect(readJson(VSCODE_PKG).version).toBe(version);
     const vscodeDeps = readJson(VSCODE_PKG).dependencies as Record<string, string>;
-    expect(vscodeDeps["@gitreqd/core"]).toBe(version);
+    expect(vscodeDeps["@shallgraph/core"]).toBe(version);
 
     const cargo = fs.readFileSync(CARGO_TOML, "utf-8");
     const match = cargo.match(/\[workspace\.package\][^\[]*?version\s*=\s*"([^"]+)"/s);
@@ -108,9 +108,9 @@ describe("GRD-DEVOPS-003: shared release version", () => {
 
   it("README documents cargo install and the native Linux binary", () => {
     const readme = fs.readFileSync(README, "utf-8");
-    expect(readme).toContain("cargo install --path crates/gitreqd");
-    expect(readme).toContain("gitreqd-linux-x86_64");
-    expect(readme).not.toMatch(/gitreqd-\d+\.\d+\.\d+\.tgz/);
+    expect(readme).toContain("cargo install --path crates/shallgraph");
+    expect(readme).toContain("shallgraph-linux-x86_64");
+    expect(readme).not.toMatch(/shallgraph-\d+\.\d+\.\d+\.tgz/);
   });
 
   it("bump-version.py updates packages, lockfiles, and README install URLs", () => {
@@ -123,29 +123,29 @@ describe("GRD-DEVOPS-003: shared release version", () => {
 
     expect(readJson(path.join(tmpDir, "packages", "core", "package.json")).version).toBe("9.8.7");
     const corePkgText = fs.readFileSync(path.join(tmpDir, "packages", "core", "package.json"), "utf-8");
-    expect(corePkgText).toContain("gitreqd — fixture");
+    expect(corePkgText).toContain("shallgraph — fixture");
     expect(corePkgText).not.toContain("\\u2014");
     expect(readJson(path.join(tmpDir, "packages", "vscode", "package.json")).version).toBe("9.8.7");
     const lock = readJson(path.join(tmpDir, "package-lock.json"));
     const packages = lock.packages as Record<string, { version?: string; dependencies?: Record<string, string> }>;
     expect(packages["packages/core"].version).toBe("9.8.7");
-    expect(packages["packages/vscode"].dependencies?.["@gitreqd/core"]).toBe("9.8.7");
+    expect(packages["packages/vscode"].dependencies?.["@shallgraph/core"]).toBe("9.8.7");
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.toml"), "utf-8")).toContain('version = "9.8.7"');
-    expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain('name = "gitreqd"\nversion = "9.8.7"');
+    expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain('name = "shallgraph"\nversion = "9.8.7"');
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
-      'name = "gitreqd-core"\nversion = "9.8.7"'
+      'name = "shallgraph-core"\nversion = "9.8.7"'
     );
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
-      'name = "gitreqd-macros"\nversion = "9.8.7"'
+      'name = "shallgraph-macros"\nversion = "9.8.7"'
     );
     expect(fs.readFileSync(path.join(tmpDir, "Cargo.lock"), "utf-8")).toContain(
-      'name = "gitreqd-wasm"\nversion = "9.8.7"'
+      'name = "shallgraph-wasm"\nversion = "9.8.7"'
     );
     const readme = fs.readFileSync(path.join(tmpDir, "README.md"), "utf-8");
-    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-core-9.8.7.tgz");
+    expect(readme).toContain("/releases/download/v9.8.7/shallgraph-core-9.8.7.tgz");
     expect(readme).not.toContain("0.1.0");
     expect(fs.readFileSync(path.join(tmpDir, "packages", "vscode", "README.md"), "utf-8")).toContain(
-      "gitreqd-vscode-9.8.7.vsix"
+      "shallgraph-vscode-9.8.7.vsix"
     );
   });
 
@@ -155,7 +155,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     fs.writeFileSync(
       path.join(tmpDir, "README.md"),
       [
-        'Download "https://github.com/example/gitreqd/releases/download/v0.2.0/gitreqd-core-0.1.0.tgz"',
+        'Download "https://github.com/example/shallgraph/releases/download/v0.2.0/shallgraph-core-0.1.0.tgz"',
         "",
       ].join("\n")
     );
@@ -164,7 +164,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
       stdio: "pipe",
     });
     const readme = fs.readFileSync(path.join(tmpDir, "README.md"), "utf-8");
-    expect(readme).toContain("/releases/download/v9.8.7/gitreqd-core-9.8.7.tgz");
+    expect(readme).toContain("/releases/download/v9.8.7/shallgraph-core-9.8.7.tgz");
     expect(readme).not.toContain("v0.2.0");
     expect(readme).not.toContain("0.1.0");
   });
@@ -173,7 +173,7 @@ describe("GRD-DEVOPS-003: shared release version", () => {
     const tmpDir = makeTempDir();
     seedVersionTree(tmpDir, "1.2.3");
     fs.mkdirSync(path.join(tmpDir, "release"), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, "release", "gitreqd-core-1.2.3.tgz"), "");
+    fs.writeFileSync(path.join(tmpDir, "release", "shallgraph-core-1.2.3.tgz"), "");
     const out = execFileSync("python3", [path.join(tmpDir, "scripts", "assert-release-tag.py"), "v1.2.3", "cli"], {
       cwd: tmpDir,
       encoding: "utf-8",

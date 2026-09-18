@@ -63,9 +63,9 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.13.1"
+version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b588b76d00fde79687d7646a9b5bdf3cc0f655e0bbd080335a95d7e96f3587da"
+checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
 
 [[package]]
 name = "bumpalo"
@@ -75,9 +75,9 @@ checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
 name = "cfg-if"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
+checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
 name = "clap"
@@ -130,54 +130,6 @@ name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
-
-[[package]]
-name = "gitreqd"
-version = "0.6.0"
-dependencies = [
- "clap",
- "gitreqd-core",
- "gitreqd-macros",
- "serde_json",
- "serde_yaml",
-]
-
-[[package]]
-name = "gitreqd-core"
-version = "0.6.0"
-dependencies = [
- "gitreqd-macros",
- "indexmap",
- "proc-macro2",
- "pulldown-cmark",
- "regex",
- "serde",
- "serde_json",
- "serde_yaml",
- "syn 2.0.119",
- "thiserror",
- "walkdir",
-]
-
-[[package]]
-name = "gitreqd-macros"
-version = "0.6.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "gitreqd-wasm"
-version = "0.6.0"
-dependencies = [
- "gitreqd-core",
- "indexmap",
- "serde",
- "serde_json",
- "wasm-bindgen",
-]
 
 [[package]]
 name = "hashbrown"
@@ -350,7 +302,7 @@ checksum = "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 3.0.4",
+ "syn 3.0.6",
 ]
 
 [[package]]
@@ -380,6 +332,54 @@ dependencies = [
 ]
 
 [[package]]
+name = "shallgraph"
+version = "0.6.0"
+dependencies = [
+ "clap",
+ "serde_json",
+ "serde_yaml",
+ "shallgraph-core",
+ "shallgraph-macros",
+]
+
+[[package]]
+name = "shallgraph-core"
+version = "0.6.0"
+dependencies = [
+ "indexmap",
+ "proc-macro2",
+ "pulldown-cmark",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "shallgraph-macros",
+ "syn 2.0.119",
+ "thiserror",
+ "walkdir",
+]
+
+[[package]]
+name = "shallgraph-macros"
+version = "0.6.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "shallgraph-wasm"
+version = "0.6.0"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_json",
+ "shallgraph-core",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -398,9 +398,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "3.0.4"
+version = "3.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6275cddf4610d1775e6d1fe9469b2e77d0f39fd98fb7450901b821e0c53649f"
+checksum = "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -411,7 +411,7 @@ dependencies = [
 name = "tempconv"
 version = "0.1.0"
 dependencies = [
- "gitreqd-macros",
+ "shallgraph-macros",
 ]
 
 [[package]]
@@ -442,9 +442,9 @@ checksum = "dbc4bc3a9f746d862c45cb89d705aa10f187bb96c76001afab07a0d35ce60142"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.24"
+version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+checksum = "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
 
 [[package]]
 name = "unsafe-libyaml"

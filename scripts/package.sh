@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# GRD-SYS-008: Build and package @gitreqd/core for distribution.
-# Produces gitreqd-core-X.Y.Z.tgz in the release/ directory.
+# GRD-SYS-008: Build and package @shallgraph/core for distribution.
+# Produces shallgraph-core-X.Y.Z.tgz in the release/ directory.
 # Usage: ./scripts/package.sh
 
 set -euo pipefail
@@ -18,22 +18,22 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Building @gitreqd/core (WASM facade) ..."
+echo "Building @shallgraph/core (WASM facade) ..."
 cd "${REPO_ROOT}"
 npm install
-npm run build -w @gitreqd/core
+npm run build -w @shallgraph/core
 
 echo "Creating release directory: ${RELEASE_DIR}"
 rm -rf "${RELEASE_DIR}"
 mkdir -p "${RELEASE_DIR}"
 
-echo "Packaging @gitreqd/core ..."
+echo "Packaging @shallgraph/core ..."
 cd "${REPO_ROOT}/packages/core"
 npm pack --pack-destination "${RELEASE_DIR}"
 
 echo "Done. Distribution artifacts:"
 ls -la "${RELEASE_DIR}"/*.tgz
 echo ""
-echo "The native gitreqd CLI is a Rust binary. Build it with:"
+echo "The native shallgraph CLI is a Rust binary. Build it with:"
 echo "  ./scripts/package-native-cli.sh"
-echo "or: cargo install --path crates/gitreqd"
+echo "or: cargo install --path crates/shallgraph"

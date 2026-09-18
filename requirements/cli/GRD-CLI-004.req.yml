@@ -1,6 +1,6 @@
 id: GRD-CLI-004
 title: CLI bootstrap project
-require: The CLI shall provide a bootstrap command that initializes a directory with the basic files for a gitreqd project.
+require: The CLI shall provide a bootstrap command that initializes a directory with the basic files for a shallgraph project.
 refinement: |
   * The target directory shall be the current working directory by default, or a directory specified by the user (e.g. via an option or argument).
 
@@ -13,7 +13,7 @@ refinement: |
   * Confirm with the user if .cursor rules should be added to the target directory.
 attributes:
   rationale: |
-    Users need a quick way to start a new gitreqd project without manually creating {{ GRD-SYS-007:root_marker_filename }} and the requirements directory structure.
+    Users need a quick way to start a new shallgraph project without manually creating {{ GRD-SYS-007:root_marker_filename }} and the requirements directory structure.
   status: active
 links:
   - satisfies: GRD-SYS-007

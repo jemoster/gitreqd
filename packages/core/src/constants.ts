@@ -1,6 +1,12 @@
-export const ROOT_MARKER = "gitreqd.yaml";
-export const ROOT_MARKER_FILENAMES = ["gitreqd.yaml", "gitreqd.yml"] as const;
-export const ROOT_MARKER_HINT = "gitreqd.yaml or gitreqd.yml";
+export const ROOT_MARKER = "shallgraph.yaml";
+/** Primary markers first; `gitreqd.yaml` / `gitreqd.yml` remain as legacy aliases. */
+export const ROOT_MARKER_FILENAMES = [
+  "shallgraph.yaml",
+  "shallgraph.yml",
+  "gitreqd.yaml",
+  "gitreqd.yml",
+] as const;
+export const ROOT_MARKER_HINT = "shallgraph.yaml or shallgraph.yml";
 export const REQUIREMENT_FILE_EXTENSIONS = [".req.yaml", ".req.yml"] as const;
 export const REQUIREMENT_FILE_EXTENSION = ".req.yml";
 export const STANDARD_PROFILE_ID = "standard";

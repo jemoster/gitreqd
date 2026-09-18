@@ -2,11 +2,11 @@ id: GRD-DEVOPS-003
 title: Align package versions with the GitHub release tag
 require: The core, VS Code, and Cargo workspace packages shall share one version that matches the GitHub release tag and the names of the packaged artifacts.
 refinement: |
-  The shared version is the `version` field of `@gitreqd/core` and `gitreqd-vscode`. The VS Code dependency on `@gitreqd/core` shall use that same version.
+  The shared version is the `version` field of `@shallgraph/core` and `shallgraph-vscode`. The VS Code dependency on `@shallgraph/core` shall use that same version.
 
   When a Rust workspace is present, `[workspace.package] version` shall match the shared version.
 
-  The GitHub release tag shall be `v` followed by that version (for example tag `v1.2.3` for version `1.2.3`). Packed npm tarball, VSIX, and native CLI artifact names shall include that version where the filename is versioned (for example `gitreqd-core-1.2.3.tgz`, `gitreqd-vscode-1.2.3.vsix`). The Linux x86_64 native CLI binary artifact is `gitreqd-linux-x86_64`.
+  The GitHub release tag shall be `v` followed by that version (for example tag `v1.2.3` for version `1.2.3`). Packed npm tarball, VSIX, and native CLI artifact names shall include that version where the filename is versioned (for example `shallgraph-core-1.2.3.tgz`, `shallgraph-vscode-1.2.3.vsix`). The Linux x86_64 native CLI binary artifact is `shallgraph-linux-x86_64`.
 attributes:
   rationale: |
     When package versions, git tags, and artifact names diverge, users cannot tell which release they installed and VS Code may not replace a prior extension install.

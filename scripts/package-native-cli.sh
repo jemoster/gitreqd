@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# GRD-CLI-009 / GRD-SYS-008: Build the native gitreqd CLI binary for Linux x86_64.
-# Writes release/gitreqd-linux-x86_64.
+# GRD-CLI-009 / GRD-SYS-008: Build the native shallgraph CLI binary for Linux x86_64.
+# Writes release/shallgraph-linux-x86_64.
 # Usage: ./scripts/package-native-cli.sh
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RELEASE_DIR="${REPO_ROOT}/release"
-ASSET_NAME="gitreqd-linux-x86_64"
+ASSET_NAME="shallgraph-linux-x86_64"
 REQUIRED_HOST="x86_64-unknown-linux-gnu"
 
 if ! command -v rustc >/dev/null 2>&1 || ! command -v cargo >/dev/null 2>&1; then
@@ -21,11 +21,11 @@ if [[ "${HOST}" != "${REQUIRED_HOST}" ]]; then
   exit 1
 fi
 
-echo "Building gitreqd native CLI (${REQUIRED_HOST}, release) ..."
+echo "Building shallgraph native CLI (${REQUIRED_HOST}, release) ..."
 cd "${REPO_ROOT}"
-cargo build --release -p gitreqd
+cargo build --release -p shallgraph
 
-BIN="${REPO_ROOT}/target/release/gitreqd"
+BIN="${REPO_ROOT}/target/release/shallgraph"
 if [[ ! -f "${BIN}" ]]; then
   echo "ERROR: Expected binary not found: ${BIN}"
   exit 1
@@ -42,4 +42,4 @@ fi
 echo "Done. Native CLI artifact: ${ASSET}"
 ls -la "${ASSET}"
 echo ""
-echo "To install onto this host: cp ${ASSET} /usr/local/bin/gitreqd"
+echo "To install onto this host: cp ${ASSET} /usr/local/bin/shallgraph"

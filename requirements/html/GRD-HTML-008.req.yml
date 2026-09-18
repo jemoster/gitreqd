@@ -12,7 +12,7 @@ refinement: |
   - Project-relative `satisfied_by` and `verified_by` artifact paths as defined by GRD-SYS-016. HTTP(S) artifact URLs remain ordinary web links.
   - Source-link records presented by GRD-HTML-007, using `path` and `linespace`. Source-link line ranges shall become GitHub URL fragments (`#L10` or `#L10-L12`).
 
-  The blob path shall be repository-relative. When the gitreqd project root is a subdirectory of the git toplevel, the path includes that subfolder.
+  The blob path shall be repository-relative. When the shallgraph project root is a subdirectory of the git toplevel, the path includes that subfolder.
 
   Each GitHub file link shall open in a new top-level browsing context (`target="_blank"`) and shall include `rel="noopener noreferrer"` on the anchor element.
 attributes:

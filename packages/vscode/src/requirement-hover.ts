@@ -2,7 +2,7 @@
  * GRD-VSC-007: Hover shows requirement title for requirement ids in YAML text (links and plain references).
  */
 import * as vscode from "vscode";
-import { parseRequirementFile } from "@gitreqd/core";
+import { parseRequirementFile } from "@shallgraph/core";
 import { resolveRequirementPath, type LogFn } from "./link-resolver.js";
 import { findRequirementIdAtLinePosition } from "./requirement-id-at-position.js";
 

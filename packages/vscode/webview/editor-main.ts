@@ -24,12 +24,12 @@ function debounce(fn: () => void, ms: number): () => void {
 }
 
 function mountRequireEditor(value: string): void {
-  const container = document.querySelector('[data-gitreqd-field="require"]');
+  const container = document.querySelector('[data-shallgraph-field="require"]');
   if (!container || !(container instanceof HTMLElement)) return;
 
   container.innerHTML = "";
   const textarea = document.createElement("textarea");
-  textarea.className = "gitreqd-require-editor";
+  textarea.className = "shallgraph-require-editor";
   textarea.value = value;
   textarea.rows = 3;
   textarea.style.width = "100%";
@@ -60,7 +60,7 @@ function mountEditors(payload: BootstrapPayload): void {
   for (const key of keys) {
     const raw = fields[key];
     if (raw === undefined) continue;
-    const container = document.querySelector(`[data-gitreqd-field="${key}"]`);
+    const container = document.querySelector(`[data-shallgraph-field="${key}"]`);
     if (!container || !(container instanceof HTMLElement)) continue;
 
     container.innerHTML = "";
@@ -96,7 +96,7 @@ function mountEditors(payload: BootstrapPayload): void {
 }
 
 function readBootstrap(): BootstrapPayload {
-  const el = document.getElementById("gitreqd-bootstrap");
+  const el = document.getElementById("shallgraph-bootstrap");
   if (!el?.textContent) {
     return { fields: {} };
   }
@@ -114,8 +114,8 @@ window.addEventListener("message", (event: MessageEvent) => {
   let applied = false;
 
   if (typeof msg.fields.require === "string") {
-    const container = document.querySelector('[data-gitreqd-field="require"]');
-    const textarea = container?.querySelector("textarea.gitreqd-require-editor");
+    const container = document.querySelector('[data-shallgraph-field="require"]');
+    const textarea = container?.querySelector("textarea.shallgraph-require-editor");
     if (textarea instanceof HTMLTextAreaElement && textarea.value !== msg.fields.require) {
       textarea.value = msg.fields.require;
       applied = true;

@@ -9,11 +9,11 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@gitreqd/core": ["packages/core/src/index.ts"],
-      "@gitreqd/core/html": ["packages/core/src/html.ts"],
-      "@gitreqd/core/engine": ["packages/core/src/engine.ts"],
-      "@gitreqd/core/types": ["packages/core/src/types.ts"],
-      "@gitreqd/core/*": ["packages/core/src/*"]
+      "@shallgraph/core": ["packages/core/src/index.ts"],
+      "@shallgraph/core/html": ["packages/core/src/html.ts"],
+      "@shallgraph/core/engine": ["packages/core/src/engine.ts"],
+      "@shallgraph/core/types": ["packages/core/src/types.ts"],
+      "@shallgraph/core/*": ["packages/core/src/*"]
     }
   },
   "include": ["packages/**/*"]

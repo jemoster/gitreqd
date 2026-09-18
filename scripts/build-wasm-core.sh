@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Build gitreqd-wasm and emit wasm-bindgen bindings for Node and the browser.
+# Build shallgraph-wasm and emit wasm-bindgen bindings for Node and the browser.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NODE_OUT="${REPO_ROOT}/packages/core/wasm"
 WEB_OUT="${REPO_ROOT}/packages/core/wasm-web"
 TARGET_DIR="${REPO_ROOT}/target/wasm32-unknown-unknown/release"
-WASM_FILE="${TARGET_DIR}/gitreqd_wasm.wasm"
+WASM_FILE="${TARGET_DIR}/shallgraph_wasm.wasm"
 
 cd "${REPO_ROOT}"
 
@@ -27,23 +27,23 @@ if [ "${actual}" != "${WASM_BINDGEN_VERSION}" ]; then
   exit 1
 fi
 
-cargo build -p gitreqd-wasm --target wasm32-unknown-unknown --release
+cargo build -p shallgraph-wasm --target wasm32-unknown-unknown --release
 
 rm -rf "${NODE_OUT}" "${WEB_OUT}"
 mkdir -p "${NODE_OUT}" "${WEB_OUT}"
 
 wasm-bindgen "${WASM_FILE}" \
   --out-dir "${NODE_OUT}" \
-  --out-name gitreqd_wasm \
+  --out-name shallgraph_wasm \
   --target nodejs \
   --typescript
 
 # wasm-bindgen Node glue is CommonJS. Isolate it from packages/core "type": "module".
 printf '%s\n' '{ "type": "commonjs" }' > "${NODE_OUT}/package.json"
 
-# Browser glue (--target web) has no Node builtins; instantiate with initGitreqdWasm().
+# Browser glue (--target web) has no Node builtins; instantiate with initShallgraphWasm().
 wasm-bindgen "${WASM_FILE}" \
   --out-dir "${WEB_OUT}" \
-  --out-name gitreqd_wasm \
+  --out-name shallgraph_wasm \
   --target web \
   --typescript

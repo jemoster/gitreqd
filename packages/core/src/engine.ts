@@ -88,7 +88,7 @@ export function parseRootMarker(
 
 export function stampEditableFieldMarkers(html: string): string {
   return html
-    .replaceAll('<div class="require">', '<div class="require" data-gitreqd-field="require">')
-    .replaceAll('<div class="refinement">', '<div class="refinement" data-gitreqd-field="refinement">')
-    .replaceAll('<div class="rationale">', '<div class="rationale" data-gitreqd-field="rationale">');
+    .replaceAll('<div class="require">', '<div class="require" data-shallgraph-field="require">')
+    .replaceAll('<div class="refinement">', '<div class="refinement" data-shallgraph-field="refinement">')
+    .replaceAll('<div class="rationale">', '<div class="rationale" data-shallgraph-field="rationale">');
 }

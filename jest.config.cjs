@@ -6,13 +6,13 @@ module.exports = {
   testMatch: ["**/*.test.ts", "**/*.test.tsx"],
   moduleFileExtensions: ["ts", "tsx", "js", "json"],
   moduleNameMapper: {
-    "^\\./wasm/gitreqd_wasm\\.js$": "<rootDir>/packages/core/wasm/gitreqd_wasm.js",
-    "^\\./wasm-web/gitreqd_wasm\\.js$": "<rootDir>/packages/core/wasm-web/gitreqd_wasm.js",
+    "^\\./wasm/shallgraph_wasm\\.js$": "<rootDir>/packages/core/wasm/shallgraph_wasm.js",
+    "^\\./wasm-web/shallgraph_wasm\\.js$": "<rootDir>/packages/core/wasm-web/shallgraph_wasm.js",
     "^(\\.{1,2}/.*)\\.js$": "$1",
-    "^@gitreqd/core/html$": "<rootDir>/packages/core/src/html.ts",
-    "^@gitreqd/core/engine$": "<rootDir>/packages/core/src/engine.ts",
-    "^@gitreqd/core/types$": "<rootDir>/packages/core/src/types.ts",
-    "^@gitreqd/core$": "<rootDir>/packages/core/src/index.ts",
+    "^@shallgraph/core/html$": "<rootDir>/packages/core/src/html.ts",
+    "^@shallgraph/core/engine$": "<rootDir>/packages/core/src/engine.ts",
+    "^@shallgraph/core/types$": "<rootDir>/packages/core/src/types.ts",
+    "^@shallgraph/core$": "<rootDir>/packages/core/src/index.ts",
   },
   transform: {
     "^.+\\.tsx?$": [

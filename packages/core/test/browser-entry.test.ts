@@ -4,8 +4,8 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { generateSingleRequirementHtml, initGitreqdWasm } from "@gitreqd/core/html";
-import type { RequirementWithSource } from "@gitreqd/core/types";
+import { generateSingleRequirementHtml, initShallgraphWasm } from "@shallgraph/core/html";
+import type { RequirementWithSource } from "@shallgraph/core/types";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 const CORE_PKG = path.join(REPO_ROOT, "packages", "core", "package.json");
@@ -66,8 +66,8 @@ describe("Node-free HTML / engine entries", () => {
   it("dist exists so the module graph can be inspected", () => {
     expect(fs.existsSync(path.join(DIST, "html.js"))).toBe(true);
     expect(fs.existsSync(path.join(DIST, "wasm.browser.js"))).toBe(true);
-    expect(fs.existsSync(path.join(DIST, "wasm-web", "gitreqd_wasm.js"))).toBe(true);
-    expect(fs.existsSync(path.join(DIST, "wasm-web", "gitreqd_wasm_bg.wasm"))).toBe(true);
+    expect(fs.existsSync(path.join(DIST, "wasm-web", "shallgraph_wasm.js"))).toBe(true);
+    expect(fs.existsSync(path.join(DIST, "wasm-web", "shallgraph_wasm_bg.wasm"))).toBe(true);
   });
 
   it("html and engine dist graphs never import fs-adapter or glob", () => {
@@ -93,8 +93,8 @@ describe("Node-free HTML / engine entries", () => {
     expect(joined).not.toContain("node:fs");
     expect(joined).not.toContain("createRequire");
     expect(joined).not.toMatch(/from ["']glob["']/);
-    expect(read("wasm-web/gitreqd_wasm.js")).toContain("import.meta.url");
-    expect(read("wasm-web/gitreqd_wasm.js")).toContain("__wbg_init");
+    expect(read("wasm-web/shallgraph_wasm.js")).toContain("import.meta.url");
+    expect(read("wasm-web/shallgraph_wasm.js")).toContain("__wbg_init");
   });
 
   it("browser barrel does not import the Node filesystem adapter", () => {
@@ -104,8 +104,8 @@ describe("Node-free HTML / engine entries", () => {
     expect(files.has("html.js")).toBe(true);
   });
 
-  it("generateSingleRequirementHtml from @gitreqd/core/html works after initGitreqdWasm", async () => {
-    await initGitreqdWasm();
+  it("generateSingleRequirementHtml from @shallgraph/core/html works after initShallgraphWasm", async () => {
+    await initShallgraphWasm();
     const requirement: RequirementWithSource = {
       id: "GRD-HTML-ENTRY-001",
       title: "HTML entry",

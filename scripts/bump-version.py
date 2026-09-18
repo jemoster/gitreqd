@@ -23,7 +23,7 @@ CARGO_WORKSPACE_VERSION = re.compile(
     r'(\[workspace\.package\][^\[]*?version\s*=\s*")([^"]+)(")',
     re.S,
 )
-CARGO_PACKAGE_NAMES = ("gitreqd", "gitreqd-core", "gitreqd-macros", "gitreqd-wasm")
+CARGO_PACKAGE_NAMES = ("shallgraph", "shallgraph-core", "shallgraph-macros", "shallgraph-wasm")
 
 
 def die(message: str) -> None:
@@ -43,8 +43,8 @@ def rewrite_install_docs(root: Path, old: str, new: str) -> None:
         text = path.read_text(encoding="utf-8")
         # README tags may already disagree with package.json; always point install URLs at v${new}.
         text = re.sub(r"/releases/download/v\d+\.\d+\.\d+/", f"/releases/download/v{new}/", text)
-        text = text.replace(f"gitreqd-core-{old}.tgz", f"gitreqd-core-{new}.tgz")
-        text = text.replace(f"gitreqd-vscode-{old}.vsix", f"gitreqd-vscode-{new}.vsix")
+        text = text.replace(f"shallgraph-core-{old}.tgz", f"shallgraph-core-{new}.tgz")
+        text = text.replace(f"shallgraph-vscode-{old}.vsix", f"shallgraph-vscode-{new}.vsix")
         path.write_text(text, encoding="utf-8")
 
 
@@ -65,8 +65,8 @@ def bump(root: Path, new: str) -> None:
         pkg = json.loads(path.read_text(encoding="utf-8"))
         pkg["version"] = new
         deps = pkg.get("dependencies")
-        if isinstance(deps, dict) and "@gitreqd/core" in deps:
-            deps["@gitreqd/core"] = new
+        if isinstance(deps, dict) and "@shallgraph/core" in deps:
+            deps["@shallgraph/core"] = new
         write_json(path, pkg)
 
     lock_path = root / "package-lock.json"
@@ -80,8 +80,8 @@ def bump(root: Path, new: str) -> None:
                     continue
                 entry["version"] = new
                 deps = entry.get("dependencies")
-                if isinstance(deps, dict) and "@gitreqd/core" in deps:
-                    deps["@gitreqd/core"] = new
+                if isinstance(deps, dict) and "@shallgraph/core" in deps:
+                    deps["@shallgraph/core"] = new
         write_json(lock_path, lock)
 
     cargo_toml = root / "Cargo.toml"

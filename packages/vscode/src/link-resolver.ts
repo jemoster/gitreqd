@@ -1,5 +1,5 @@
 import path from "node:path";
-import { discoverRequirementPaths, requirementIdFromFilename } from "@gitreqd/core";
+import { discoverRequirementPaths, requirementIdFromFilename } from "@shallgraph/core";
 
 const cache = new Map<string, Map<string, string>>();
 
@@ -31,14 +31,14 @@ async function getIdToPathMap(
     return idToPath;
   }
 
-  log?.(`[Gitreqd] Using workspace root: ${workspaceRoot}`);
+  log?.(`[ShallGraph] Using workspace root: ${workspaceRoot}`);
   let paths: string[];
   try {
     paths = await discoverRequirementPaths(workspaceRoot);
-    log?.(`[Gitreqd] Discovered ${paths.length} requirement file(s)`);
+    log?.(`[ShallGraph] Discovered ${paths.length} requirement file(s)`);
   } catch (err) {
     paths = [];
-    log?.(`[Gitreqd] Discovery failed: ${err instanceof Error ? err.message : String(err)}`);
+    log?.(`[ShallGraph] Discovery failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   idToPath = new Map<string, string>();

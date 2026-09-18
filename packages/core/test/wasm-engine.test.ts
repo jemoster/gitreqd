@@ -12,18 +12,18 @@ import {
   generateSingleRequirementHtml,
   loadRequirements,
   loadWasmBindings,
-  initGitreqdWasm,
+  initShallgraphWasm,
   parseRequirementContent,
   validateRequirements,
-} from "@gitreqd/core";
+} from "@shallgraph/core";
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 const SAMPLE = path.join(REPO_ROOT, "sample_projects", "basic");
 const FIXTURE_PATH = path.join(SAMPLE, "system", "SYS-001.req.yml");
 
-describe("gitreqd WASM core facade", () => {
+describe("shallgraph WASM core facade", () => {
   beforeAll(async () => {
-    await initGitreqdWasm();
+    await initShallgraphWasm();
     loadWasmBindings();
   });
 
@@ -102,9 +102,9 @@ attributes:
     });
     expect(html).toContain("GRD-WASM-004");
     expect(html).toContain('class="require"');
-    expect(html).toContain('data-gitreqd-field="require"');
-    expect(html).toContain('data-gitreqd-field="refinement"');
-    expect(html).toContain('data-gitreqd-field="rationale"');
+    expect(html).toContain('data-shallgraph-field="require"');
+    expect(html).toContain('data-shallgraph-field="refinement"');
+    expect(html).toContain('data-shallgraph-field="rationale"');
   });
 
   it("turns file paths into GitHub blob links when artifactLinks.github is set", () => {
@@ -160,7 +160,7 @@ satisfied_by:
   it("loads wasm from the package dist when process.cwd is not the repo root", () => {
     const distIndex = path.join(REPO_ROOT, "packages", "core", "dist", "index.js");
     expect(fs.existsSync(distIndex)).toBe(true);
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gitreqd-wasm-cwd-"));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "shallgraph-wasm-cwd-"));
     const spec = pathToFileURL(distIndex).href;
     const script = `
       import { parseRequirementContent } from ${JSON.stringify(spec)};
@@ -181,14 +181,14 @@ satisfied_by:
     const cjsIndex = path.join(REPO_ROOT, "packages", "core", "dist-cjs", "index.js");
     expect(fs.existsSync(cjsIndex)).toBe(true);
     const script = `
-      const core = require("@gitreqd/core");
+      const core = require("@shallgraph/core");
       const result = core.parseRequirementContent(
         "id: GRD-CJS-001\\ntitle: CommonJS\\nrequire: The CommonJS export shall load WASM bindings.\\n",
         "GRD-CJS-001.req.yml"
       );
       if ("error" in result) throw new Error(result.error.message);
       if (result.requirement.id !== "GRD-CJS-001") throw new Error(result.requirement.id);
-      process.stdout.write(require.resolve("@gitreqd/core"));
+      process.stdout.write(require.resolve("@shallgraph/core"));
     `;
     const resolved = execFileSync(
       process.execPath,
