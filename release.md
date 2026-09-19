@@ -37,7 +37,7 @@ Use semantic versioning for `vX.Y.Z`.
 
 Publishing the release triggers automation that packs artifacts and uploads them. The jobs fail if the tag does not match the shared package version or if packed npm/VSIX filenames do not include that version.
 
-The VS Code release job also publishes the versioned VSIX to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode). Store an Azure DevOps personal access token with Marketplace **Publish** as the `VSCE_PAT` repository secret. The publisher ID in `packages/vscode/package.json` (`shallgraph`) must already exist on the marketplace. Re-running a release for a version that is already published is skipped.
+The VS Code release job also publishes the versioned VSIX to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode). Store an Azure DevOps personal access token as the `VSCE_PAT` repository secret. Create the token at `https://dev.azure.com/{your-org}/_usersSettings/tokens` with **Organization** set to **All accessible organizations**, **Scopes** set to **Custom defined**, then **Show all scopes** and **Marketplace** → **Manage**. Marketplace **Publish** is not sufficient; see [Get a Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token). The publisher ID in `packages/vscode/package.json` (`shallgraph`) must already exist on the marketplace. Re-running a release for a version that is already published is skipped.
 
 ## 4) Verify artifacts and install path
 
