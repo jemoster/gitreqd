@@ -40,6 +40,9 @@ describe("GRD-VSC-008: Visual Studio Marketplace publication", () => {
     expect(scripts.package).not.toContain("--allow-missing-repository");
     expect(scripts["publish-marketplace"]).toContain("vsce publish");
     expect(scripts["publish-marketplace"]).toContain("--skip-duplicate");
+    const ignore = fs.readFileSync(path.join(REPO_ROOT, "packages", "vscode", ".vscodeignore"), "utf-8");
+    expect(ignore).toContain("webview/**");
+    expect(ignore).toContain(".gitignore");
   });
 
   it("extension LICENSE allows redistribution (MIT)", () => {
