@@ -93,7 +93,7 @@ For GitHub-based releases, branch artifact download, and how to dry-run packagin
 
 ### VS Code Extension
 
-Publishing a GitHub Release triggers extension build and uploads a `.vsix` artifact. Install it in VS Code via **Extensions** -> **...** -> **Install from VSIX...**.
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) (search **ShallGraph** in the Extensions view). Publishing a GitHub Release packages the extension, uploads a `.vsix` to the release, and publishes that same VSIX to the marketplace. Sideload the VSIX from **Extensions** -> **...** -> **Install from VSIX...** when you need a local or GitHub Release build.
 
 For local extension packaging details, see `packages/vscode/README.md`.
 

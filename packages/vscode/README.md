@@ -2,7 +2,35 @@
 
 Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satisfies: GRD-SYS-001`) via click or Go to Definition.
 
-## Install for regular use
+## Install
+
+Install **ShallGraph** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode):
+
+1. Open the **Extensions** view (Ctrl+Shift+X / Cmd+Shift+X).
+2. Search for `ShallGraph`.
+3. Install the extension published by `shallgraph` (`shallgraph.shallgraph-vscode`).
+
+Or from a terminal:
+
+```bash
+code --install-extension shallgraph.shallgraph-vscode
+```
+
+The extension activates when you open YAML (including `.req.yml` / `.req.yaml` requirement files) in a workspace whose root contains `shallgraph.yaml` or `shallgraph.yml`. Link navigation, Go to Definition, schema validation under `requirements/`, and the preview apply only to `*.req.yml` and `*.req.yaml` files, not plain `.yml` or `.yaml` files. Requirement YAML validation uses the Red Hat **YAML** extension: on activation, shallgraph registers the JSON Schema from core (and refreshes it when `shallgraph.yaml` / `shallgraph.yml` or workspace folders change).
+
+### Requirement preview and rich-text editing
+
+With a requirement file active, use the editor title **Open Requirement Preview** action (preview icon) to open the HTML preview beside the editor. The preview matches the structure and styling of the exported requirements report. File paths in the preview (the requirement source file and local implementation or verification artifacts) open in the current editor, including when that editor is attached over SSH or to a container.
+
+For **Description** and **Rationale** (when present), the preview includes a rich (WYSIWYG) editor with a formatting toolbar (headings, emphasis, lists, links, images, tables, code blocks, quotes). Edit the raw Markdown in the YAML file when you need the plain source. Changes in the preview are written back to the YAML file; you can also edit the same fields in the text editor—updates stay in sync when the document changes.
+
+## Update the installation
+
+Marketplace installs update through the VS Code Extensions view like other extensions.
+
+### Install from a VSIX (optional)
+
+Use a VSIX when developing the extension or when you need a GitHub Release build that is not yet on the marketplace.
 
 1. **Build and package** (from the repo root):
 
@@ -13,40 +41,17 @@ Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satis
 
    (The package script uses the local `vsce` via `npx`; no global install needed.)
 
-   The build bundles `@shallgraph/core` and the wasm-bindgen glue into the extension and copies `shallgraph_wasm_bg.wasm` next to `dist/extension.js`, so the installed VSIX is self-contained. Requirement YAML validation uses the Red Hat **YAML** extension: on activation, shallgraph registers the JSON Schema from core (and refreshes it when `shallgraph.yaml` / `shallgraph.yml` or workspace folders change).
+   The build bundles `@shallgraph/core` and the wasm-bindgen glue into the extension and copies `shallgraph_wasm_bg.wasm` next to `dist/extension.js`, so the installed VSIX is self-contained.
 
    This produces a `.vsix` file in `packages/vscode/` (e.g. `shallgraph-vscode-0.6.0.vsix`).
 
-2. **Install the VSIX in VSCode**:
+2. **Install the VSIX in VS Code**:
 
    - Open the **Extensions** view (Ctrl+Shift+X / Cmd+Shift+X).
    - Click the **...** menu at the top of the Extensions panel.
    - Choose **Install from VSIX...**.
    - Select the `shallgraph-vscode-*.vsix` file from `packages/vscode/`.
    - Reload the window if prompted.
-
-The extension will then be installed like any marketplace extension and activate when you open YAML (including `.req.yml` / `.req.yaml` requirement files) in a workspace whose root contains `shallgraph.yaml` or `shallgraph.yml` (see shallgraph docs). Link navigation, Go to Definition, schema validation under `requirements/`, and the preview apply only to `*.req.yml` and `*.req.yaml` files, not plain `.yml` or `.yaml` files.
-
-### Requirement preview and rich-text editing
-
-With a requirement file active, use the editor title **Open Requirement Preview** action (preview icon) to open the HTML preview beside the editor. The preview matches the structure and styling of the exported requirements report. File paths in the preview (the requirement source file and local implementation or verification artifacts) open in the current editor, including when that editor is attached over SSH or to a container.
-
-For **Description** and **Rationale** (when present), the preview includes a rich (WYSIWYG) editor with a formatting toolbar (headings, emphasis, lists, links, images, tables, code blocks, quotes). Edit the raw Markdown in the YAML file when you need the plain source. Changes in the preview are written back to the YAML file; you can also edit the same fields in the text editor—updates stay in sync when the document changes.
-
-## Update the installation
-
-After changing the extension or upgrading the repo:
-
-1. **Rebuild and repackage** (from repo root):
-
-   ```bash
-   npm run build
-   cd packages/vscode && npm run package
-   ```
-
-2. **Install the new VSIX** (same as above):
-
-   - **Extensions** → **...** → **Install from VSIX...** → select the new `shallgraph-vscode-*.vsix`.
 
 Installing a VSIX with the same or higher version replaces the previously installed copy. Reload the window after installing if the extension was already active.
 

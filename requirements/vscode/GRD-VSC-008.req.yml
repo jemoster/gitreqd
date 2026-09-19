@@ -11,3 +11,15 @@ attributes:
 links:
   - satisfies: GRD-VSC-001
   - satisfies: GRD-SYS-008
+satisfied_by:
+  - artifact: scripts/publish-vscode-marketplace.sh
+    description: Publishes the packaged shallgraph-vscode VSIX to the Visual Studio Marketplace.
+  - artifact: .github/workflows/release-vscode.yml
+    description: Release job publishes the version-asserted VSIX to the marketplace after attaching it to the GitHub Release.
+  - artifact: packages/vscode/package.json
+    description: Marketplace publisher, repository, and homepage metadata for shallgraph.shallgraph-vscode.
+  - artifact: packages/vscode/LICENSE
+    description: MIT license shipped with the marketplace package.
+verified_by:
+  - artifact: packages/core/test/release-vscode-marketplace.test.ts
+    description: Asserts marketplace metadata, publish script, release workflow, and install documentation.
