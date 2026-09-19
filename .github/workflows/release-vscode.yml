@@ -1,4 +1,5 @@
 # GRD-DEVOPS-002: Build VSCode extension and attach the .vsix to the GitHub Release.
+# GRD-VSC-008: Publish that same versioned VSIX to the Visual Studio Marketplace.
 name: Release VSCode extension
 on:
   release:
@@ -9,7 +10,7 @@ permissions:
 
 jobs:
   vsix:
-    name: Package and upload VSIX
+    name: Package, upload, and publish VSIX
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,3 +44,8 @@ jobs:
           for f in packages/vscode/*.vsix; do
             gh release upload "${{ github.event.release.tag_name }}" "$f" --clobber
           done
+      # GRD-VSC-008: publish the version-asserted VSIX to the Visual Studio Marketplace.
+      - name: Publish to Visual Studio Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: bash ./scripts/publish-vscode-marketplace.sh
