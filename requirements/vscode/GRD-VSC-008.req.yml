@@ -22,4 +22,4 @@ satisfied_by:
     description: MIT license shipped with the marketplace package.
 verified_by:
   - artifact: packages/core/test/release-vscode-marketplace.test.ts
-    description: Asserts marketplace metadata, publish script, release workflow, and install documentation.
+    description: Runs the marketplace publish script and checks it refuses to publish without VSCE_PAT or a single VSIX.
