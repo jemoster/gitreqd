@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # GRD-VSC-008: Publish the packaged shallgraph-vscode VSIX to the Visual Studio Marketplace.
 # Uses the same versioned VSIX that the release workflow uploads to GitHub (GRD-DEVOPS-002 / GRD-DEVOPS-003).
-# Requires VSCE_PAT (Azure DevOps PAT with Marketplace Publish).
+# Requires VSCE_PAT (Azure DevOps PAT with Marketplace Manage, all accessible organizations).
 # Usage: ./scripts/publish-vscode-marketplace.sh
 
 set -euo pipefail
@@ -9,7 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [[ -z "${VSCE_PAT:-}" ]]; then
-  echo "ERROR: VSCE_PAT is not set. Create an Azure DevOps PAT with Marketplace Publish and export it before publishing."
+  echo "ERROR: VSCE_PAT is not set. Create an Azure DevOps PAT at https://dev.azure.com/{your-org}/_usersSettings/tokens with Marketplace Manage (All accessible organizations) and export it before publishing."
   exit 1
 fi
 
