@@ -1,0 +1,13 @@
+id: GRD-VSC-008
+title: Publish VS Code extension to Visual Studio Marketplace
+require: The project distribution shall publish the shallgraph VS Code extension to the Visual Studio Marketplace.
+refinement: |
+  The published extension shall be discoverable and installable from the Visual Studio Code Extensions view without requiring the user to clone this repository or sideload a VSIX.
+  This requirement does not replace GRD-DEVOPS-002. A GitHub Release may still attach a VSIX for sideload installs; marketplace publication is the supported path for users who install extensions from the marketplace.
+  Published marketplace versions shall match the shared package version described by GRD-DEVOPS-003.
+attributes:
+  rationale: Sideloading a GitHub Release VSIX is a high-friction install path. Publishing to the Visual Studio Marketplace lets users find, install, and update shallgraph the same way they install other VS Code extensions.
+  status: active
+links:
+  - satisfies: GRD-VSC-001
+  - satisfies: GRD-SYS-008
