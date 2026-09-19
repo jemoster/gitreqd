@@ -43,7 +43,7 @@ Use a VSIX when developing the extension or when you need a GitHub Release build
 
    The build bundles `@shallgraph/core` and the wasm-bindgen glue into the extension and copies `shallgraph_wasm_bg.wasm` next to `dist/extension.js`, so the installed VSIX is self-contained.
 
-   This produces a `.vsix` file in `packages/vscode/` (e.g. `shallgraph-vscode-0.6.0.vsix`).
+   This produces a `.vsix` file in `packages/vscode/` (e.g. `shallgraph-vscode-0.7.0.vsix`).
 
 2. **Install the VSIX in VS Code**:
 
