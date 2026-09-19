@@ -8,10 +8,19 @@
     "copy-wasm": "mkdir -p dist && cp ../core/wasm/shallgraph_wasm_bg.wasm dist/",
     "build": "npm run build -w @shallgraph/core && npm run build:webview && npm run copy-wasm && esbuild src/extension.ts --bundle --outfile=dist/extension.js --platform=node --format=cjs --external:vscode --sourcemap",
     "clean": "rm -rf dist",
-    "package": "npm run copy-wasm && npx vsce package --no-dependencies --allow-missing-repository"
+    "package": "npm run copy-wasm && npx vsce package --no-dependencies",
+    "publish-marketplace": "npx vsce publish --no-dependencies --skip-duplicate"
   },
   "displayName": "ShallGraph",
   "publisher": "shallgraph",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jemoster/gitreqd.git"
+  },
+  "homepage": "https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode",
+  "bugs": {
+    "url": "https://github.com/jemoster/gitreqd/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

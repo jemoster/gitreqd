@@ -37,11 +37,14 @@ Use semantic versioning for `vX.Y.Z`.
 
 Publishing the release triggers automation that packs artifacts and uploads them. The jobs fail if the tag does not match the shared package version or if packed npm/VSIX filenames do not include that version.
 
+The VS Code release job also publishes the versioned VSIX to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode). Store an Azure DevOps personal access token with Marketplace **Publish** as the `VSCE_PAT` repository secret. The publisher ID in `packages/vscode/package.json` (`shallgraph`) must already exist on the marketplace. Re-running a release for a version that is already published is skipped.
+
 ## 4) Verify artifacts and install path
 
 1. Confirm release automation completed successfully.
 2. Confirm required artifacts are attached to the release, including the `@shallgraph/core` tarball `shallgraph-core-X.Y.Z.tgz`, the VS Code extension `shallgraph-vscode-X.Y.Z.vsix`, and the Linux x86_64 native CLI binary (`shallgraph-linux-x86_64`) produced by workflow automation.
-3. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `shallgraph`.
+3. Confirm the VS Code extension version is listed on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) and can be installed from the Extensions view.
+4. On Linux x86_64, confirm the native binary can be downloaded from the same release, marked executable, and run as `shallgraph`.
 
 ## Testing release generation
 
@@ -77,4 +80,4 @@ Actions → **Release CLI artifacts** → **Run workflow**. Manual `workflow_dis
 
 ### Full GitHub Release path
 
-Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload`. Confirm the release page includes `shallgraph-core-X.Y.Z.tgz`, `shallgraph-vscode-X.Y.Z.vsix`, and `shallgraph-linux-x86_64`.
+Publish a GitHub Release (a prerelease is enough) from a tag. That is the only trigger that attaches assets with `gh release upload` and publishes the VSIX to the Visual Studio Marketplace. Confirm the release page includes `shallgraph-core-X.Y.Z.tgz`, `shallgraph-vscode-X.Y.Z.vsix`, and `shallgraph-linux-x86_64`. Confirm the marketplace listing matches that same version.

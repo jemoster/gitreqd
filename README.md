@@ -8,6 +8,8 @@ A requirements management CLI for repositories that store requirements as YAML f
 
 On Linux x86_64, download `shallgraph-linux-x86_64` from the GitHub Releases page, mark it executable, and place it on your `PATH`. Unreleased branch builds attach the same binary as a Tests workflow artifact.
 
+Install the VS Code extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) (search **ShallGraph** in the Extensions view) or with `code --install-extension shallgraph.shallgraph-vscode`.
+
 To build from source:
 
 ```bash
