@@ -1,6 +1,7 @@
 import type {
   RequirementSchemaComposeOptions,
   RequirementWithSource,
+  SourceLink,
   ValidationError,
 } from "./types.js";
 import { loadWasmBindings } from "./wasm.js";
@@ -64,16 +65,35 @@ export function exportRequirementFileJsonSchema(
 export function generateSingleRequirementHtmlRaw(
   requirement: RequirementWithSource,
   allRequirements?: RequirementWithSource[],
-  artifactLinksJson?: string | null
+  artifactLinksJson?: string | null,
+  sourceLinksJson?: string | null
 ): string {
   const html = loadWasmBindings().generateSingleRequirementHtml(
     JSON.stringify(requirement),
     allRequirements ? JSON.stringify(allRequirements) : null,
-    artifactLinksJson ?? null
+    artifactLinksJson ?? null,
+    sourceLinksJson ?? null
   );
   const err = parseMaybeError(html);
   if (err) throw new Error(err.error.message);
   return html;
+}
+
+/** GRD-SYS-018 / GRD-UI-009: Collect Rust source-link records from in-memory file texts. */
+export function collectRustSourceLinksFromSources(
+  sources: Array<{ path: string; content: string }>,
+  knownIds: readonly string[]
+): SourceLink[] {
+  if (knownIds.length === 0 || sources.length === 0) {
+    return [];
+  }
+  const raw = loadWasmBindings().collectRustSourceLinksFromSources(
+    JSON.stringify(sources),
+    JSON.stringify(knownIds)
+  );
+  const err = parseMaybeError(raw);
+  if (err) throw new Error(err.error.message);
+  return parseJsonResult<SourceLink[]>(raw);
 }
 
 export function parseRootMarker(

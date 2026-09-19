@@ -2,16 +2,17 @@
 
 use std::path::Path;
 
-use shallgraph_core::{
-    export_requirement_file_json_schema, format_requirement_to_yaml,
-    generate_single_requirement_html_with_source_links, get_requirement_profile,
-    is_requirement_filename, list_registered_profile_ids, parse_requirement_content,
-    parse_root_marker_yaml, requirement_id_from_filename, validate_requirements,
-    ArtifactLinkRenderOptions, ArtifactRef, GithubArtifactLinkContext, Link, ParameterValue,
-    RequirementWithSource, REQUIREMENT_FILE_EXTENSION, STANDARD_PROFILE_ID,
-};
 use indexmap::IndexMap;
 use serde_json::{json, Map, Value};
+use shallgraph_core::{
+    collect_rust_source_links_from_sources, export_requirement_file_json_schema,
+    format_requirement_to_yaml, generate_single_requirement_html_with_source_links,
+    get_requirement_profile, is_requirement_filename, list_registered_profile_ids,
+    parse_requirement_content, parse_root_marker_yaml, requirement_id_from_filename,
+    validate_requirements, ArtifactLinkRenderOptions, ArtifactRef, GithubArtifactLinkContext, Link,
+    ParameterValue, RequirementWithSource, SourceLink, SourceLinkKind, REQUIREMENT_FILE_EXTENSION,
+    STANDARD_PROFILE_ID,
+};
 use wasm_bindgen::prelude::*;
 
 fn parameter_to_json(value: &ParameterValue) -> Value {
@@ -358,11 +359,118 @@ fn artifact_links_from_json(raw: Option<&str>) -> Option<ArtifactLinkRenderOptio
     Some(ArtifactLinkRenderOptions { github })
 }
 
+fn source_link_kind_from_str(s: &str) -> Option<SourceLinkKind> {
+    match s {
+        "implements" => Some(SourceLinkKind::Implements),
+        "verifies" => Some(SourceLinkKind::Verifies),
+        _ => None,
+    }
+}
+
+fn source_link_kind_to_str(kind: SourceLinkKind) -> &'static str {
+    match kind {
+        SourceLinkKind::Implements => "implements",
+        SourceLinkKind::Verifies => "verifies",
+    }
+}
+
+fn source_link_to_json(link: &SourceLink) -> Value {
+    json!({
+        "requirementId": link.requirement_id,
+        "kind": source_link_kind_to_str(link.kind),
+        "path": link.path,
+        "item": link.item,
+        "linespace": link.linespace,
+    })
+}
+
+fn source_link_from_json(value: &Value) -> Option<SourceLink> {
+    let obj = value.as_object()?;
+    let requirement_id = obj
+        .get("requirementId")
+        .or_else(|| obj.get("requirement_id"))
+        .and_then(Value::as_str)?;
+    let kind = obj
+        .get("kind")
+        .and_then(Value::as_str)
+        .and_then(source_link_kind_from_str)?;
+    let path = obj.get("path").and_then(Value::as_str)?;
+    let item = obj.get("item").and_then(Value::as_str)?;
+    let linespace = obj
+        .get("linespace")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(Value::as_u64)
+                .filter_map(|n| u32::try_from(n).ok())
+                .collect::<Vec<u32>>()
+        })?;
+    SourceLink::new(requirement_id, kind, path, item, linespace)
+}
+
+fn source_links_from_json(raw: Option<&str>) -> Result<Vec<SourceLink>, String> {
+    let Some(raw) = raw.filter(|s| !s.is_empty()) else {
+        return Ok(Vec::new());
+    };
+    let v = parse_json(raw)?;
+    let arr = v
+        .as_array()
+        .ok_or_else(|| "sourceLinks must be a JSON array".to_string())?;
+    Ok(arr.iter().filter_map(source_link_from_json).collect())
+}
+
+#[wasm_bindgen(js_name = collectRustSourceLinksFromSources)]
+pub fn wasm_collect_rust_source_links_from_sources(
+    sources_json: &str,
+    known_ids_json: &str,
+) -> String {
+    let sources_val = match parse_json(sources_json) {
+        Ok(v) => v,
+        Err(err) => return error_json("", &err, None),
+    };
+    let ids_val = match parse_json(known_ids_json) {
+        Ok(v) => v,
+        Err(err) => return error_json("", &err, None),
+    };
+    let Some(source_arr) = sources_val.as_array() else {
+        return error_json("", "sources must be a JSON array", None);
+    };
+    let Some(id_arr) = ids_val.as_array() else {
+        return error_json("", "knownIds must be a JSON array", None);
+    };
+    let mut known_ids = std::collections::HashSet::new();
+    for id in id_arr {
+        if let Some(s) = id.as_str() {
+            known_ids.insert(s.to_string());
+        }
+    }
+    let mut sources: Vec<(String, String)> = Vec::new();
+    for item in source_arr {
+        let Some(obj) = item.as_object() else {
+            continue;
+        };
+        let Some(path) = obj.get("path").and_then(Value::as_str) else {
+            continue;
+        };
+        let Some(content) = obj.get("content").and_then(Value::as_str) else {
+            continue;
+        };
+        sources.push((path.to_string(), content.to_string()));
+    }
+    let links = collect_rust_source_links_from_sources(
+        sources.iter().map(|(p, c)| (p.as_str(), c.as_str())),
+        &known_ids,
+    );
+    json!(links.iter().map(source_link_to_json).collect::<Vec<_>>()).to_string()
+}
+
 #[wasm_bindgen(js_name = generateSingleRequirementHtml)]
 pub fn wasm_generate_single_requirement_html(
     requirement_json: &str,
     all_json: Option<String>,
     artifact_links_json: Option<String>,
+    source_links_json: Option<String>,
 ) -> String {
     let parsed = match parse_json(requirement_json) {
         Ok(v) => v,
@@ -395,10 +503,14 @@ pub fn wasm_generate_single_requirement_html(
         None
     };
     let artifact_links = artifact_links_from_json(artifact_links_json.as_deref());
+    let source_links = match source_links_from_json(source_links_json.as_deref()) {
+        Ok(links) => links,
+        Err(err) => return error_json("", &err, None),
+    };
     generate_single_requirement_html_with_source_links(
         &req,
         all.as_deref(),
-        &[],
+        &source_links,
         artifact_links.as_ref(),
     )
 }

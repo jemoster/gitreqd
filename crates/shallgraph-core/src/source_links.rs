@@ -1,7 +1,9 @@
 //! GRD-SYS-018: Collect source-link records from shallgraph tracing attributes on Rust items.
 
 use std::collections::HashSet;
+#[cfg(feature = "std-fs")]
 use std::fs;
+#[cfg(feature = "std-fs")]
 use std::path::Path;
 
 use proc_macro2::Span;
@@ -10,23 +12,30 @@ use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 use syn::{Attribute, ImplItem, Item, LitStr, Token, TraitItem};
+#[cfg(feature = "std-fs")]
 use walkdir::WalkDir;
 
+#[cfg(feature = "std-fs")]
 use crate::discovery::normalize_path;
+#[cfg(feature = "std-fs")]
 use crate::error::Error;
 use crate::types::{SourceLink, SourceLinkKind};
 
+#[cfg(feature = "std-fs")]
 const SKIP_DIR_NAMES: &[&str] = &["target", "node_modules", ".git", "dist"];
 
+#[cfg(feature = "std-fs")]
 fn skip_dir_name(name: &str) -> bool {
     SKIP_DIR_NAMES.contains(&name)
 }
 
+#[cfg(feature = "std-fs")]
 fn path_should_skip(path: &Path) -> bool {
     path.components()
         .any(|c| c.as_os_str().to_str().is_some_and(skip_dir_name))
 }
 
+#[cfg(feature = "std-fs")]
 fn project_relative_path(project_root: &Path, file: &Path) -> String {
     let file = normalize_path(file);
     let root = normalize_path(project_root);
@@ -267,12 +276,22 @@ impl<'ast> Visit<'ast> for FileCollector<'_> {
     }
 }
 
+fn rust_source_may_contain_tracing_attr(source: &str) -> bool {
+    source.contains("shallgraph::implements")
+        || source.contains("shallgraph::verifies")
+        || source.contains("shallgraph_macros::implements")
+        || source.contains("shallgraph_macros::verifies")
+}
+
 fn collect_from_rust_source(
     source: &str,
     path: &str,
     known_ids: &HashSet<String>,
     out: &mut Vec<SourceLink>,
 ) {
+    if !rust_source_may_contain_tracing_attr(source) {
+        return;
+    }
     let Ok(file) = syn::parse_file(source) else {
         return;
     };
@@ -284,9 +303,42 @@ fn collect_from_rust_source(
     visitor.visit_file(&file);
 }
 
+fn sort_source_links(out: &mut [SourceLink]) {
+    out.sort_by(|a, b| {
+        a.path
+            .cmp(&b.path)
+            .then(a.kind.cmp(&b.kind))
+            .then(a.requirement_id.cmp(&b.requirement_id))
+            .then(a.linespace.cmp(&b.linespace))
+            .then(a.item.cmp(&b.item))
+    });
+}
+
+/// GRD-SYS-018: Emit source-link records from in-memory Rust sources (path, content).
+/// Hosts without a local filesystem (WASM, GitHub-backed loads) use this entry point.
+#[shallgraph::implements("GRD-SYS-018")]
+pub fn collect_rust_source_links_from_sources<'a, I>(
+    sources: I,
+    known_ids: &HashSet<String>,
+) -> Vec<SourceLink>
+where
+    I: IntoIterator<Item = (&'a str, &'a str)>,
+{
+    if known_ids.is_empty() {
+        return Vec::new();
+    }
+    let mut out = Vec::new();
+    for (path, source) in sources {
+        collect_from_rust_source(source, path, known_ids, &mut out);
+    }
+    sort_source_links(&mut out);
+    out
+}
+
 /// GRD-SYS-018: Walk `*.rs` under `project_root` and emit source-link records for
 /// `#[shallgraph::implements]` / `#[shallgraph::verifies]` (and `shallgraph_macros::…`) whose
 /// IDs are in `known_ids`. Skips generated and dependency directories such as `target/`.
+#[cfg(feature = "std-fs")]
 #[shallgraph::implements("GRD-SYS-018")]
 pub fn collect_rust_source_links(
     project_root: &Path,
@@ -307,7 +359,7 @@ pub fn collect_rust_source_links(
         )));
     }
 
-    let mut out = Vec::new();
+    let mut sources: Vec<(String, String)> = Vec::new();
     let walker = WalkDir::new(&root)
         .follow_links(false)
         .into_iter()
@@ -338,18 +390,15 @@ pub fn collect_rust_source_links(
             continue;
         };
         let rel = project_relative_path(&root, path);
-        collect_from_rust_source(&source, &rel, known_ids, &mut out);
+        sources.push((rel, source));
     }
 
-    out.sort_by(|a, b| {
-        a.path
-            .cmp(&b.path)
-            .then(a.kind.cmp(&b.kind))
-            .then(a.requirement_id.cmp(&b.requirement_id))
-            .then(a.linespace.cmp(&b.linespace))
-            .then(a.item.cmp(&b.item))
-    });
-    Ok(out)
+    Ok(collect_rust_source_links_from_sources(
+        sources
+            .iter()
+            .map(|(path, source)| (path.as_str(), source.as_str())),
+        known_ids,
+    ))
 }
 
 #[cfg(test)]
@@ -363,7 +412,8 @@ mod tests {
 
     fn temp_root() -> PathBuf {
         let n = COUNTER.fetch_add(1, Ordering::Relaxed);
-        let dir = std::env::temp_dir().join(format!("shallgraph-src-links-{n}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("shallgraph-src-links-{n}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         dir
@@ -524,6 +574,35 @@ pub fn ok() {}
         assert_eq!(links[0].path, "src/ok.rs");
     }
 
+    #[shallgraph::verifies("GRD-SYS-018")]
+    #[test]
+    fn collects_from_in_memory_sources() {
+        let source = r#"
+#[shallgraph::implements("REQ-A")]
+pub fn from_memory() {}
+
+#[shallgraph::verifies("REQ-A")]
+#[test]
+fn checks_from_memory() {}
+"#;
+        let links =
+            collect_rust_source_links_from_sources([("src/mem.rs", source)], &ids(&["REQ-A"]));
+        assert_eq!(links.len(), 2);
+        assert!(links
+            .iter()
+            .any(|l| l.kind == SourceLinkKind::Implements && l.item == "function"));
+        assert!(links
+            .iter()
+            .any(|l| l.kind == SourceLinkKind::Verifies && l.item == "test"));
+        assert!(links.iter().all(|l| l.path == "src/mem.rs"));
+        assert!(collect_rust_source_links_from_sources(
+            [("src/plain.rs", "pub fn unused() {}")],
+            &ids(&["REQ-A"]),
+        )
+        .is_empty());
+    }
+
+    #[cfg(feature = "std-fs")]
     #[shallgraph::verifies("GRD-SYS-017")]
     #[shallgraph::verifies("GRD-SYS-018")]
     #[test]
@@ -542,7 +621,9 @@ pub fn ok() {}
                 && l.item == "function"
         }));
         assert!(links.iter().any(|l| {
-            l.requirement_id == "GRD-SYS-018" && l.kind == SourceLinkKind::Verifies && l.item == "test"
+            l.requirement_id == "GRD-SYS-018"
+                && l.kind == SourceLinkKind::Verifies
+                && l.item == "test"
         }));
         assert!(links.iter().all(|l| !l.path.contains("target/")));
     }

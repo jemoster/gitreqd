@@ -34,6 +34,7 @@ export {
   validateRequirements,
   formatRequirementToYaml,
   exportRequirementFileJsonSchema,
+  collectRustSourceLinksFromSources,
 } from "./engine.js";
 
 export {
@@ -58,5 +59,7 @@ export type {
   Requirement,
   RequirementSchemaComposeOptions,
   RequirementWithSource,
+  SourceLink,
+  SourceLinkKind,
   ValidationError,
 } from "./types.js";

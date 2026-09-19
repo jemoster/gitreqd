@@ -147,6 +147,30 @@ satisfied_by:
     expect(result.requirements.length).toBeGreaterThan(0);
     expect(result.requirements.some((r) => r.id === "SYS-001")).toBe(true);
     expect(result.requirements.some((r) => r.sourcePath.includes("SYS-001"))).toBe(true);
+    expect(result.sourceLinks).toEqual([]);
+  });
+
+  it("collects Rust implements/verifies source links from the rust sample (GRD-UI-009)", async () => {
+    const rustSample = path.join(REPO_ROOT, "sample_projects", "rust");
+    const result = await loadRequirements(rustSample);
+    expect(result.errors).toEqual([]);
+    expect(result.sourceLinks.some((l) => l.requirementId === "TEMP-001" && l.kind === "implements")).toBe(
+      true
+    );
+    expect(result.sourceLinks.some((l) => l.requirementId === "TEMP-001" && l.kind === "verifies")).toBe(true);
+    const implementsLink = result.sourceLinks.find(
+      (l) => l.requirementId === "TEMP-001" && l.kind === "implements"
+    );
+    expect(implementsLink?.path).toMatch(/\.rs$/);
+    expect(implementsLink?.item).toBeTruthy();
+    expect(implementsLink?.linespace.length).toBeGreaterThan(0);
+    const req = result.requirements.find((r) => r.id === "TEMP-001");
+    expect(req).toBeDefined();
+    const html = generateSingleRequirementHtml(req!, result.requirements, {
+      sourceLinks: result.sourceLinks,
+    });
+    expect(html).toContain("Rust");
+    expect(html).toContain(implementsLink!.path);
   });
 
   it("parses a sample requirement file from disk", () => {

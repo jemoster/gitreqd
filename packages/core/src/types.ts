@@ -33,9 +33,22 @@ export interface ValidationError {
   line?: number;
 }
 
+export type SourceLinkKind = "implements" | "verifies";
+
+/** GRD-SYS-017: Collected association of a requirement with a located source artifact. */
+export interface SourceLink {
+  requirementId: string;
+  kind: SourceLinkKind;
+  path: string;
+  item: string;
+  linespace: number[];
+}
+
 export interface LoadResult {
   requirements: RequirementWithSource[];
   errors: ValidationError[];
+  /** GRD-UI-009 / GRD-SYS-018: Rust tracing attributes collected for the loaded project. */
+  sourceLinks: SourceLink[];
 }
 
 export interface DiscoverResult {

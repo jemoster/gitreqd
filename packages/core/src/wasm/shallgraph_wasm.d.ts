@@ -6,10 +6,15 @@ export function parseRequirementContent(yaml: string, path: string): string;
 export function validateRequirements(requirementsJson: string): string;
 export function formatRequirementToYaml(requirementJson: string): string;
 export function exportRequirementFileJsonSchema(composeJson?: string | null): string;
+export function collectRustSourceLinksFromSources(
+  sourcesJson: string,
+  knownIdsJson: string
+): string;
 export function generateSingleRequirementHtml(
   requirementJson: string,
   allJson?: string | null,
-  artifactLinksJson?: string | null
+  artifactLinksJson?: string | null,
+  sourceLinksJson?: string | null
 ): string;
 export function parseRootMarker(yaml: string, markerLabel: string): string;
 export function standardProfileId(): string;

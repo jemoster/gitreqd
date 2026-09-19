@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 
 [dependencies]
-shallgraph-core = { workspace = true }
+shallgraph-core = { workspace = true, features = ["source-links"] }
 wasm-bindgen.workspace = true
 serde.workspace = true
 serde_json.workspace = true

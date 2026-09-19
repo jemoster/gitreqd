@@ -9,8 +9,10 @@ export interface WasmBindings {
   generateSingleRequirementHtml(
     requirementJson: string,
     allJson?: string | null,
-    artifactLinksJson?: string | null
+    artifactLinksJson?: string | null,
+    sourceLinksJson?: string | null
   ): string;
+  collectRustSourceLinksFromSources(sourcesJson: string, knownIdsJson: string): string;
   parseRootMarker(yaml: string, markerLabel: string): string;
   standardProfileId(): string;
   listRegisteredProfileIds(): string;

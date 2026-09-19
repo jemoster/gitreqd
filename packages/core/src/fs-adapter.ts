@@ -1,7 +1,12 @@
 import { glob } from "glob";
 import fs from "node:fs";
 import path from "node:path";
-import { parseRootMarker, parseRequirementContent, validateRequirements } from "./engine.js";
+import {
+  collectRustSourceLinksFromSources,
+  parseRootMarker,
+  parseRequirementContent,
+  validateRequirements,
+} from "./engine.js";
 import {
   REQUIREMENT_FILE_EXTENSIONS,
   ROOT_MARKER,
@@ -9,6 +14,33 @@ import {
   ROOT_MARKER_HINT,
 } from "./constants.js";
 import type { DiscoverResult, LoadResult, RequirementWithSource, ValidationError } from "./types.js";
+
+const RUST_SOURCE_IGNORE = ["**/target/**", "**/node_modules/**", "**/.git/**", "**/dist/**"];
+
+async function collectProjectRustSources(
+  projectRoot: string
+): Promise<Array<{ path: string; content: string }>> {
+  const cwd = path.resolve(projectRoot);
+  const matches = await glob("**/*.rs", {
+    cwd,
+    ignore: RUST_SOURCE_IGNORE,
+    nodir: true,
+    absolute: false,
+  });
+  const sources: Array<{ path: string; content: string }> = [];
+  for (const rel of [...new Set(matches)].sort()) {
+    const posixRel = rel.split(path.sep).join("/");
+    try {
+      sources.push({
+        path: posixRel,
+        content: fs.readFileSync(path.join(cwd, rel), "utf-8"),
+      });
+    } catch {
+      continue;
+    }
+  }
+  return sources;
+}
 
 export { ROOT_MARKER, ROOT_MARKER_FILENAMES, ROOT_MARKER_HINT };
 
@@ -168,7 +200,11 @@ export async function loadRequirements(startDir: string, projectRoot?: string): 
     }
   }
   errors.push(...validateRequirements(requirements));
-  return { requirements, errors };
+  /** GRD-UI-009 / GRD-SYS-018: Collect Rust implements/verifies tags for browser and JS hosts. */
+  const knownIds = requirements.map((r) => r.id);
+  const rustSources = await collectProjectRustSources(root);
+  const sourceLinks = collectRustSourceLinksFromSources(rustSources, knownIds);
+  return { requirements, errors, sourceLinks };
 }
 
 export function loadActiveProfileId(projectRoot: string): string {

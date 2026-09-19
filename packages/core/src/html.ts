@@ -8,7 +8,7 @@
  * Pass `artifactLinks.github` to turn presented file paths into GitHub blob
  * links at a commit (`https://github.com/.../blob/<sha>/...`).
  */
-import type { ArtifactLinkRenderOptions, RequirementWithSource } from "./types.js";
+import type { ArtifactLinkRenderOptions, RequirementWithSource, SourceLink } from "./types.js";
 import {
   generateSingleRequirementHtmlRaw,
   stampEditableFieldMarkers,
@@ -21,6 +21,8 @@ export { stampEditableFieldMarkers } from "./engine.js";
 export type SingleRequirementHtmlOptions = {
   editableFieldMarkers?: boolean;
   artifactLinks?: ArtifactLinkRenderOptions;
+  /** GRD-UI-009 / GRD-HTML-007: source-link records shown under Satisfied by / Verified by. */
+  sourceLinks?: SourceLink[];
 };
 
 export function generateSingleRequirementHtml(
@@ -42,6 +44,12 @@ export function generateSingleRequirementHtml(
           : undefined,
       })
     : null;
-  const html = generateSingleRequirementHtmlRaw(requirement, allRequirements, artifactLinksJson);
+  const sourceLinksJson = options?.sourceLinks ? JSON.stringify(options.sourceLinks) : null;
+  const html = generateSingleRequirementHtmlRaw(
+    requirement,
+    allRequirements,
+    artifactLinksJson,
+    sourceLinksJson
+  );
   return options?.editableFieldMarkers ? stampEditableFieldMarkers(html) : html;
 }

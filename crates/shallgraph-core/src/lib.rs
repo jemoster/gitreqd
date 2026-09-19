@@ -68,8 +68,10 @@ pub use rules::{
 pub use schema::{export_requirement_file_json_schema, parse_requirement_value};
 #[cfg(feature = "std-fs")]
 pub use schema_compose::requirement_schema_compose_options_for_project;
-#[cfg(feature = "source-links")]
+#[cfg(all(feature = "source-links", feature = "std-fs"))]
 pub use source_links::collect_rust_source_links;
+#[cfg(feature = "source-links")]
+pub use source_links::collect_rust_source_links_from_sources;
 pub use types::{
     ArtifactRef, Link, LoadResult, ParameterValue, ProjectInfo, Requirement,
     RequirementSchemaComposeOptions, RequirementWithSource, SourceLink, SourceLinkKind,
