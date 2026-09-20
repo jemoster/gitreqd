@@ -97,6 +97,20 @@ Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.co
 
 For local extension packaging details, see `packages/vscode/README.md`.
 
+## Canonical GitHub repository
+
+The source repository is [`jemoster/shallgraph`](https://github.com/jemoster/shallgraph). Keep that identity by **renaming** the existing GitHub repository (`jemoster/gitreqd` → `shallgraph`) rather than creating a new empty repo and pushing. A rename preserves issues, pull requests, stars, Actions history, repository secrets (`VSCE_PAT`), and GitHub Releases. GitHub then redirects git and web URLs from `jemoster/gitreqd`.
+
+Do not recreate `jemoster/gitreqd` later; that breaks GitHub's redirects.
+
+After the GitHub rename:
+
+```bash
+git remote set-url origin https://github.com/jemoster/shallgraph.git
+```
+
+Update any Cursor Cloud environment that still lists `github.com/jemoster/gitreqd` to `github.com/jemoster/shallgraph`. The next VS Code Marketplace publish picks up `packages/vscode/package.json` `repository` and `bugs` URLs.
+
 ## Advanced CLI Usage
 
 Specify a project explicitly:

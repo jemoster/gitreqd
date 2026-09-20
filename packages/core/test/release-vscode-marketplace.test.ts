@@ -7,6 +7,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const PUBLISH_SCRIPT = path.resolve(__dirname, "../../../scripts/publish-vscode-marketplace.sh");
+const VSCODE_PACKAGE_JSON = path.resolve(__dirname, "../../vscode/package.json");
+const README = path.resolve(__dirname, "../../../README.md");
 
 function runPublish(env: NodeJS.ProcessEnv): { status: number | null; output: string } {
   const result = spawnSync("bash", [PUBLISH_SCRIPT], {
@@ -38,6 +40,18 @@ describe("GRD-VSC-008: Visual Studio Marketplace publish script", () => {
     expect(result.status).not.toBe(0);
     expect(result.output).toMatch(/expected exactly one VSIX/i);
     expect(result.output).toContain(emptyDir);
+  });
+
+  it("marketplace and README metadata point at jemoster/shallgraph", () => {
+    const pkg = JSON.parse(fs.readFileSync(VSCODE_PACKAGE_JSON, "utf-8")) as {
+      repository?: { url?: string };
+      bugs?: { url?: string };
+    };
+    expect(pkg.repository?.url).toBe("https://github.com/jemoster/shallgraph.git");
+    expect(pkg.bugs?.url).toBe("https://github.com/jemoster/shallgraph/issues");
+    const readme = fs.readFileSync(README, "utf-8");
+    expect(readme).toContain("https://github.com/jemoster/shallgraph/actions/workflows/test.yml");
+    expect(readme).not.toMatch(/https:\/\/github\.com\/jemoster\/gitreqd/);
   });
 
   it("exits when more than one VSIX is present", () => {
