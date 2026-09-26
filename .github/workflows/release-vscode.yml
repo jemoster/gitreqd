@@ -1,5 +1,6 @@
 # GRD-DEVOPS-002: Build VSCode extension and attach the .vsix to the GitHub Release.
 # GRD-VSC-008: Publish that same versioned VSIX to the Visual Studio Marketplace.
+# GRD-VSC-009: Publish that same versioned VSIX to Open VSX so Cursor can install it.
 name: Release VSCode extension
 on:
   release:
@@ -49,3 +50,8 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: bash ./scripts/publish-vscode-marketplace.sh
+      # GRD-VSC-009: publish the same VSIX to Open VSX so Cursor can install it.
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: bash ./scripts/publish-open-vsx.sh

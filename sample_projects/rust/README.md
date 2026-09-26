@@ -6,10 +6,10 @@ Requirements live in `requirements/`. Implementation is tagged with `#[shallgrap
 
 ## Latest shallgraph release
 
-This sample is meant to be used with the latest `shallgraph` CLI from [GitHub Releases](https://github.com/jemoster/gitreqd/releases/latest). On Linux x86_64:
+This sample is meant to be used with the latest `shallgraph` CLI from [GitHub Releases](https://github.com/jemoster/shallgraph/releases/latest). On Linux x86_64:
 
 ```bash
-curl -L -o shallgraph "https://github.com/jemoster/gitreqd/releases/latest/download/shallgraph-linux-x86_64"
+curl -L -o shallgraph "https://github.com/jemoster/shallgraph/releases/latest/download/shallgraph-linux-x86_64"
 chmod +x shallgraph
 ```
 
@@ -24,7 +24,7 @@ cargo run -p shallgraph -- html --project-dir sample_projects/rust --output ./ou
 The `shallgraph-macros` crate is a path dependency on this workspace (same macros the latest release collects). In your own project, pin the macros crate to that release:
 
 ```toml
-shallgraph-macros = { git = "https://github.com/jemoster/gitreqd", tag = "v0.5.0" }
+shallgraph-macros = { git = "https://github.com/jemoster/shallgraph", tag = "v0.5.0" }
 ```
 
 ## Run the tests

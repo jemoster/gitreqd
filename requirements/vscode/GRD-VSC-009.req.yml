@@ -1,0 +1,24 @@
+id: GRD-VSC-009
+title: Publish VS Code extension to Open VSX
+require: The project distribution shall publish the shallgraph VS Code extension to the Open VSX registry so it can be installed from Cursor.
+refinement: |
+  The published extension shall be discoverable and installable from the Cursor Extensions view without requiring the user to clone this repository or sideload a VSIX.
+  This requirement does not replace GRD-DEVOPS-002 or GRD-VSC-008. A GitHub Release may still attach a VSIX for sideload installs, and the Visual Studio Marketplace publication remains the supported path for Visual Studio Code.
+  Published Open VSX versions shall match the shared package version described by GRD-DEVOPS-003.
+attributes:
+  rationale: Cursor installs third-party extensions from Open VSX. Publishing the same versioned VSIX there lets Cursor users find, install, and update shallgraph from the Extensions view.
+  status: active
+links:
+  - satisfies: GRD-VSC-001
+satisfied_by:
+  - artifact: scripts/publish-open-vsx.sh
+    description: Publishes the packaged shallgraph-vscode VSIX to Open VSX.
+  - artifact: .github/workflows/release-vscode.yml
+    description: Release job publishes the version-asserted VSIX to Open VSX after attaching it to the GitHub Release.
+  - artifact: packages/vscode/package.json
+    description: Publisher id shallgraph.shallgraph-vscode shared with the Visual Studio Marketplace listing.
+  - artifact: release.md
+    description: Maintainer steps to create the Eclipse account, sign the Open VSX Publisher Agreement, and store OVSX_PAT.
+verified_by:
+  - artifact: packages/core/test/release-open-vsx.test.ts
+    description: Runs the Open VSX publish script and checks it refuses to publish without OVSX_PAT or a single VSIX.
