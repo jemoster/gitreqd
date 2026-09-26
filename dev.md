@@ -91,11 +91,18 @@ Install a local CLI from source with `./scripts/install-shallgraph.sh` (`cargo i
 
 For GitHub-based releases, branch artifact download, and how to dry-run packaging, use `release.md`.
 
-### VS Code Extension
+### Extension
 
-Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) (search **ShallGraph** in the Extensions view). In Cursor, install **ShallGraph** from the Extensions view; Cursor installs it from [Open VSX](https://open-vsx.org/extension/shallgraph/shallgraph-vscode). Publishing a GitHub Release packages the extension, uploads a `.vsix` to the release, and publishes that same VSIX to the Visual Studio Marketplace and to Open VSX. Sideload the VSIX from **Extensions** -> **...** -> **Install from VSIX...** when you need a local or GitHub Release build.
+Publishing a GitHub Release packages the extension, uploads a `.vsix` to the release, and publishes that VSIX to the Visual Studio Marketplace and to Open VSX. Cursor installs third-party extensions from Open VSX.
 
-For local extension packaging details, see `packages/vscode/README.md`.
+Package a local VSIX from the repo root:
+
+```bash
+npm run build
+npm run package -w shallgraph-vscode
+```
+
+The package bundles `@shallgraph/core` and the wasm glue, so the VSIX is self-contained. The file is `packages/vscode/shallgraph-vscode-X.Y.Z.vsix`.
 
 ## Advanced CLI Usage
 
