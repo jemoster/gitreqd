@@ -4,13 +4,13 @@ Follow links in requirement files named `*.req.yml` or `*.req.yaml` (e.g. `satis
 
 ## Install
 
-Install **ShallGraph** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode):
+Install **ShallGraph** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) in Visual Studio Code, or from the Extensions view in Cursor. Cursor installs the same extension from [Open VSX](https://open-vsx.org/extension/shallgraph/shallgraph-vscode).
 
 1. Open the **Extensions** view (Ctrl+Shift+X / Cmd+Shift+X).
 2. Search for `ShallGraph`.
 3. Install the extension published by `shallgraph` (`shallgraph.shallgraph-vscode`).
 
-Or from a terminal:
+Or from a terminal in Visual Studio Code:
 
 ```bash
 code --install-extension shallgraph.shallgraph-vscode
@@ -26,7 +26,7 @@ For **Description** and **Rationale** (when present), the preview includes a ric
 
 ## Update the installation
 
-Marketplace installs update through the VS Code Extensions view like other extensions.
+Marketplace and Open VSX installs update through the Extensions view like other extensions.
 
 ### Install from a VSIX (optional)
 

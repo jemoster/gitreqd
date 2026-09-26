@@ -93,7 +93,7 @@ For GitHub-based releases, branch artifact download, and how to dry-run packagin
 
 ### VS Code Extension
 
-Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) (search **ShallGraph** in the Extensions view). Publishing a GitHub Release packages the extension, uploads a `.vsix` to the release, and publishes that same VSIX to the marketplace. Sideload the VSIX from **Extensions** -> **...** -> **Install from VSIX...** when you need a local or GitHub Release build.
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=shallgraph.shallgraph-vscode) (search **ShallGraph** in the Extensions view). In Cursor, install **ShallGraph** from the Extensions view; Cursor installs it from [Open VSX](https://open-vsx.org/extension/shallgraph/shallgraph-vscode). Publishing a GitHub Release packages the extension, uploads a `.vsix` to the release, and publishes that same VSIX to the Visual Studio Marketplace and to Open VSX. Sideload the VSIX from **Extensions** -> **...** -> **Install from VSIX...** when you need a local or GitHub Release build.
 
 For local extension packaging details, see `packages/vscode/README.md`.
 
